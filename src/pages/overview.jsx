@@ -1,5 +1,71 @@
+/**
+ * Fetches KPI data from the live API when MeridianAPI.live is true,
+ * otherwise returns a snapshot of the mock data in the same shape.
+ * @returns {{ data: object|null, error: Error|null }}
+ */
+function useOverviewData() {
+  const [data, setData] = React.useState(null);
+  const [error, setError] = React.useState(null);
+
+  React.useEffect(() => {
+    if (!window.MeridianAPI || !window.MeridianAPI.live) {
+      const M = window.MERIDIAN;
+      setData({
+        totalSpendUsd:       M.KPI.totalSpend,
+        totalRequests:       M.KPI.totalCalls,
+        estimatedSavingsUsd: M.KPI.totalSaved,
+        dailySpend:          M.SPEND_30
+          ? M.SPEND_30.map((v, i) => ({ date: `day-${i}`, costUsd: v }))
+          : [],
+        teamSpend:           (M.TEAMS || []).map(t => ({
+          teamId:           t.id,
+          name:             t.name,
+          monthlyBudgetUsd: t.budget,
+          spentUsd:         t.spend,
+        })),
+        modelMix: (M.MODELS || []).map(m => ({
+          model:   m.name,
+          costUsd: m.spend,
+        })),
+        // pass-through helpers used by the bottom section
+        _fmtMoney:    M.fmtMoney,
+        _totalSpend:  M.totalSpend,
+        _budgetCap:   M.budgetCap,
+        _projectedEOM: M.projectedEOM,
+        _teamSpendCustomization: M.TEAM_SPEND_CUSTOMIZATION,
+      });
+      return;
+    }
+
+    let alive = true;
+    window.MeridianAPI.kpi.overview()
+      .then(d => {
+        if (alive) {
+          const M = window.MERIDIAN;
+          setData({
+            ...d,
+            // keep fmtMoney helper from mock for display formatting
+            _fmtMoney:    M.fmtMoney,
+            _totalSpend:  d.totalSpendUsd,
+            _budgetCap:   M.budgetCap,
+            _projectedEOM: M.projectedEOM,
+            _teamSpendCustomization: M.TEAM_SPEND_CUSTOMIZATION,
+          });
+        }
+      })
+      .catch(e => { if (alive) setError(e); });
+
+    return () => { alive = false; };
+  }, []);
+
+  return { data, error };
+}
+
 function PageOverview() {
-  const M = window.MERIDIAN;
+  const { data, error } = useOverviewData();
+  if (error) return <div className="meridian-error">{error.message}</div>;
+  if (!data)  return <div className="meridian-loading">Loading…</div>;
+
   const labels = ['Apr 4', 'Apr 10', 'Apr 16', 'Apr 22', 'Apr 28'];
 
   const teamColors = {
@@ -208,25 +274,27 @@ function PageOverview() {
           <div className="card">
             <div className="card-title">Spend by team</div>
             <div className="card-sub">
-              {M.TEAMS.length} groups · {M.fmtMoney(M.totalSpend)} total ·{' '}
-              <span className="dim" title={M.TEAM_SPEND_CUSTOMIZATION.description}>
+              {data.teamSpend.length} groups · {data._fmtMoney(data._totalSpend)} total ·{' '}
+              <span className="dim" title={data._teamSpendCustomization && data._teamSpendCustomization.description}>
                 Future: map accounts and prompt sources to each group
               </span>
             </div>
             <div style={{ marginTop: 18, display: 'flex', flexDirection: 'column', gap: 14 }}>
-              {M.TEAMS.map(t => {
-                const pct = (t.spend / t.budget) * 100;
+              {data.teamSpend.map(t => {
+                const spend  = t.spentUsd  != null ? t.spentUsd  : (t.spend  || 0);
+                const budget = t.monthlyBudgetUsd != null ? t.monthlyBudgetUsd : (t.budget || 1);
+                const pct = (spend / budget) * 100;
                 const c = teamColors[t.name];
                 return (
-                  <div key={t.id || t.name}>
+                  <div key={t.teamId || t.id || t.name}>
                     <div className="between" style={{ marginBottom: 7 }}>
                       <div style={{ fontSize: 13 }}>{t.name}</div>
                       <div style={{ display: 'flex', gap: 14, alignItems: 'center', fontVariantNumeric: 'tabular-nums', fontWeight: 300, fontSize: 11.5 }}>
-                        <span>{M.fmtMoney(t.spend)}</span>
+                        <span>{data._fmtMoney(spend)}</span>
                         <span style={{ color: pct > 80 ? 'var(--amber-2)' : 'var(--text-mute)', fontWeight: 500, minWidth: 38, textAlign: 'right' }}>{pct.toFixed(0)}%</span>
                       </div>
                     </div>
-                    <HBar value={t.spend} max={t.budget} color={c} height={5} />
+                    <HBar value={spend} max={budget} color={c} height={5} />
                   </div>
                 );
               })}
@@ -234,9 +302,9 @@ function PageOverview() {
           </div>
           <div className="card">
             <div className="card-title">Budget Utilization</div>
-            <div className="card-sub">{M.fmtMoney(M.budgetCap)} monthly cap</div>
+            <div className="card-sub">{data._fmtMoney(data._budgetCap)} monthly cap</div>
             <div style={{ marginTop: 20 }}>
-              <BudgetGauge used={M.totalSpend} cap={M.budgetCap} projected={M.projectedEOM} />
+              <BudgetGauge used={data._totalSpend} cap={data._budgetCap} projected={data._projectedEOM} />
             </div>
           </div>
         </div>
