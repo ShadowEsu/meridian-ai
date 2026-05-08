@@ -31,6 +31,7 @@ window.addEventListener('error', function (e) {
   meridianShowBootError(e.message || (e.error && e.error.message) || e);
 });
 </script>
+<script>window.MERIDIAN_LIVE = false;</script>
 
 <!-- Served from node_modules (same origin as npm start) — avoids CDN/ad-blocker blank screens -->
 <script src="/node_modules/react/umd/react.development.js"></script>
@@ -38,6 +39,7 @@ window.addEventListener('error', function (e) {
 <script src="/node_modules/@babel/standalone/babel.min.js"></script>
 
 <script type="text/babel" src="src/core/data.jsx"></script>
+<script type="text/babel" src="src/core/api.jsx"></script>
 <script type="text/babel" src="src/core/icons.jsx"></script>
 <script type="text/babel" src="src/core/charts.jsx"></script>
 <script type="text/babel" src="src/core/shell.jsx"></script>
