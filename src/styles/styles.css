@@ -15,7 +15,7 @@
   --border-2: #2D2D31;       /* border-muted */
   --text: #E6E8EC;
   --text-dim: #9097A3;
-  --text-mute: #5A616E;
+  --text-mute: #7A8190;
   --indigo: #6366F1;
   --indigo-2: #818CF8;
   --indigo-deep: #4338CA;
@@ -40,6 +40,35 @@ html, body { margin: 0; padding: 0; }
 html {
   font-family: var(--font-sans);
 }
+
+:focus-visible {
+  outline: 2px solid var(--indigo-2);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+.skip-link {
+  position: absolute;
+  top: -40px;
+  left: 12px;
+  z-index: 10001;
+  background: var(--indigo);
+  color: #fff;
+  padding: 8px 14px;
+  border-radius: 6px;
+  font: 500 13px var(--font-sans);
+  text-decoration: none;
+}
+.skip-link:focus { top: 12px; }
 
 /* Thin, unobtrusive scrollbars (Stitch screenshots) */
 ::-webkit-scrollbar { width: 4px; height: 4px; }
@@ -94,167 +123,6 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   overflow: hidden;
-}
-
-@media (max-width: 1100px) {
-  :root { --ui: 0.94; }
-  .content { padding: 22px; }
-  .header { padding: 0 18px; }
-  .header-projects { min-width: 185px; gap: 12px; }
-  .header-search-wrap { flex-basis: 300px; }
-  .search { max-width: 360px; }
-}
-
-@media (max-width: 860px) {
-  :root { --ui: 0.88; }
-  .app { grid-template-columns: 220px 1fr; }
-  .content { padding: 18px; }
-  .nav-item { font-size: 12.75px; padding: 9px 10px; }
-  .brand-name { font-size: 15px; }
-  .brand-tag { font-size: 9.5px; }
-  .header {
-    gap: 10px;
-    padding: 0 14px;
-  }
-  .header-projects {
-    min-width: 0;
-    flex: 0 1 auto;
-  }
-  .header-projects > div:last-child {
-    display: none;
-  }
-  .header-search-wrap {
-    flex: 1 1 220px;
-  }
-  .search-input {
-    height: 34px;
-    font-size: 12px;
-    padding-right: 10px;
-  }
-  .search-kbd {
-    display: none;
-  }
-  .search-popover {
-    left: 50%;
-    right: auto;
-    width: min(420px, calc(100vw - 32px));
-    transform: translateX(-50%);
-    max-height: min(420px, calc(100vh - 96px));
-  }
-}
-
-@media (max-width: 720px) {
-  :root { --ui: 0.84; }
-  body { overflow: auto; }
-  .app { grid-template-columns: 1fr; height: auto; }
-  .sidebar { position: sticky; top: 0; z-index: 50; height: auto; }
-  .main { min-height: calc(100vh - 1px); }
-  .header { position: sticky; top: 0; z-index: 1000; }
-  .content { overflow: visible; }
-  .glass-panel,
-  .card {
-    border-radius: 14px;
-  }
-  .velocity-head {
-    flex-direction: column;
-  }
-  .velocity-summary {
-    width: 100%;
-    min-width: 0;
-  }
-  .keys-hero {
-    align-items: stretch;
-  }
-  .keys-hero-stats {
-    width: 100%;
-  }
-  .keys-table-toolbar {
-    align-items: flex-start;
-    flex-direction: column;
-  }
-  .header-actions .btn {
-    display: none;
-  }
-}
-
-@media (max-width: 560px) {
-  :root { --ui: 0.78; }
-  .content {
-    padding: 14px;
-  }
-  .demo-data-ribbon {
-    padding: 10px 14px;
-  }
-  .overview-kpi-grid,
-  .overview-chart-grid,
-  .overview-bottom-grid,
-  .stitch-grid-3,
-  .stitch-grid-2,
-  .stitch-grid-12 {
-    gap: 12px;
-  }
-  .overview-hero-metric {
-    font-size: clamp(28px, 11vw, 38px);
-  }
-  .velocity-card {
-    padding: 14px;
-  }
-  .velocity-summary {
-    grid-template-columns: 1fr;
-  }
-  .velocity-chart {
-    height: 148px;
-    gap: 5px;
-    grid-template-columns: repeat(7, minmax(24px, 1fr));
-    overflow: visible;
-  }
-  .velocity-value {
-    display: none;
-  }
-  .velocity-limit {
-    font-size: 8.5px;
-    letter-spacing: .06em;
-  }
-  .velocity-foot {
-    font-size: 10.5px;
-  }
-  .keys-hero-stats .glass-panel {
-    min-width: 0 !important;
-  }
-  table {
-    font-size: 12px;
-  }
-  .header {
-    height: auto;
-    min-height: 64px;
-    flex-wrap: wrap;
-    align-content: center;
-    padding: 10px 12px;
-  }
-  .header-projects {
-    order: 1;
-    min-width: auto;
-  }
-  .header-actions {
-    order: 2;
-    margin-left: auto;
-  }
-  .header-search-wrap {
-    order: 3;
-    flex: 1 0 100%;
-  }
-  .search {
-    max-width: none;
-  }
-  .search-popover {
-    position: fixed;
-    top: 118px;
-    left: 12px;
-    right: 12px;
-    width: auto;
-    transform: none;
-    max-height: calc(100vh - 140px);
-  }
 }
 
 /* Stitch page layout helpers */
@@ -334,12 +202,15 @@ body {
   display: flex;
   align-items: center;
   gap: 12px;
+  width: 100%;
   padding: 10px 12px;
   border-radius: 8px;
   color: #71717A;
   font-size: 13.5px;
   font-weight: 400;
   font-family: var(--font-serif);
+  text-align: left;
+  background: transparent;
   cursor: pointer;
   border: 1px solid transparent;
   transition: background .15s, color .15s, border-color .15s;
@@ -392,9 +263,14 @@ body {
 .user-role { font-size: 11.5px; color: #71717A; font-weight: 500; font-family: var(--font-body); }
 .sidebar-link {
   display:flex; align-items:center; gap:12px;
+  width: 100%;
   padding: 10px 12px;
   border-radius: 8px;
   color: #71717A;
+  background: transparent;
+  border: 0;
+  text-align: left;
+  font: inherit;
   cursor: pointer;
   font-family: var(--font-serif);
 }
@@ -1499,8 +1375,8 @@ code, kbd {
     flex: 1 1 220px;
   }
   .search-input {
-    height: 34px;
-    font-size: 12px;
+    height: 40px;
+    font-size: 16px;
     padding-right: 10px;
   }
   .search-kbd {
@@ -1557,5 +1433,137 @@ code, kbd {
     width: auto;
     transform: none;
     max-height: calc(100vh - 140px);
+  }
+}
+
+/* === Responsive overrides (kept after default rules so they actually win) === */
+
+@media (max-width: 1100px) {
+  :root { --ui: 0.94; }
+  .content { padding: 22px; }
+  .header { padding: 0 18px; }
+  .header-projects { min-width: 185px; gap: 12px; }
+  .header-search-wrap { flex-basis: 300px; }
+  .search { max-width: 360px; }
+}
+
+@media (max-width: 860px) {
+  :root { --ui: 0.88; }
+  .app { grid-template-columns: 220px 1fr; }
+  .content { padding: 18px; }
+  .nav-item { font-size: 13px; padding: 12px 12px; min-height: 44px; }
+  .brand-name { font-size: 15px; }
+  .brand-tag { font-size: 9.5px; }
+  .header {
+    gap: 10px;
+    padding: 0 14px;
+  }
+  .header-projects {
+    min-width: 0;
+    flex: 0 1 auto;
+  }
+  .header-projects > div:last-child {
+    display: none;
+  }
+  .header-search-wrap {
+    flex: 1 1 220px;
+  }
+  .search-input {
+    height: 40px;
+    font-size: 16px;
+    padding-right: 10px;
+  }
+  .search-kbd {
+    display: none;
+  }
+  .search-popover {
+    left: 50%;
+    right: auto;
+    width: min(420px, calc(100vw - 32px));
+    transform: translateX(-50%);
+    max-height: min(420px, calc(100vh - 96px));
+  }
+}
+
+@media (max-width: 720px) {
+  :root { --ui: 0.84; }
+  body { overflow: auto; }
+  .app { grid-template-columns: 1fr; height: auto; }
+  .sidebar { position: sticky; top: 0; z-index: 50; height: auto; }
+  .main { min-height: calc(100vh - 1px); }
+  .header { position: sticky; top: 0; z-index: 1000; }
+  .content { overflow: visible; }
+  .glass-panel,
+  .card {
+    border-radius: 14px;
+  }
+  .velocity-head {
+    flex-direction: column;
+  }
+  .velocity-summary {
+    width: 100%;
+    min-width: 0;
+  }
+  .keys-hero {
+    align-items: stretch;
+  }
+  .keys-hero-stats {
+    width: 100%;
+  }
+  .keys-table-toolbar {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+  .header-actions .btn {
+    display: none;
+  }
+}
+
+@media (max-width: 560px) {
+  :root { --ui: 0.78; }
+  .content {
+    padding: 14px;
+  }
+  .demo-data-ribbon {
+    padding: 10px 14px;
+  }
+  .overview-kpi-grid,
+  .overview-chart-grid,
+  .overview-bottom-grid,
+  .stitch-grid-3,
+  .stitch-grid-2,
+  .stitch-grid-12 {
+    gap: 12px;
+  }
+  .overview-hero-metric {
+    font-size: clamp(28px, 11vw, 38px);
+  }
+  .velocity-card {
+    padding: 14px;
+  }
+  .velocity-summary {
+    grid-template-columns: 1fr;
+  }
+  .velocity-chart {
+    height: 148px;
+    gap: 5px;
+    grid-template-columns: repeat(7, minmax(24px, 1fr));
+    overflow: visible;
+  }
+  .velocity-value {
+    display: none;
+  }
+  .velocity-limit {
+    font-size: 8.5px;
+    letter-spacing: .06em;
+  }
+  .velocity-foot {
+    font-size: 10.5px;
+  }
+  .keys-hero-stats .glass-panel {
+    min-width: 0 !important;
+  }
+  table {
+    font-size: 12px;
   }
 }

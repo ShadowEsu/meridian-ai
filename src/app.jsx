@@ -29,6 +29,7 @@ function AuthenticatedApp({ user }) {
 
   return (
     <div className="app">
+      <a href="#main-content" className="skip-link">Skip to main content</a>
       {showSetup ? <SetupWizard user={user} onDone={() => setShowSetup(false)} /> : null}
       <Sidebar
         page={page}
@@ -36,7 +37,7 @@ function AuthenticatedApp({ user }) {
         user={user}
         onLogout={undefined}
       />
-      <div className="main">
+      <main className="main" id="main-content" tabIndex="-1">
         {M.uiDemoSampleData ? (
           <div className="demo-data-ribbon">
             <span className="demo-data-pill">Sample data</span>
@@ -55,7 +56,7 @@ function AuthenticatedApp({ user }) {
         {page === 'agents' && <PageAgents />}
         {page === 'keys' && <PageKeys keysFilter={keysFilter} />}
         {page === 'alerts' && <PageAlerts />}
-      </div>
+      </main>
     </div>
   );
 }

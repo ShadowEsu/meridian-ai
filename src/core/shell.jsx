@@ -15,34 +15,48 @@ function Sidebar({ page, setPage, user, onLogout }) {
         <div className="brand-tag">AI Operations</div>
       </div>
 
-      <div className="nav">
-        {items.map(it => (
-          <div
-            key={it.id}
-            className={`nav-item ${page === it.id ? 'active' : ''}`}
-            onClick={() => setPage(it.id)}
-          >
-            {Icon[it.icon]({ width: 16, height: 16 })}
-            <div className="label">{it.label}</div>
-            {it.dot && <div className={`nav-dot ${it.dot === 'amber' ? 'amber' : ''}`}></div>}
-          </div>
-        ))}
-        <div
+      <nav className="nav" aria-label="Primary">
+        {items.map(it => {
+          const isActive = page === it.id;
+          const dotLabel = it.dot === 'green' ? 'Live' : it.dot === 'amber' ? 'Attention needed' : null;
+          return (
+            <button
+              type="button"
+              key={it.id}
+              className={`nav-item ${isActive ? 'active' : ''}`}
+              aria-current={isActive ? 'page' : undefined}
+              onClick={() => setPage(it.id)}
+            >
+              {Icon[it.icon]({ width: 16, height: 16, 'aria-hidden': true })}
+              <div className="label">{it.label}</div>
+              {it.dot && (
+                <div
+                  className={`nav-dot ${it.dot === 'amber' ? 'amber' : ''}`}
+                  role="img"
+                  aria-label={dotLabel}
+                ></div>
+              )}
+            </button>
+          );
+        })}
+        <button
+          type="button"
           className={`nav-item ${page === 'alerts' ? 'active' : ''}`}
+          aria-current={page === 'alerts' ? 'page' : undefined}
           onClick={() => setPage('alerts')}
           style={{ marginTop: 8 }}
         >
-          {Icon.bell({ width: 16, height: 16 })}
+          {Icon.bell({ width: 16, height: 16, 'aria-hidden': true })}
           <div className="label">Alerts</div>
-          <div className="nav-badge">2</div>
-        </div>
-      </div>
+          <div className="nav-badge" aria-label="2 unread alerts">2</div>
+        </button>
+      </nav>
 
       <div className="user-card">
-        <div className="sidebar-link" style={{ marginTop: 2 }} onClick={() => {}}>
-          {Icon.settings({ width: 16, height: 16 })}
+        <button type="button" className="sidebar-link" style={{ marginTop: 2 }} onClick={() => {}}>
+          {Icon.settings({ width: 16, height: 16, 'aria-hidden': true })}
           <div className="label">Settings</div>
-        </div>
+        </button>
 
         <div className="user-card-row">
           <div className="user-avatar">
@@ -104,10 +118,12 @@ function GlobalSearch({ setPage, setFleetSelected, setKeysFilter }) {
 
   return (
     <div className="search">
-      <span className="search-icon">{Icon.search()}</span>
+      <span className="search-icon" aria-hidden="true">{Icon.search()}</span>
       <input
         ref={inputRef}
         className="search-input"
+        type="search"
+        aria-label="Search models, API keys, and teams"
         placeholder="Search models, API keys, teams..."
         value={q}
         onChange={e => { setQ(e.target.value); setOpen(true); }}
