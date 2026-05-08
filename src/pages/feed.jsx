@@ -1,3 +1,81 @@
+/**
+ * Maps a raw API recent-activity row (a request record) to the shape
+ * expected by FeedRow JSX.
+ * API: { id, provider, model, promptTokens, completionTokens, latencyMs,
+ *         costUsd, status, teamId, timestamp }
+ * JSX: { id, time, model, family, routedFrom, routed, error, cost, inTok,
+ *         outTok, latency, team, reqId }
+ * @param {object} r - raw API row
+ * @returns {object} adapted row
+ */
+function adaptFeedRow(r) {
+  const modelLower = (r.model || '').toLowerCase();
+  let family = 'other';
+  if (modelLower.includes('haiku')) family = 'haiku';
+  else if (modelLower.includes('sonnet')) family = 'sonnet';
+  else if (modelLower.includes('opus')) family = 'opus';
+  else if (modelLower.includes('gpt-4.1-mini') || modelLower.includes('gpt-4.1-nano')) family = 'gpt4omini';
+  else if (modelLower.includes('gpt')) family = 'gpt4o';
+  else if (modelLower.includes('gemini-2.5-flash') || modelLower.includes('geminiflash')) family = 'geminiflash';
+  else if (modelLower.includes('gemini')) family = 'geminipro';
+  else if (modelLower.includes('mistral')) family = 'mistral';
+
+  const ts = r.timestamp ? new Date(r.timestamp) : new Date();
+  const time = ts.toLocaleTimeString('en-US', { hour12: false });
+
+  return {
+    id:         r.id,
+    time,
+    model:      r.model || '—',
+    family,
+    routedFrom: null,
+    routed:     false,
+    error:      r.status === 'error' || r.status === 'rate_limited',
+    cost:       r.costUsd || 0,
+    inTok:      r.promptTokens || 0,
+    outTok:     r.completionTokens || 0,
+    latency:    r.latencyMs || 0,
+    team:       r.teamId || '—',
+    reqId:      r.id,
+  };
+}
+
+/**
+ * Polls MeridianAPI.kpi.feed() every 5 seconds in live mode.
+ * In demo mode, returns mock KPI counters on an identical tick cadence
+ * so the page feels alive in both modes.
+ * @returns {{ requestsPerMinute: number, tokensPerSecond: number, costPerHourUsd: number, recent: object[] }|null}
+ */
+function useFeed() {
+  const [data, setData] = React.useState(null);
+
+  React.useEffect(() => {
+    let alive = true;
+
+    function tick() {
+      if (!window.MeridianAPI || !window.MeridianAPI.live) {
+        // Demo mode: serve mock counters so the tick fires and the page re-renders.
+        setData({
+          requestsPerMinute: window.MERIDIAN.KPI.rpm || 0,
+          tokensPerSecond:   window.MERIDIAN.KPI.tps || 0,
+          costPerHourUsd:    window.MERIDIAN.KPI.costPerHour || 0,
+          recent:            (window.MERIDIAN.REQUEST_LOGS || []).slice(0, 50),
+        });
+        return;
+      }
+      window.MeridianAPI.kpi.feed()
+        .then(d => { if (alive) setData(d); })
+        .catch(() => { /* silently ignore transient errors */ });
+    }
+
+    tick();
+    const t = setInterval(tick, 5000);
+    return () => { alive = false; clearInterval(t); };
+  }, []);
+
+  return data;
+}
+
 function PageLiveFeed() {
   const M = window.MERIDIAN;
   const [paused, setPaused] = React.useState(false);
@@ -6,8 +84,27 @@ function PageLiveFeed() {
     tps: 2340, rpm: 94, cpm: 0.42, savedHr: 43,
   });
 
-  // Update counters every second
+  // Fetch live counters + recent rows every 5 seconds.
+  const liveData = useFeed();
+
+  // In live mode, sync counters from the API response.
   React.useEffect(() => {
+    if (!liveData || !window.MeridianAPI || !window.MeridianAPI.live) return;
+    setCounters(c => ({
+      tps:     liveData.tokensPerSecond   || c.tps,
+      rpm:     liveData.requestsPerMinute || c.rpm,
+      // costPerHour → cost-per-minute for the card label
+      cpm:     liveData.costPerHourUsd != null ? +(liveData.costPerHourUsd / 60).toFixed(2) : c.cpm,
+      savedHr: c.savedHr,                // not returned by feed endpoint yet; keep current
+    }));
+    if (liveData.recent && liveData.recent.length > 0 && !paused) {
+      setFeed(liveData.recent.map(adaptFeedRow).slice(0, 60));
+    }
+  }, [liveData, paused]);
+
+  // Demo mode: update counters every second with a random walk.
+  React.useEffect(() => {
+    if (window.MeridianAPI && window.MeridianAPI.live) return; // live mode handled above
     if (paused) return;
     const t = setInterval(() => {
       setCounters(c => ({
@@ -20,8 +117,9 @@ function PageLiveFeed() {
     return () => clearInterval(t);
   }, [paused]);
 
-  // Add new feed row every 1.5s
+  // Demo mode: add new feed row every 1.5s.
   React.useEffect(() => {
+    if (window.MeridianAPI && window.MeridianAPI.live) return; // live mode handled above
     if (paused) return;
     const t = setInterval(() => {
       setFeed(prev => [generateRow(), ...prev].slice(0, 60));

@@ -1,3 +1,81 @@
+/**
+ * Maps a raw API request row to the shape expected by the table JSX.
+ * API: { id, virtualKeyId, teamId, agentId, provider, model, promptTokens,
+ *         completionTokens, latencyMs, costUsd, status, taskType, timestamp }
+ * JSX: { id, time, model, modelFamily, routedFrom, team, inTok, outTok,
+ *         cost, latency, status, saving }
+ * @param {object} r - raw API row
+ * @returns {object} adapted row
+ */
+function adaptApiRow(r) {
+  const statusMap = { ok: 'Success', error: 'Error', rate_limited: 'Rate Limited' };
+  // Derive a display model family from the model string (e.g. "claude-haiku-4-5" → "haiku")
+  let family = 'other';
+  const modelLower = (r.model || '').toLowerCase();
+  if (modelLower.includes('haiku')) family = 'haiku';
+  else if (modelLower.includes('sonnet')) family = 'sonnet';
+  else if (modelLower.includes('opus')) family = 'opus';
+  else if (modelLower.includes('gpt-4o-mini') || modelLower.includes('gpt4omini')) family = 'gpt4omini';
+  else if (modelLower.includes('gpt-4o') || modelLower.includes('gpt4o')) family = 'gpt4o';
+  else if (modelLower.includes('gpt-4.1-mini') || modelLower.includes('gpt-4.1-nano')) family = 'gpt4omini';
+  else if (modelLower.includes('gpt')) family = 'gpt4o';
+  else if (modelLower.includes('gemini-2.5-flash') || modelLower.includes('geminiflash')) family = 'geminiflash';
+  else if (modelLower.includes('gemini')) family = 'geminipro';
+  else if (modelLower.includes('mistral')) family = 'mistral';
+
+  const ts = r.timestamp ? new Date(r.timestamp) : null;
+  const time = ts ? ts.toISOString().replace('T', ' ').slice(0, 19) : '—';
+
+  return {
+    id:          r.id,
+    time,
+    model:       r.model || '—',
+    modelFamily: family,
+    routedFrom:  null,           // API doesn't expose routing info yet
+    team:        r.teamId || '—',
+    inTok:       r.promptTokens || 0,
+    outTok:      r.completionTokens || 0,
+    cost:        r.costUsd || 0,
+    latency:     r.latencyMs || 0,
+    status:      statusMap[r.status] || r.status || '—',
+    saving:      0,              // not yet computed server-side
+  };
+}
+
+/**
+ * Fetches request logs from the live API when MeridianAPI.live is true,
+ * otherwise returns a snapshot of the mock REQUEST_LOGS array.
+ * Re-fetches whenever filters change.
+ * @param {object} filters - query params forwarded to MeridianAPI.requests.list
+ * @returns {{ requests: object[], total: number, error: Error|null }}
+ */
+function useLogs(filters) {
+  const [out, setOut] = React.useState(() => {
+    const logs = window.MERIDIAN.REQUEST_LOGS || [];
+    return { requests: logs, total: logs.length };
+  });
+  const [error, setError] = React.useState(null);
+
+  React.useEffect(() => {
+    if (!window.MeridianAPI || !window.MeridianAPI.live) return;
+    let alive = true;
+    window.MeridianAPI.requests.list(filters)
+      .then(d => {
+        if (alive) {
+          setOut({
+            requests: (d.requests || []).map(adaptApiRow),
+            total: d.total || 0,
+          });
+        }
+      })
+      .catch(e => { if (alive) setError(e); });
+    return () => { alive = false; };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [JSON.stringify(filters)]);
+
+  return { ...out, error };
+}
+
 function PageRequestLogs() {
   const M = window.MERIDIAN;
   const [model, setModel] = React.useState('all');
@@ -8,24 +86,44 @@ function PageRequestLogs() {
   const [sortKey, setSortKey] = React.useState('time');
   const [sortDir, setSortDir] = React.useState('desc');
 
+  // Build the filter object passed to useLogs (and used for client-side
+  // filtering in demo mode).
+  const apiFilters = React.useMemo(() => {
+    const f = {};
+    if (model !== 'all') f.model = model;
+    if (team !== 'all') f.teamId = team;
+    if (status !== 'all') {
+      const reverseMap = { Success: 'ok', Error: 'error', 'Rate Limited': 'rate_limited' };
+      f.status = reverseMap[status] || status;
+    }
+    return f;
+  }, [model, team, status]);
+
+  const { requests: apiRows, total, error } = useLogs(apiFilters);
+
+  // In demo mode, apiRows === mock REQUEST_LOGS (no live call fired).
+  // Apply client-side filtering + sorting regardless of mode so the UI stays
+  // interactive even when the API hasn't returned yet.
   const rows = React.useMemo(() => {
-    let r = M.REQUEST_LOGS.slice();
+    let r = apiRows.slice();
     if (model !== 'all') r = r.filter(x => x.model === model);
     if (team !== 'all') r = r.filter(x => x.team === team);
     if (status !== 'all') r = r.filter(x => x.status === status);
-    if (query) r = r.filter(x => x.id.includes(query.toLowerCase()));
+    if (query) r = r.filter(x => String(x.id).toLowerCase().includes(query.toLowerCase()));
     r.sort((a, b) => {
       const av = a[sortKey], bv = b[sortKey];
       const cmp = av < bv ? -1 : av > bv ? 1 : 0;
       return sortDir === 'asc' ? cmp : -cmp;
     });
     return r;
-  }, [model, team, status, query, sortKey, sortDir]);
+  }, [apiRows, model, team, status, query, sortKey, sortDir]);
 
   const toggleSort = (k) => {
     if (sortKey === k) setSortDir(d => d === 'asc' ? 'desc' : 'asc');
     else { setSortKey(k); setSortDir('desc'); }
   };
+
+  if (error) return <div className="meridian-error">{error.message}</div>;
 
   return (
     <div className="content" data-screen-label="Request Logs">
@@ -55,7 +153,7 @@ function PageRequestLogs() {
         <div className="between" style={{ padding: '16px 22px', borderBottom: '1px solid var(--border)' }}>
           <div>
             <div className="card-title">{rows.length} requests</div>
-            <div className="card-sub">Page 1 of 57 · 50 rows per page</div>
+            <div className="card-sub">Page 1 of {Math.max(1, Math.ceil(total / 50))} · 50 rows per page</div>
           </div>
         </div>
         <div style={{ overflowX: 'auto' }}>
@@ -110,7 +208,7 @@ function PageRequestLogs() {
           </table>
         </div>
         <div style={{ padding: '14px 22px', borderTop: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: 12, color: 'var(--text-dim)' }}>
-          <span>Showing 1–{rows.length} of 2,847,391</span>
+          <span>Showing 1–{rows.length} of {total.toLocaleString()}</span>
           <div style={{ display: 'flex', gap: 6 }}>
             <button className="btn btn-ghost">‹ Prev</button>
             <button className="btn">1</button>
