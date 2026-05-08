@@ -16,7 +16,7 @@ function PageOverview() {
       {/* Overview layout aligned to provided HTML (glass KPI cards + charts + table) */}
       <div style={{ display: 'grid', gap: 16 }}>
         {/* Hero Row: KPI Cards */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 16 }}>
+        <div className="overview-kpi-grid">
           <div className="glass-panel" style={{ padding: 20, overflow: 'hidden' }}>
             <div className="between" style={{ alignItems: 'flex-start' }}>
               <div className="kpi-label">Total Revenue</div>
@@ -26,7 +26,7 @@ function PageOverview() {
             </div>
             <div style={{ marginTop: 14, display: 'flex', justifyContent: 'space-between', gap: 18, alignItems: 'flex-end' }}>
               <div>
-                <div style={{ fontSize: 46, lineHeight: 1.05, letterSpacing: '-0.02em', fontWeight: 300, color: 'var(--text)', fontVariantNumeric: 'tabular-nums' }}>
+                <div className="overview-hero-metric">
                   $93,450
                 </div>
                 <div style={{ marginTop: 8, fontSize: 10.5, letterSpacing: '0.09em', textTransform: 'uppercase', color: 'var(--indigo-2)', fontWeight: 500 }}>
@@ -46,7 +46,7 @@ function PageOverview() {
             </div>
             <div style={{ marginTop: 14, display: 'flex', justifyContent: 'space-between', gap: 18, alignItems: 'flex-end' }}>
               <div>
-                <div style={{ fontSize: 46, lineHeight: 1.05, letterSpacing: '-0.02em', fontWeight: 300, color: 'var(--text)', fontVariantNumeric: 'tabular-nums' }}>
+                <div className="overview-hero-metric">
                   42
                 </div>
                 <div style={{ marginTop: 8, fontSize: 10.5, letterSpacing: '0.09em', textTransform: 'uppercase', color: 'var(--amber-2)', fontWeight: 500 }}>
@@ -66,7 +66,7 @@ function PageOverview() {
             </div>
             <div style={{ marginTop: 14, display: 'flex', justifyContent: 'space-between', gap: 18, alignItems: 'flex-end' }}>
               <div>
-                <div style={{ fontSize: 46, lineHeight: 1.05, letterSpacing: '-0.02em', fontWeight: 300, color: 'var(--text)', fontVariantNumeric: 'tabular-nums' }}>
+                <div className="overview-hero-metric">
                   99.99%
                 </div>
                 <div style={{ marginTop: 8, fontSize: 10.5, letterSpacing: '0.09em', textTransform: 'uppercase', color: 'var(--green-2)', fontWeight: 500 }}>
@@ -79,7 +79,7 @@ function PageOverview() {
         </div>
 
         {/* Second Row: Charts (7/3 split) */}
-        <div style={{ display: 'grid', gridTemplateColumns: '7fr 3fr', gap: 16 }}>
+        <div className="overview-chart-grid">
           <div className="glass-panel" style={{ padding: 20 }}>
             <div className="between" style={{ alignItems: 'center' }}>
               <div className="kpi-label" style={{ color: 'var(--text)' }}>Financial Overview</div>
@@ -204,7 +204,7 @@ function PageOverview() {
         </div>
 
         {/* Keep existing team spend/budget section as a real-data-backed module */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: 16 }}>
+        <div className="overview-bottom-grid">
           <div className="card">
             <div className="card-title">Spend by team</div>
             <div className="card-sub">

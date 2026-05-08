@@ -151,12 +151,79 @@ body {
   .main { min-height: calc(100vh - 1px); }
   .header { position: sticky; top: 0; z-index: 1000; }
   .content { overflow: visible; }
+  .glass-panel,
+  .card {
+    border-radius: 14px;
+  }
+  .velocity-head {
+    flex-direction: column;
+  }
+  .velocity-summary {
+    width: 100%;
+    min-width: 0;
+  }
+  .keys-hero {
+    align-items: stretch;
+  }
+  .keys-hero-stats {
+    width: 100%;
+  }
+  .keys-table-toolbar {
+    align-items: flex-start;
+    flex-direction: column;
+  }
   .header-actions .btn {
     display: none;
   }
 }
 
 @media (max-width: 560px) {
+  :root { --ui: 0.78; }
+  .content {
+    padding: 14px;
+  }
+  .demo-data-ribbon {
+    padding: 10px 14px;
+  }
+  .overview-kpi-grid,
+  .overview-chart-grid,
+  .overview-bottom-grid,
+  .stitch-grid-3,
+  .stitch-grid-2,
+  .stitch-grid-12 {
+    gap: 12px;
+  }
+  .overview-hero-metric {
+    font-size: clamp(28px, 11vw, 38px);
+  }
+  .velocity-card {
+    padding: 14px;
+  }
+  .velocity-summary {
+    grid-template-columns: 1fr;
+  }
+  .velocity-chart {
+    height: 148px;
+    gap: 5px;
+    grid-template-columns: repeat(7, minmax(24px, 1fr));
+    overflow: visible;
+  }
+  .velocity-value {
+    display: none;
+  }
+  .velocity-limit {
+    font-size: 8.5px;
+    letter-spacing: .06em;
+  }
+  .velocity-foot {
+    font-size: 10.5px;
+  }
+  .keys-hero-stats .glass-panel {
+    min-width: 0 !important;
+  }
+  table {
+    font-size: 12px;
+  }
   .header {
     height: auto;
     min-height: 64px;
@@ -199,6 +266,12 @@ body {
   .stitch-grid-12 { grid-template-columns: 1fr; }
   .stitch-grid-3 { grid-template-columns: 1fr; }
   .stitch-grid-2 { grid-template-columns: 1fr; }
+  .velocity-card { grid-column: auto; }
+  .overview-kpi-grid,
+  .overview-chart-grid,
+  .overview-bottom-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 .app {
@@ -528,6 +601,221 @@ body {
   border: 1px solid var(--border);
   border-radius: 18px;
   position: relative;
+}
+
+/* Overview + Virtual Keys responsive dashboard modules */
+.overview-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+.overview-chart-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 7fr) minmax(260px, 3fr);
+  gap: 16px;
+}
+.overview-bottom-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(280px, 1fr);
+  gap: 16px;
+}
+.overview-hero-metric {
+  font-family: var(--font-serif);
+  font-size: clamp(30px, 4.6vw, 46px);
+  line-height: 1.05;
+  letter-spacing: -0.035em;
+  font-weight: 300;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.keys-hero {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 16px;
+  margin-bottom: 18px;
+  flex-wrap: wrap;
+}
+.keys-hero > div:first-child {
+  min-width: min(100%, 420px);
+  flex: 1 1 420px;
+}
+.keys-hero-stats {
+  display: flex;
+  gap: 12px;
+  flex: 0 1 auto;
+  flex-wrap: wrap;
+}
+.keys-hero-stats .glass-panel {
+  flex: 1 1 150px;
+}
+.velocity-card {
+  grid-column: span 2;
+  padding: 18px;
+  overflow: hidden;
+  position: relative;
+}
+.velocity-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 18px;
+  align-items: flex-start;
+}
+.velocity-summary {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(80px, 1fr));
+  gap: 8px;
+  min-width: min(100%, 330px);
+}
+.velocity-summary div {
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: rgba(255,255,255,.03);
+}
+.velocity-summary span {
+  display: block;
+  font-size: 9.5px;
+  letter-spacing: .11em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,.42);
+}
+.velocity-summary strong {
+  display: block;
+  margin-top: 4px;
+  font-size: 13px;
+  color: #fff;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+.velocity-chart {
+  height: 164px;
+  display: grid;
+  grid-template-columns: repeat(7, minmax(34px, 1fr));
+  gap: 8px;
+  align-items: end;
+  margin-top: 16px;
+  padding: 22px 0 28px;
+  position: relative;
+}
+.velocity-chart::before,
+.velocity-chart::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  border-top: 1px solid rgba(255,255,255,.06);
+  pointer-events: none;
+}
+.velocity-chart::before { top: 22px; }
+.velocity-chart::after { top: 50%; }
+.velocity-limit {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 45px;
+  border-top: 1px dashed rgba(245,158,11,.45);
+  color: rgba(251,191,36,.9);
+  font-size: 10px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  padding-top: 4px;
+  pointer-events: none;
+  z-index: 2;
+}
+.velocity-bar-wrap {
+  min-width: 0;
+  height: 100%;
+  display: flex;
+  align-items: flex-end;
+  position: relative;
+}
+.velocity-bar {
+  width: 100%;
+  min-height: 24px;
+  border: 1px solid rgba(129,140,248,.18);
+  border-radius: 8px 8px 3px 3px;
+  background: linear-gradient(180deg, rgba(129,140,248,.88), rgba(67,56,202,.45));
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.08);
+}
+.velocity-bar.hot {
+  background: linear-gradient(180deg, rgba(251,191,36,.88), rgba(180,83,9,.38));
+  border-color: rgba(251,191,36,.20);
+}
+.velocity-bar.current {
+  background: linear-gradient(180deg, rgba(99,102,241,1), rgba(99,102,241,.68));
+  box-shadow: 0 0 22px rgba(99,102,241,.22), inset 0 1px 0 rgba(255,255,255,.14);
+}
+.velocity-label,
+.velocity-value {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+.velocity-value {
+  bottom: 15px;
+  font-size: 10px;
+  color: rgba(255,255,255,.52);
+}
+.velocity-label {
+  bottom: -22px;
+  font-size: 10px;
+  letter-spacing: .10em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,.38);
+}
+.velocity-tooltip {
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + 10px);
+  transform: translateX(-50%);
+  width: max-content;
+  max-width: 160px;
+  display: none;
+  gap: 3px;
+  padding: 8px 10px;
+  border: 1px solid var(--border-2);
+  border-radius: 10px;
+  background: #14171F;
+  box-shadow: 0 18px 42px -18px rgba(0,0,0,.7);
+  z-index: 5;
+  font-size: 10.5px;
+}
+.velocity-tooltip strong,
+.velocity-tooltip span {
+  display: block;
+}
+.velocity-tooltip strong { color: #fff; font-size: 11px; }
+.velocity-tooltip span { color: rgba(255,255,255,.55); }
+.velocity-bar-wrap:hover .velocity-tooltip {
+  display: grid;
+}
+.velocity-foot {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 10px;
+  color: rgba(255,255,255,.52);
+  font-size: 11.5px;
+  line-height: 1.5;
+}
+.keys-table-toolbar {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border-2);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  background: rgba(255,255,255,.03);
+}
+.keys-tabs {
+  display: flex;
+  gap: 14px;
+  overflow-x: auto;
+  max-width: 100%;
 }
 .card-title { font-size: 14.5px; font-weight: 500; letter-spacing: -0.005em; }
 .card-sub { font-size: 12px; color: var(--text-dim); font-weight: 300; margin-top: 3px; }

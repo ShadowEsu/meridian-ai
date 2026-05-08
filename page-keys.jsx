@@ -4,6 +4,20 @@ function PageKeys({ keysFilter }) {
 
   React.useEffect(() => { if (keysFilter) setFilter(keysFilter); }, [keysFilter]);
 
+  const velocity = [
+    { day: 'Mon', spend: 820, requests: '18.2k', saved: 92, risk: 'Low' },
+    { day: 'Tue', spend: 1210, requests: '24.7k', saved: 118, risk: 'Low' },
+    { day: 'Wed', spend: 1125, requests: '22.9k', saved: 104, risk: 'Med' },
+    { day: 'Thu', spend: 1620, requests: '31.4k', saved: 176, risk: 'Med' },
+    { day: 'Fri', spend: 1320, requests: '27.1k', saved: 143, risk: 'Low' },
+    { day: 'Sat', spend: 1835, requests: '36.8k', saved: 205, risk: 'High' },
+    { day: 'Sun', spend: 1510, requests: '29.6k', saved: 188, risk: 'Med' },
+  ];
+  const peakSpend = Math.max(...velocity.map(v => v.spend));
+  const totalWeeklySpend = velocity.reduce((sum, v) => sum + v.spend, 0);
+  const totalWeeklySaved = velocity.reduce((sum, v) => sum + v.saved, 0);
+  const latest = velocity[velocity.length - 1];
+
   const filteredKeys = M.VIRTUAL_KEYS.filter(k =>
     !filter || k.name.toLowerCase().includes(filter.toLowerCase()) || k.team.toLowerCase().includes(filter.toLowerCase())
   );
@@ -11,7 +25,7 @@ function PageKeys({ keysFilter }) {
   return (
     <div className="content" data-screen-label="Virtual Keys">
       {/* Header section (Stitch) */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', gap: 16, marginBottom: 18, flexWrap: 'wrap' }}>
+      <div className="keys-hero">
         <div>
           <div className="kpi-label" style={{ color: 'var(--indigo-2)' }}>Operational overview</div>
           <div style={{ fontFamily: 'var(--font-display)', fontSize: `calc(28px * var(--ui))`, letterSpacing: '-0.02em', color: '#fff', marginTop: 6 }}>
@@ -21,7 +35,7 @@ function PageKeys({ keysFilter }) {
             Financial governance for agent infrastructure. Monitor token consumption, liquidity reserves, and attribution across virtual team environments.
           </div>
         </div>
-        <div style={{ display: 'flex', gap: 12 }}>
+        <div className="keys-hero-stats">
           <div className="glass-panel" style={{ padding: 14, minWidth: 160 }}>
             <div className="kpi-label" style={{ color: 'rgba(255,255,255,.45)' }}>Total spend</div>
             <div style={{ fontFamily: 'var(--font-display)', fontSize: 18, color: '#fff', marginTop: 8 }}>$14,204.50</div>
@@ -35,15 +49,52 @@ function PageKeys({ keysFilter }) {
 
       {/* Bento stats */}
       <div className="stitch-grid-3" style={{ marginBottom: 16 }}>
-        <div className="glass-panel" style={{ gridColumn: 'span 2', padding: 18, overflow: 'hidden', position: 'relative' }}>
-          <div>
-            <div style={{ fontFamily: 'var(--font-display)', fontSize: 15, color: '#fff', fontWeight: 600 }}>Consumption Velocity</div>
-            <div style={{ marginTop: 4, color: 'rgba(255,255,255,.55)' }}>Across all active virtual clusters.</div>
+        <div className="glass-panel velocity-card">
+          <div className="velocity-head">
+            <div>
+              <div style={{ fontFamily: 'var(--font-display)', fontSize: 15, color: '#fff', fontWeight: 600 }}>Consumption Velocity</div>
+              <div style={{ marginTop: 4, color: 'rgba(255,255,255,.55)' }}>7-day spend, request load, and savings across all active virtual clusters.</div>
+            </div>
+            <div className="velocity-summary">
+              <div>
+                <span>Week spend</span>
+                <strong>${totalWeeklySpend.toLocaleString()}</strong>
+              </div>
+              <div>
+                <span>Saved</span>
+                <strong style={{ color: 'var(--green-2)' }}>${totalWeeklySaved.toLocaleString()}</strong>
+              </div>
+              <div>
+                <span>Today</span>
+                <strong>{latest.requests}</strong>
+              </div>
+            </div>
           </div>
-          <div style={{ height: 110, display: 'flex', alignItems: 'flex-end', gap: 6, marginTop: 14 }}>
-            {[0.4,0.6,0.55,0.8,0.65,0.9,0.75].map((h,i)=>(
-              <div key={i} style={{ flex: 1, height: `${h*100}%`, background: i === 6 ? 'var(--indigo)' : `rgba(99,102,241,${0.18 + i*0.06})` }} />
-            ))}
+          <div className="velocity-chart" aria-label="Consumption velocity over the last seven days">
+            <div className="velocity-limit">Budget guardrail $1.6k/day</div>
+            {velocity.map((v, i) => {
+              const pct = Math.max(18, Math.round((v.spend / peakSpend) * 100));
+              const overGuardrail = v.spend >= 1600;
+              return (
+                <div className="velocity-bar-wrap" key={v.day}>
+                  <div className="velocity-tooltip">
+                    <strong>{v.day}: ${v.spend.toLocaleString()}</strong>
+                    <span>{v.requests} requests</span>
+                    <span>${v.saved} saved · {v.risk} risk</span>
+                  </div>
+                  <div
+                    className={`velocity-bar ${overGuardrail ? 'hot' : ''} ${i === velocity.length - 1 ? 'current' : ''}`}
+                    style={{ height: `${pct}%` }}
+                  />
+                  <div className="velocity-value">${(v.spend / 1000).toFixed(1)}k</div>
+                  <div className="velocity-label">{v.day}</div>
+                </div>
+              );
+            })}
+          </div>
+          <div className="velocity-foot">
+            <span><b style={{ color: 'var(--indigo-2)' }}>Current:</b> Sunday is ${latest.spend.toLocaleString()} with {latest.requests} requests.</span>
+            <span><b style={{ color: 'var(--amber-2)' }}>Watch:</b> bars above the guardrail can trigger budget alerts.</span>
           </div>
         </div>
 
@@ -62,8 +113,8 @@ function PageKeys({ keysFilter }) {
 
       {/* Dense table */}
       <div className="glass-panel" style={{ padding: 0, overflow: 'hidden' }}>
-        <div style={{ padding: '12px 16px', borderBottom: '1px solid var(--border-2)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(255,255,255,.03)' }}>
-          <div style={{ display: 'flex', gap: 14 }}>
+        <div className="keys-table-toolbar">
+          <div className="keys-tabs">
             <button type="button" style={tabBtnActive}>ALL TEAMS</button>
             <button type="button" style={tabBtn}>ENGINEERING</button>
             <button type="button" style={tabBtn}>MARKETING</button>
