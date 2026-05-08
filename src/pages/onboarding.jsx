@@ -1,10 +1,10 @@
 // Supported providers accepted by the backend.
-// ‘azure’ is not yet supported server-side; it is excluded from the enum.
+// 'azure' is not yet supported server-side; it is excluded from the enum.
 const PROVIDER_OPTIONS = [
-  { value: ‘openai’,    label: ‘OpenAI’ },
-  { value: ‘anthropic’, label: ‘Anthropic’ },
-  { value: ‘google’,    label: ‘Google’ },
-  { value: ‘mistral’,   label: ‘Mistral’ },
+  { value: 'openai',    label: 'OpenAI' },
+  { value: 'anthropic', label: 'Anthropic' },
+  { value: 'google',    label: 'Google' },
+  { value: 'mistral',   label: 'Mistral' },
 ];
 
 /**
@@ -15,7 +15,7 @@ const PROVIDER_OPTIONS = [
  * key object.  Throws on network / validation errors so the caller can surface
  * the message in the UI.
  *
- * @param {string} provider - One of ‘openai’ | ‘anthropic’ | ‘google’ | ‘mistral’
+ * @param {string} provider - One of 'openai' | 'anthropic' | 'google' | 'mistral'
  * @param {string} apiKey   - Raw API key string (min 8 chars)
  * @param {string} [label]  - Optional human-readable label
  * @returns {Promise<object|null>} Created key record in live mode, null in demo mode
@@ -30,9 +30,9 @@ async function saveProviderKey(provider, apiKey, label) {
 
 // Provider key form shown on the "Connect your APIs" wizard step.
 function ProviderKeyForm({ onSaved }) {
-  const [provider, setProvider] = React.useState(‘openai’);
-  const [apiKey, setApiKey]     = React.useState(‘’);
-  const [label, setLabel]       = React.useState(‘’);
+  const [provider, setProvider] = React.useState('openai');
+  const [apiKey, setApiKey]     = React.useState('');
+  const [label, setLabel]       = React.useState('');
   const [saving, setSaving]     = React.useState(false);
   const [error, setError]       = React.useState(null);
   const [saved, setSaved]       = React.useState(false);
@@ -43,7 +43,7 @@ function ProviderKeyForm({ onSaved }) {
     setError(null);
 
     if (!apiKey.trim()) {
-      setError(‘API key is required.’);
+      setError('API key is required.');
       return;
     }
 
@@ -60,7 +60,7 @@ function ProviderKeyForm({ onSaved }) {
       setSaved(true);
       if (onSaved) onSaved(result);
     } catch (err) {
-      setError(err.message || ‘Failed to save provider key.’);
+      setError(err.message || 'Failed to save provider key.');
     } finally {
       setSaving(false);
     }
@@ -69,10 +69,10 @@ function ProviderKeyForm({ onSaved }) {
   if (saved) {
     return (
       <div className="setup-key-success">
-        <p style={{ color: ‘var(--color-success, #22c55e)’, marginBottom: 4 }}>
-          {live ? ‘Provider key saved.’ : ‘Got it (demo mode — key not persisted).’}
+        <p style={{ color: 'var(--color-success, #22c55e)', marginBottom: 4 }}>
+          {live ? 'Provider key saved.' : 'Got it (demo mode — key not persisted).'}
         </p>
-        <p style={{ fontSize: 13, color: ‘var(--color-muted, #888)’ }}>
+        <p style={{ fontSize: 13, color: 'var(--color-muted, #888)' }}>
           You can add more keys later from the Keys page.
         </p>
       </div>
@@ -82,16 +82,16 @@ function ProviderKeyForm({ onSaved }) {
   return (
     <form onSubmit={handleSubmit} style={{ marginTop: 12 }}>
       {!live && (
-        <p style={{ fontSize: 12, color: ‘var(--color-muted, #888)’, marginBottom: 8 }}>
+        <p style={{ fontSize: 12, color: 'var(--color-muted, #888)', marginBottom: 8 }}>
           Demo mode — keys are not persisted to the backend.
         </p>
       )}
-      <div style={{ display: ‘flex’, flexDirection: ‘column’, gap: 8 }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
         <select
           value={provider}
           onChange={e => setProvider(e.target.value)}
           className="input"
-          style={{ width: ‘100%’ }}
+          style={{ width: '100%' }}
           disabled={saving}
           aria-label="Provider"
         >
@@ -108,7 +108,7 @@ function ProviderKeyForm({ onSaved }) {
           disabled={saving}
           autoComplete="off"
           aria-label="API key"
-          style={{ width: ‘100%’, boxSizing: ‘border-box’ }}
+          style={{ width: '100%', boxSizing: 'border-box' }}
         />
         <input
           type="text"
@@ -118,10 +118,10 @@ function ProviderKeyForm({ onSaved }) {
           onChange={e => setLabel(e.target.value)}
           disabled={saving}
           aria-label="Label"
-          style={{ width: ‘100%’, boxSizing: ‘border-box’ }}
+          style={{ width: '100%', boxSizing: 'border-box' }}
         />
         {error && (
-          <p role="alert" style={{ color: ‘var(--color-danger, #ef4444)’, fontSize: 13, margin: 0 }}>
+          <p role="alert" style={{ color: 'var(--color-danger, #ef4444)', fontSize: 13, margin: 0 }}>
             {error}
           </p>
         )}
@@ -129,9 +129,9 @@ function ProviderKeyForm({ onSaved }) {
           type="submit"
           className="btn btn-primary"
           disabled={saving}
-          style={{ alignSelf: ‘flex-start’ }}
+          style={{ alignSelf: 'flex-start' }}
         >
-          {saving ? ‘Saving…’ : ‘Save key’}
+          {saving ? 'Saving…' : 'Save key'}
         </button>
       </div>
     </form>
@@ -152,7 +152,7 @@ function SetupWizard({ user, onDone }) {
 
   const finish = () => {
     try {
-      localStorage.setItem(‘meridian_setup_v1_’ + user.id, ‘1’);
+      localStorage.setItem('meridian_setup_v1_' + user.id, '1');
     } catch { /* ignore */ }
     onDone();
   };
@@ -164,21 +164,21 @@ function SetupWizard({ user, onDone }) {
 
   const steps = [
     {
-      title: ‘Welcome aboard’,
-      body: ‘Meridian helps you see AI spend, route models, and watch agents — all in one place. Your account is ready; everything you see next is designed to get you productive quickly.’,
-      hint: ‘You can reopen tips anytime from Settings (coming soon).’,
+      title: 'Welcome aboard',
+      body: 'Meridian helps you see AI spend, route models, and watch agents — all in one place. Your account is ready; everything you see next is designed to get you productive quickly.',
+      hint: 'You can reopen tips anytime from Settings (coming soon).',
       extra: null,
     },
     {
-      title: ‘Connect your APIs’,
-      body: ‘Add a provider API key so Meridian can track usage against your account. You can add more keys later from the Keys page.’,
-      hint: ‘Azure support is coming soon. For now, use OpenAI, Anthropic, Google, or Mistral.’,
+      title: 'Connect your APIs',
+      body: 'Add a provider API key so Meridian can track usage against your account. You can add more keys later from the Keys page.',
+      hint: 'Azure support is coming soon. For now, use OpenAI, Anthropic, Google, or Mistral.',
       extra: <ProviderKeyForm onSaved={handleKeySaved} />,
     },
     {
-      title: ‘Sample dashboard’,
-      body: ‘Charts, dollars, and call counts on Overview and other pages are placeholder examples so the UI feels real. They are not your live usage yet.’,
-      hint: ‘When you connect billing or ingest logs, these panels will swap to real data.’,
+      title: 'Sample dashboard',
+      body: 'Charts, dollars, and call counts on Overview and other pages are placeholder examples so the UI feels real. They are not your live usage yet.',
+      hint: 'When you connect billing or ingest logs, these panels will swap to real data.',
       extra: null,
     },
   ];
@@ -186,17 +186,17 @@ function SetupWizard({ user, onDone }) {
   const s = steps[step];
   // On the key step, the primary button label changes once a key has been saved.
   const primaryLabel = step === 1 && !keySaved
-    ? ‘Skip for now’
+    ? 'Skip for now'
     : step < total - 1
-      ? ‘Next’
-      : ‘Open Meridian’;
+      ? 'Next'
+      : 'Open Meridian';
 
   return (
     <div className="setup-overlay" role="dialog" aria-modal="true" aria-labelledby="setup-title">
       <div className="setup-modal">
         <div className="setup-progress">
           {Array.from({ length: total }, (_, i) => (
-            <div key={i} className={‘setup-dot’ + (i === step ? ‘ active’ : ‘’) + (i < step ? ‘ done’ : ‘’)} />
+            <div key={i} className={'setup-dot' + (i === step ? ' active' : '') + (i < step ? ' done' : '')} />
           ))}
         </div>
         <h2 id="setup-title" className="setup-title">{s.title}</h2>
@@ -209,7 +209,7 @@ function SetupWizard({ user, onDone }) {
           ) : (
             <span />
           )}
-          <div style={{ display: ‘flex’, gap: 8 }}>
+          <div style={{ display: 'flex', gap: 8 }}>
             {step !== 1 && (
               <button type="button" className="btn btn-ghost" onClick={finish}>Skip</button>
             )}

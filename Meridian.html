@@ -31,7 +31,15 @@ window.addEventListener('error', function (e) {
   meridianShowBootError(e.message || (e.error && e.error.message) || e);
 });
 </script>
-<script>window.MERIDIAN_LIVE = false;</script>
+<script>
+window.MERIDIAN_LIVE = (function () {
+  try {
+    if (new URLSearchParams(location.search).get('live') === '1') return true;
+    if (localStorage.getItem('meridian_live') === '1') return true;
+  } catch (_) { /* private mode etc. */ }
+  return false;
+})();
+</script>
 
 <!-- Served from node_modules (same origin as npm start) — avoids CDN/ad-blocker blank screens -->
 <script src="/node_modules/react/umd/react.development.js"></script>
