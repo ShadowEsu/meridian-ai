@@ -48,6 +48,18 @@ function register(app, { store, audit, budget, alerts }) {
         latencyMs: body.latencyMs, costUsd, status: body.status, taskType: body.taskType || null,
       });
       await store.virtualKeys.recordSpend(vk.id, costUsd);
+      if (body.agentId) {
+        // Find the most recent open run for this agent and bump it.
+        const runs = await store.agentRuns.list(vk.userId, body.agentId);
+        const open = runs.find(r => r.status === 'running');
+        if (open) {
+          await store.agentRuns.patch(open.id, {
+            requestCount: (open.requestCount || 0) + 1,
+            costUsd: Number(((open.costUsd || 0) + costUsd).toFixed(6)),
+            lastRequestId: row.id,
+          });
+        }
+      }
       await alerts.onRequest({ request: row, severity: sev });
       audit.append({
         userId: vk.userId, action: 'request.ingest',

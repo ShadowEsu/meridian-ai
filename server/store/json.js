@@ -225,8 +225,68 @@ function createJsonStore(opts) {
         return wrap(true);
       },
     },
-    agents: notImplemented('agents'),
-    agentRuns: notImplemented('agentRuns'),
+    agents: {
+      list: (userId) => wrap(data.agents.filter(a => String(a.userId) === String(userId)).sort((a, b) => b.id - a.id)),
+      get: (userId, id) => wrap(data.agents.find(a => String(a.userId) === String(userId) && a.id === Number(id)) || null),
+      add: (userId, row) => {
+        const r = {
+          id: data.nextAgentId++, userId: Number(userId),
+          teamId: row.teamId == null ? null : Number(row.teamId),
+          name: String(row.name), description: String(row.description || ''),
+          status: 'idle',
+          maxRunCostUsd: row.maxRunCostUsd == null ? null : Number(row.maxRunCostUsd),
+          maxLoopIterations: row.maxLoopIterations == null ? null : Number(row.maxLoopIterations),
+          createdAt: nowIso(),
+        };
+        data.agents.push(r);
+        persist();
+        return wrap(r);
+      },
+      update: (userId, id, patch) => {
+        const a = data.agents.find(a => String(a.userId) === String(userId) && a.id === Number(id));
+        if (!a) return wrap(null);
+        for (const f of ['name', 'description', 'status', 'teamId', 'maxRunCostUsd', 'maxLoopIterations']) {
+          if (f in patch) a[f] = patch[f];
+        }
+        persist();
+        return wrap(a);
+      },
+      delete: (userId, id) => {
+        const i = data.agents.findIndex(a => String(a.userId) === String(userId) && a.id === Number(id));
+        if (i === -1) return wrap(false);
+        data.agents.splice(i, 1);
+        persist();
+        return wrap(true);
+      },
+    },
+    agentRuns: {
+      list: (userId, agentId) => wrap(
+        data.agentRuns
+          .filter(r => String(r.userId) === String(userId) && String(r.agentId) === String(agentId))
+          .sort((a, b) => b.id - a.id)
+      ),
+      add: (userId, agentId, row) => {
+        const r = {
+          id: data.nextAgentRunId++, userId: Number(userId), agentId: Number(agentId),
+          startedAt: row.startedAt || nowIso(),
+          endedAt: row.endedAt || null,
+          status: row.status || 'running',
+          requestCount: 0, costUsd: 0, iterationCount: 0, lastRequestId: null,
+        };
+        data.agentRuns.push(r);
+        persist();
+        return wrap(r);
+      },
+      patch: (id, patch) => {
+        const r = data.agentRuns.find(r => r.id === Number(id));
+        if (!r) return wrap(null);
+        for (const f of ['endedAt', 'status', 'requestCount', 'costUsd', 'iterationCount', 'lastRequestId']) {
+          if (f in patch) r[f] = patch[f];
+        }
+        persist();
+        return wrap(r);
+      },
+    },
     alerts: {
       list: (userId) => wrap(
         data.alerts.filter(a => String(a.userId) === String(userId)).sort((a, b) => b.id - a.id)

@@ -46,8 +46,7 @@ function createApp({ store }) {
   virtualKeysRoutes.register(app, ctx);
   proxyRoutes.register(app, ctx);
   kpiRoutes.register(app, ctx);
-  // Later tasks register more routes here:
-  //   agents
+  require('./routes/agents').register(app, ctx);
 
   // 404 fallthrough for /api/* must be JSON, not the static file 404 page.
   app.use('/api', (_req, res) => jsonError(res, 404, 'Not found', { code: 'NOT_FOUND' }));
