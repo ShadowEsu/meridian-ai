@@ -12,13 +12,13 @@ This file is the short version: where we are, what's next, and what's blocked.
 
 | Surface           | State                                                                  |
 |-------------------|------------------------------------------------------------------------|
-| Static UI demo    | Complete. All 6 active pages render off `src/core/data.jsx`.           |
-| API server        | Scaffold only. Auth + encrypted provider keys work; no real data CRUD. |
-| JSON store        | Works for users + provider keys. Not a production target.              |
-| Supabase          | Not started.                                                           |
+| Static UI demo    | Complete. All 7 active pages render off `src/core/data.jsx`.           |
+| API server        | MVP shipped (M3). 31 backend tests green. All pages support `MERIDIAN_LIVE` toggle. |
+| JSON store        | Full CRUD for all domains. Not a production target.                    |
+| Supabase          | Not started (M2).                                                      |
 | Cost router (ML)  | FastAPI service with heuristic fallback. No trained model in repo.     |
 | Training pipeline | Not started. CSV exporter from Node logs is missing.                   |
-| Tests             | None (frontend, backend, or ML).                                       |
+| Tests             | 31 Vitest/supertest backend tests. No frontend or ML tests yet.        |
 
 ## Audit findings (carried over from initial cleanup)
 
@@ -63,14 +63,18 @@ Exit: API server runs against Supabase end-to-end; demo path still uses neither.
 
 The pages currently read from `window.MERIDIAN.*`. Replace with real endpoints, one domain at a time.
 
-- [ ] `agents` — CRUD + `POST /api/agents/:id/runs` to record a run.
-- [ ] `requests` — append-only log table; pagination + filter endpoints to back `pages/logs.jsx`.
-- [ ] `budgets` — per-key + per-team thresholds; alert state machine.
-- [ ] `alerts` — channel registration (email first), threshold matching, dispatch.
+- [x] `agents` — CRUD + `POST /api/agents/:id/runs` to record a run.
+- [x] `requests` — append-only log table; pagination + filter endpoints to back `pages/logs.jsx`.
+- [x] `budgets` — per-key + per-team thresholds; alert state machine.
+- [x] `alerts` — channel registration (email first), threshold matching, dispatch.
+- [x] `virtualKeys` — CRUD with bcrypt-hashed secrets; `X-Meridian-Key` ingest auth.
+- [x] `teams` — CRUD; per-team budget rollup in KPI aggregation.
+- [x] `audit log` — append-only event log; `GET /api/audit-log` for the dashboard.
+- [x] `KPI aggregation` — `GET /api/kpi/overview` and `GET /api/kpi/feed` over the request log.
 
 Each domain ships behind a `MERIDIAN_LIVE_<DOMAIN>` flag; the demo data path is the fallback.
 
-Exit: a real workload writes to `requests` and the Logs page renders it.
+Exit: a real workload writes to `requests` and the Logs page renders it. **DONE — 2026-05-08.**
 
 ### M4 — Cost router (ML)
 
@@ -111,6 +115,7 @@ Append-only. Each entry: date, decision, why.
 - **2026-05-07** — Reorganized flat root into `src/{core,pages,styles}` and moved planning docs to `docs/`. Why: 16 JSX files at root made onboarding noisy and obscured the server/python/schema separation.
 - **2026-05-07** — Kept `Meridian.html` as the entrypoint name (rather than `index.html`). Why: `server/index.js` hardcodes the filename and renaming touches three files for no real gain right now.
 - **2026-05-07** — Dropped the `page-` prefix on files inside `src/pages/`. Why: redundant with the folder name; component names (`PageOverview` etc.) keep the prefix where it actually matters.
+- **2026-05-08** — Shipped backend MVP: per-request log, virtual keys with bcrypt-hashed secrets, budget engine, alert engine, agents/runs, KPI aggregation. Frontend reads from MeridianAPI when MERIDIAN_LIVE=true; demo path unchanged.
 
 ## Known cuts (won't do unless asked)
 

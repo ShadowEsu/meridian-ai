@@ -63,6 +63,47 @@ npm start
 
 Serves `Meridian.html` at `http://localhost:3000`. All numbers come from `src/core/data.jsx`. No login, no persistence.
 
+### Run with the live backend
+
+```bash
+cp .env.example .env
+
+# Generate secrets and paste into .env
+node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"   # → JWT_SECRET
+node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"   # → ENCRYPTION_KEY
+
+npm install
+npm run doctor          # verify env + store paths are healthy
+npm run seed:demo       # optional: pre-populate demo data
+npm run start:api       # API server at http://localhost:5500
+```
+
+Then open the dashboard in a browser and run in the console:
+
+```js
+window.MERIDIAN_LIVE = true; location.reload();
+```
+
+The dashboard will now read from the live API instead of the static mock data.
+
+**Demo login (after `npm run seed:demo`):** `demo@meridian.local` / `demo123demo`
+
+#### Endpoint surface
+
+| Domain         | Routes                                              |
+|----------------|-----------------------------------------------------|
+| Auth           | `POST /api/auth/signup`, `/login`, `/logout`, `/me` |
+| Teams          | `GET/POST/PUT/DELETE /api/teams`                    |
+| Provider keys  | `GET/POST/DELETE /api/provider-keys`                |
+| Virtual keys   | `GET/POST/PUT/DELETE /api/virtual-keys`             |
+| Agents         | `GET/POST /api/agents`, `POST /api/agents/:id/runs` |
+| Alerts         | `GET/POST/PUT/DELETE /api/alerts`                   |
+| Request log    | `POST /api/v1/requests` (ingest), `GET /api/requests` (query) |
+| KPI            | `GET /api/kpi/overview`, `GET /api/kpi/feed`        |
+| Audit log      | `GET /api/audit-log`                                |
+
+Full schema and design rationale: [`docs/superpowers/plans/2026-05-07-backend-mvp.md`](docs/superpowers/plans/2026-05-07-backend-mvp.md).
+
 ### API server (auth + encrypted provider keys)
 
 ```
@@ -101,6 +142,8 @@ Returns a tier prediction (`cheap` / `mid` / `premium`) for a given prompt. Fall
 
 ## Status
 
-This is an early-stage product. The static UI is feature-complete for the demo path (`npm start`); the API server scaffolds auth and provider-key storage but most data endpoints are not yet wired to real storage; the ML service has feature extraction + a heuristic fallback but no production training loop.
+The static UI is feature-complete for the demo path (`npm start`). The backend MVP (M3) is shipped: all dashboard pages support a `MERIDIAN_LIVE` toggle that reads from the live API — auth, virtual keys, provider keys, agents, alerts, request log, KPI aggregation, and audit log are all backed by real storage. The ML service has feature extraction + a heuristic fallback but no production training loop.
+
+Next: Supabase migration (M2), OTP auth (M1 remainder), ML cost router (M4), Vite + CSP hardening (M6).
 
 See [docs/GOAL.md](docs/GOAL.md) for the product vision and [PLAN.md](PLAN.md) for the engineering roadmap.
