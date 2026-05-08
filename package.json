@@ -8,7 +8,9 @@
     "start:api": "node server/index.with-api.js",
     "dev": "node server/index.js",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "doctor": "node scripts/doctor.js",
+    "seed:demo": "node scripts/seed-demo.js"
   },
   "engines": {
     "node": ">=18"
