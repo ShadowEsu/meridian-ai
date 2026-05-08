@@ -1,8 +1,113 @@
 function PageKeys({ keysFilter }) {
   const M = window.MERIDIAN;
   const [filter, setFilter] = React.useState(keysFilter || '');
+  const [showCreate, setShowCreate] = React.useState(false);
+  const [createForm, setCreateForm] = React.useState({ label: '', monthlyBudgetUsd: '' });
+  const [createBusy, setCreateBusy] = React.useState(false);
+  const [createError, setCreateError] = React.useState(null);
+
+  // One-time secret modal state — never logged, never persisted
+  const [revealed, setRevealed] = React.useState(null); // { secret, prefix }
+  const [copied, setCopied] = React.useState(false);
 
   React.useEffect(() => { if (keysFilter) setFilter(keysFilter); }, [keysFilter]);
+
+  const { items: keysData, error: listError, refresh } = window.MeridianAPI.useList(
+    () => window.MeridianAPI.virtualKeys.list(),
+    { keys: M.VIRTUAL_KEYS || [] }
+  );
+
+  // Normalize: API returns { keys: [...] }, demo fallback has same shape or raw array
+  const rawKeys = keysData ? (keysData.keys || keysData) : [];
+
+  // Adapt API shape → display shape used by the table
+  function adaptKey(k) {
+    // Live API shape: { id, prefix, label, monthlyBudgetUsd, spentMtdUsd, status, ... }
+    // Demo shape:     { name, team, budget, spend, requests, status, mask }
+    if (k.prefix !== undefined) {
+      return {
+        id: k.id,
+        name: k.label || k.prefix,
+        team: k.teamId || '—',
+        budget: k.monthlyBudgetUsd || 0,
+        spend: k.spentMtdUsd || 0,
+        requests: '—',
+        status: k.status || 'active',
+        mask: k.prefix + '…',
+      };
+    }
+    return { id: k.id || k.name, ...k };
+  }
+
+  const allKeys = rawKeys.map(adaptKey);
+  const filteredKeys = allKeys.filter(k =>
+    !filter ||
+    String(k.name).toLowerCase().includes(filter.toLowerCase()) ||
+    String(k.team).toLowerCase().includes(filter.toLowerCase())
+  );
+
+  async function createKey() {
+    setCreateBusy(true);
+    setCreateError(null);
+    try {
+      const form = {
+        label: createForm.label,
+        monthlyBudgetUsd: createForm.monthlyBudgetUsd ? Number(createForm.monthlyBudgetUsd) : null,
+      };
+      if (!window.MeridianAPI.live) {
+        // Demo: append to in-memory list, no secret to show
+        M.VIRTUAL_KEYS.push({
+          id: Date.now(),
+          prefix: 'mk_demo',
+          name: form.label || 'mk_demo',
+          label: form.label,
+          team: '—',
+          budget: form.monthlyBudgetUsd || 0,
+          spend: 0,
+          requests: 0,
+          status: 'active',
+          mask: 'mk_demo…',
+        });
+        refresh();
+        setShowCreate(false);
+        setCreateForm({ label: '', monthlyBudgetUsd: '' });
+      } else {
+        const r = await window.MeridianAPI.virtualKeys.create(form);
+        setRevealed({ secret: r.secret, prefix: r.key.prefix }); // shown once
+        refresh();
+        setShowCreate(false);
+        setCreateForm({ label: '', monthlyBudgetUsd: '' });
+      }
+    } catch (e) {
+      setCreateError(e.message || 'Create failed');
+    } finally {
+      setCreateBusy(false);
+    }
+  }
+
+  async function deleteKey(id) {
+    if (!window.MeridianAPI.live) {
+      const idx = M.VIRTUAL_KEYS.findIndex(k => (k.id || k.name) === id);
+      if (idx !== -1) M.VIRTUAL_KEYS.splice(idx, 1);
+      refresh();
+      return;
+    }
+    try {
+      await window.MeridianAPI.virtualKeys.delete(id);
+      refresh();
+    } catch (e) {
+      // non-blocking: log to console only (not the secret)
+      console.error('Delete key failed', e.message);
+    }
+  }
+
+  function copySecret() {
+    if (!revealed) return;
+    navigator.clipboard.writeText(revealed.secret).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
+  }
 
   const velocity = [
     { day: 'Mon', spend: 820, requests: '18.2k', saved: 92, risk: 'Low' },
@@ -17,10 +122,6 @@ function PageKeys({ keysFilter }) {
   const totalWeeklySpend = velocity.reduce((sum, v) => sum + v.spend, 0);
   const totalWeeklySaved = velocity.reduce((sum, v) => sum + v.saved, 0);
   const latest = velocity[velocity.length - 1];
-
-  const filteredKeys = M.VIRTUAL_KEYS.filter(k =>
-    !filter || k.name.toLowerCase().includes(filter.toLowerCase()) || k.team.toLowerCase().includes(filter.toLowerCase())
-  );
 
   return (
     <div className="content" data-screen-label="Virtual Keys">
@@ -122,8 +223,17 @@ function PageKeys({ keysFilter }) {
           <div style={{ display: 'flex', gap: 8 }}>
             <button className="btn btn-ghost" style={{ padding: '6px 10px' }}>{Icon.warning({ width: 14, height: 14 })}</button>
             <button className="btn btn-ghost" style={{ padding: '6px 10px' }}>{Icon.download()}</button>
+            <button className="btn btn-primary" style={{ padding: '6px 12px', fontSize: 12 }} onClick={() => setShowCreate(true)}>
+              {Icon.plus()} New Key
+            </button>
           </div>
         </div>
+
+        {listError && (
+          <div style={{ padding: '10px 16px', background: 'rgba(239,68,68,.08)', color: '#FCA5A5', fontSize: 13, borderBottom: '1px solid rgba(239,68,68,.2)' }}>
+            Failed to load keys: {listError.message}
+          </div>
+        )}
 
         <div style={{ overflowX: 'auto' }}>
           <table style={{ width: '100%', borderCollapse: 'collapse' }}>
@@ -135,14 +245,17 @@ function PageKeys({ keysFilter }) {
                 <th style={th}>Budget allocation</th>
                 <th style={{ ...th, textAlign: 'right' }}>Efficiency</th>
                 <th style={{ ...th, textAlign: 'center' }}>Status</th>
+                <th style={{ ...th, textAlign: 'center' }}>Actions</th>
               </tr>
             </thead>
             <tbody style={{ fontSize: 13 }}>
               {filteredKeys.slice(0, 8).map(k => {
-                const pct = (k.spend / k.budget) * 100;
+                const budget = Number(k.budget) || 1;
+                const spend = Number(k.spend) || 0;
+                const pct = budget > 0 ? (spend / budget) * 100 : 0;
                 const tone = pct > 100 ? 'red' : pct > 90 ? 'amber' : 'indigo';
                 return (
-                  <tr key={k.name} style={{ borderBottom: '1px solid rgba(45,45,49,.55)' }}>
+                  <tr key={k.id || k.name} style={{ borderBottom: '1px solid rgba(45,45,49,.55)' }}>
                     <td style={td}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                         <span style={{ color: 'rgba(129,140,248,.95)' }}>{Icon.key({ width: 16, height: 16 })}</span>
@@ -150,20 +263,29 @@ function PageKeys({ keysFilter }) {
                       </div>
                     </td>
                     <td style={{ ...td, color: 'rgba(255,255,255,.55)' }}>{k.team}</td>
-                    <td style={{ ...td, textAlign: 'right', color: '#fff', fontVariantNumeric: 'tabular-nums' }}>${k.spend.toLocaleString()}</td>
+                    <td style={{ ...td, textAlign: 'right', color: '#fff', fontVariantNumeric: 'tabular-nums' }}>${Number(k.spend).toLocaleString()}</td>
                     <td style={td}>
                       <div style={{ display: 'grid', gap: 6 }}>
                         <div style={{ fontSize: 10.5, color: tone === 'amber' ? 'var(--amber-2)' : tone === 'red' ? '#FCA5A5' : 'rgba(255,255,255,.45)', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
-                          {pct.toFixed(0)}% of ${Math.round(k.budget/1000)}k
+                          {pct.toFixed(0)}% of ${Math.round(budget / 1000)}k
                         </div>
                         <div style={{ height: 4, background: 'var(--border-2)', borderRadius: 999, overflow: 'hidden' }}>
                           <div style={{ height: '100%', width: `${Math.min(100, pct)}%`, background: tone === 'amber' ? 'var(--amber)' : tone === 'red' ? 'var(--red)' : 'var(--indigo)' }} />
                         </div>
                       </div>
                     </td>
-                    <td style={{ ...td, textAlign: 'right', color: tone === 'red' ? 'var(--red)' : 'var(--green-2)', fontWeight: 600 }}>+{(Math.random()*20).toFixed(1)}%</td>
+                    <td style={{ ...td, textAlign: 'right', color: tone === 'red' ? 'var(--red)' : 'var(--green-2)', fontWeight: 600 }}>—</td>
                     <td style={{ ...td, textAlign: 'center' }}>
                       <KeyStatus pct={pct} status={k.status} />
+                    </td>
+                    <td style={{ ...td, textAlign: 'center' }}>
+                      <button
+                        className="btn btn-ghost"
+                        style={{ padding: '4px 8px', fontSize: 11, color: '#FCA5A5' }}
+                        onClick={() => deleteKey(k.id || k.name)}
+                      >
+                        Revoke
+                      </button>
                     </td>
                   </tr>
                 );
@@ -173,7 +295,7 @@ function PageKeys({ keysFilter }) {
         </div>
 
         <div style={{ padding: '12px 16px', borderTop: '1px solid var(--border-2)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', color: 'rgba(255,255,255,.45)', fontSize: 12 }}>
-          <span>Showing 1-{Math.min(8, filteredKeys.length)} of {M.VIRTUAL_KEYS.length} virtual keys</span>
+          <span>Showing 1-{Math.min(8, filteredKeys.length)} of {allKeys.length} virtual keys</span>
           <div style={{ display: 'flex', gap: 8 }}>
             <button className="btn btn-ghost" style={{ padding: '6px 10px' }}>Prev</button>
             <button className="btn" style={{ padding: '6px 10px', background: '#fff', color: '#000', borderColor: '#fff' }}>1</button>
@@ -182,6 +304,67 @@ function PageKeys({ keysFilter }) {
           </div>
         </div>
       </div>
+
+      {/* Create Key Modal */}
+      {showCreate && (
+        <div className="modal-backdrop" onClick={() => setShowCreate(false)}>
+          <div className="modal" onClick={e => e.stopPropagation()}>
+            <h3>Create virtual key</h3>
+            <p className="sub">A new key will be generated. The full secret is shown once.</p>
+            <div className="field">
+              <label>Label</label>
+              <input
+                className="input"
+                placeholder="e.g. eng-prod-main"
+                value={createForm.label}
+                onChange={e => setCreateForm(f => ({ ...f, label: e.target.value }))}
+              />
+            </div>
+            <div className="field">
+              <label>Monthly budget (USD, optional)</label>
+              <input
+                className="input"
+                type="number"
+                placeholder="e.g. 1000"
+                value={createForm.monthlyBudgetUsd}
+                onChange={e => setCreateForm(f => ({ ...f, monthlyBudgetUsd: e.target.value }))}
+              />
+            </div>
+            {createError && (
+              <div style={{ color: '#FCA5A5', fontSize: 13, marginBottom: 8 }}>{createError}</div>
+            )}
+            <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', marginTop: 18 }}>
+              <button className="btn btn-ghost" onClick={() => { setShowCreate(false); setCreateError(null); }}>Cancel</button>
+              <button className="btn btn-primary" onClick={createKey} disabled={createBusy}>
+                {createBusy ? 'Creating…' : 'Create'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* One-time secret modal */}
+      {revealed && (
+        <div className="modal-backdrop" onClick={() => setRevealed(null)}>
+          <div className="modal" onClick={e => e.stopPropagation()} style={{ maxWidth: 480 }}>
+            <h3>Key created: {revealed.prefix}…</h3>
+            <div style={{ padding: '10px 14px', background: 'rgba(239,68,68,.08)', border: '1px solid rgba(239,68,68,.3)', borderRadius: 6, marginBottom: 14 }}>
+              <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.10em', textTransform: 'uppercase', color: '#FCA5A5', marginBottom: 6 }}>
+                This is the only time this secret will be shown. Copy it now.
+              </div>
+              <div className="mono" style={{ fontSize: 13, wordBreak: 'break-all', color: '#fff', userSelect: 'all' }}>
+                {revealed.secret}
+              </div>
+            </div>
+            <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+              <button className="btn btn-primary" onClick={copySecret}>
+                {copied ? 'Copied!' : 'Copy secret'}
+              </button>
+              <button className="btn btn-ghost" onClick={() => setRevealed(null)}>I've saved it, close</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

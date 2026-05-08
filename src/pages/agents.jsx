@@ -1,8 +1,48 @@
 function PageAgents() {
   const M = window.MERIDIAN;
-  const warnAgent = M.AGENTS.find(a => a.status === 'warning') || M.AGENTS[0];
-  const activeCount = M.AGENTS.filter(a => a.status === 'running').length || 18;
-  const riskCount = M.AGENTS.filter(a => a.status === 'warning').length || 2;
+
+  const { items, error: listError, refresh } = window.MeridianAPI.useList(
+    () => window.MeridianAPI.agents.list(),
+    { agents: M.AGENTS || [] }
+  );
+  const agents = items ? (items.agents || items) : [];
+
+  // Adapt API agent shape → display shape used by StitchAgentCard / the page
+  function adaptAgent(a) {
+    // Live API: { id, name, description, status, maxRunCostUsd, maxLoopIterations, createdAt }
+    // Demo:     { name, team, status, duration, calls, cost, loopRisk, sparkType }
+    if (a.maxRunCostUsd !== undefined || a.description !== undefined) {
+      return {
+        id: a.id,
+        name: a.name,
+        team: a.teamId ? `Team ${a.teamId}` : '—',
+        status: a.status === 'running' ? 'running' : a.status === 'paused' ? 'warning' : 'terminated',
+        duration: '—',
+        calls: 0,
+        cost: 0,
+        loopRisk: 0,
+        sparkType: 'flat',
+        _live: true,
+      };
+    }
+    return { id: a.id || a.name, ...a };
+  }
+
+  const displayAgents = agents.map(adaptAgent);
+
+  const warnAgent = displayAgents.find(a => a.status === 'warning') || displayAgents[0] || {};
+  const activeCount = displayAgents.filter(a => a.status === 'running').length || 0;
+  const riskCount = displayAgents.filter(a => a.status === 'warning').length || 0;
+
+  async function startRun(agentId) {
+    if (!window.MeridianAPI.live) return; // demo: noop
+    try {
+      await window.MeridianAPI.agents.startRun(agentId);
+      refresh();
+    } catch (e) {
+      console.error('Start run failed', e.message);
+    }
+  }
 
   return (
     <div className="content" data-screen-label="Agent Monitor">
@@ -34,6 +74,12 @@ function PageAgents() {
           Intercept now
         </button>
       </div>
+
+      {listError && (
+        <div style={{ padding: '10px 16px', background: 'rgba(239,68,68,.08)', color: '#FCA5A5', fontSize: 13, borderRadius: 6, marginBottom: 12 }}>
+          Failed to load agents: {listError.message}
+        </div>
+      )}
 
       {/* Stitch bento layout */}
       <div className="stitch-grid-12" style={{ marginBottom: 16 }}>
@@ -69,16 +115,18 @@ function PageAgents() {
             <div style={{ display: 'flex', gap: 8 }}>
               <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '6px 10px', background: 'var(--surface-2)', border: '1px solid var(--border-2)', fontSize: 11, letterSpacing: '0.09em', textTransform: 'uppercase', color: 'rgba(255,255,255,.5)' }}>
                 <span style={{ width: 6, height: 6, borderRadius: 999, background: 'var(--green)' }} />
-                {activeCount} active
+                {activeCount || 18} active
               </div>
               <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '6px 10px', background: 'var(--surface-2)', border: '1px solid var(--border-2)', fontSize: 11, letterSpacing: '0.09em', textTransform: 'uppercase', color: 'var(--amber-2)' }}>
                 <span style={{ width: 6, height: 6, borderRadius: 999, background: 'var(--amber)' }} />
-                {riskCount} at risk
+                {riskCount || 2} at risk
               </div>
             </div>
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: 12 }}>
-            {M.AGENTS.slice(0, 4).map(a => <StitchAgentCard key={a.name} a={a} />)}
+            {(displayAgents.length > 0 ? displayAgents : M.AGENTS).slice(0, 4).map(a => (
+              <StitchAgentCard key={a.name || a.id} a={a} onStartRun={startRun} />
+            ))}
           </div>
         </div>
       </div>
@@ -179,6 +227,42 @@ function PageAgents() {
   );
 }
 
+/**
+ * Renders recent runs for a live agent.
+ * Falls back to MERIDIAN.AGENT_RUNS_BY_AGENT in demo mode.
+ * @param {{ agentId: number|string }} props
+ */
+function AgentRuns({ agentId }) {
+  const [runs, setRuns] = React.useState([]);
+  React.useEffect(() => {
+    if (!window.MeridianAPI.live) {
+      const M = window.MERIDIAN;
+      setRuns((M.AGENT_RUNS_BY_AGENT && M.AGENT_RUNS_BY_AGENT[agentId]) || []);
+      return;
+    }
+    let alive = true;
+    window.MeridianAPI.agents.runs(agentId).then(d => { if (alive) setRuns(d.runs || d); });
+    return () => { alive = false; };
+  }, [agentId]);
+
+  if (!runs.length) return null;
+  return (
+    <div style={{ marginTop: 8, display: 'grid', gap: 4 }}>
+      {runs.map(r => (
+        <div key={r.id} className="agent-run-row" style={{ fontSize: 12, color: 'rgba(255,255,255,.55)', display: 'flex', gap: 8 }}>
+          <span>{r.startedAt}</span>
+          <span>·</span>
+          <span>{r.requestCount} reqs</span>
+          <span>·</span>
+          <span>${Number(r.costUsd || 0).toFixed(4)}</span>
+          <span>·</span>
+          <span>{r.status}</span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 const th = { padding: '12px 16px', fontWeight: 700, fontSize: 11, letterSpacing: '0.09em', textTransform: 'uppercase' };
 const td = { padding: '12px 16px' };
 
@@ -210,7 +294,7 @@ function KillCheck({ label, sub }) {
   );
 }
 
-function StitchAgentCard({ a }) {
+function StitchAgentCard({ a, onStartRun }) {
   const isRisk = a.status === 'warning';
   const riskColor = isRisk ? 'var(--red)' : 'rgba(255,255,255,.55)';
   const riskLabel = isRisk ? 'LOOP RISK' : 'STABLE';
@@ -231,15 +315,31 @@ function StitchAgentCard({ a }) {
       <div className="between" style={{ alignItems: 'flex-end' }}>
         <div>
           <div style={{ fontSize: 11, letterSpacing: '0.10em', textTransform: 'uppercase', fontWeight: 700, color: 'rgba(255,255,255,.35)' }}>SESSION COST</div>
-          <div style={{ fontSize: 18, fontWeight: 700, color: '#fff', marginTop: 6 }}>${Number(a.cost || 24.18).toFixed(2)}</div>
+          <div style={{ fontSize: 18, fontWeight: 700, color: '#fff', marginTop: 6 }}>${Number(a.cost || 0).toFixed(2)}</div>
         </div>
-        <div style={{ width: 96, height: 34, display: 'flex', alignItems: 'flex-end', gap: 4 }}>
-          {bars.map((h, i) => (
-            <div key={i} style={{ flex: 1, height: h * 4, background: isRisk ? 'rgba(239,68,68,.25)' : 'rgba(99,102,241,.45)' }} />
-          ))}
-          <div style={{ flex: 1, height: (isRisk ? 8 : 6) * 4, background: isRisk ? 'var(--red)' : 'var(--indigo)' }} />
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 6 }}>
+          <div style={{ width: 96, height: 34, display: 'flex', alignItems: 'flex-end', gap: 4 }}>
+            {bars.map((h, i) => (
+              <div key={i} style={{ flex: 1, height: h * 4, background: isRisk ? 'rgba(239,68,68,.25)' : 'rgba(99,102,241,.45)' }} />
+            ))}
+            <div style={{ flex: 1, height: (isRisk ? 8 : 6) * 4, background: isRisk ? 'var(--red)' : 'var(--indigo)' }} />
+          </div>
+          {onStartRun && (
+            <button
+              className="btn btn-ghost"
+              style={{ padding: '4px 8px', fontSize: 11 }}
+              onClick={() => onStartRun(a.id)}
+              title="Start a new run for this agent"
+            >
+              Start run
+            </button>
+          )}
         </div>
       </div>
+      {/* Runs sub-list (live mode only) */}
+      {window.MeridianAPI && window.MeridianAPI.live && a.id && (
+        <AgentRuns agentId={a.id} />
+      )}
     </div>
   );
 }
@@ -274,15 +374,15 @@ function AgentCard({ a }) {
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12, marginTop: 18 }}>
         <div>
           <div className="kpi-label">Calls</div>
-          <div style={{ fontSize: 18, fontWeight: 500, marginTop: 4, fontVariantNumeric: 'tabular-nums' }}>{a.calls.toLocaleString()}</div>
+          <div style={{ fontSize: 18, fontWeight: 500, marginTop: 4, fontVariantNumeric: 'tabular-nums' }}>{(a.calls || 0).toLocaleString()}</div>
         </div>
         <div>
           <div className="kpi-label">Cost</div>
-          <div style={{ fontSize: 18, fontWeight: 500, marginTop: 4, fontVariantNumeric: 'tabular-nums', color: a.cost > 30 ? 'var(--amber-2)' : 'var(--text)' }}>${a.cost.toFixed(2)}</div>
+          <div style={{ fontSize: 18, fontWeight: 500, marginTop: 4, fontVariantNumeric: 'tabular-nums', color: (a.cost || 0) > 30 ? 'var(--amber-2)' : 'var(--text)' }}>${Number(a.cost || 0).toFixed(2)}</div>
         </div>
         <div>
           <div className="kpi-label">Loop risk</div>
-          <div style={{ fontSize: 18, fontWeight: 500, marginTop: 4, color: a.loopRisk > 70 ? '#FCA5A5' : a.loopRisk > 40 ? 'var(--amber-2)' : 'var(--text)', fontVariantNumeric: 'tabular-nums' }}>{a.loopRisk}%</div>
+          <div style={{ fontSize: 18, fontWeight: 500, marginTop: 4, color: (a.loopRisk || 0) > 70 ? '#FCA5A5' : (a.loopRisk || 0) > 40 ? 'var(--amber-2)' : 'var(--text)', fontVariantNumeric: 'tabular-nums' }}>{a.loopRisk || 0}%</div>
         </div>
       </div>
       <div style={{ marginTop: 14, display: 'flex', alignItems: 'center', gap: 12 }}>

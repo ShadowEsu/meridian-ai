@@ -1,7 +1,26 @@
 function PageAlerts() {
   const M = window.MERIDIAN;
   const [show, setShow] = React.useState(false);
-  const [alerts] = React.useState(M.ALERTS);
+
+  // Create form state
+  const [form, setForm] = React.useState({
+    name: '',
+    type: 'team_budget',
+    teamId: '',
+    virtualKeyId: '',
+    agentId: '',
+    thresholdUsd: '',
+    thresholdRpm: '',
+    windowMinutes: '10',
+  });
+  const [createBusy, setCreateBusy] = React.useState(false);
+  const [createError, setCreateError] = React.useState(null);
+
+  const { items, error: listError, refresh } = window.MeridianAPI.useList(
+    () => window.MeridianAPI.alerts.list(),
+    { alerts: M.ALERTS || [] }
+  );
+  const alerts = items ? (items.alerts || items) : [];
 
   const stateConfig = {
     triggered: { color: '#EF4444', label: 'Triggered', bg: 'rgba(239,68,68,.08)', border: 'rgba(239,68,68,.3)' },
@@ -10,18 +29,87 @@ function PageAlerts() {
     paused: { color: '#5A616E', label: 'Paused', bg: 'rgba(255,255,255,.02)', border: 'var(--border)' },
   };
 
+  async function createAlert() {
+    setCreateBusy(true);
+    setCreateError(null);
+    try {
+      // Build target and payload based on type
+      let target = {};
+      let payload = { name: form.name, type: form.type };
+
+      if (form.type === 'team_budget') {
+        if (form.teamId) target = { teamId: Number(form.teamId) };
+        payload.target = target;
+        payload.thresholdUsd = form.thresholdUsd ? Number(form.thresholdUsd) : undefined;
+      } else if (form.type === 'key_budget') {
+        if (form.virtualKeyId) target = { virtualKeyId: Number(form.virtualKeyId) };
+        payload.target = target;
+        payload.thresholdUsd = form.thresholdUsd ? Number(form.thresholdUsd) : undefined;
+      } else if (form.type === 'spike') {
+        payload.target = {};
+        payload.thresholdRpm = form.thresholdRpm ? Number(form.thresholdRpm) : undefined;
+        payload.windowMinutes = form.windowMinutes ? Number(form.windowMinutes) : 10;
+      } else if (form.type === 'agent_loop') {
+        if (form.agentId) target = { agentId: Number(form.agentId) };
+        payload.target = target;
+      }
+
+      if (!window.MeridianAPI.live) {
+        M.ALERTS.push({ id: Date.now(), state: 'active', triggered: 'Not yet triggered', channel: 'Email', count: 0, ...payload });
+        refresh();
+        setShow(false);
+        setForm({ name: '', type: 'team_budget', teamId: '', virtualKeyId: '', agentId: '', thresholdUsd: '', thresholdRpm: '', windowMinutes: '10' });
+      } else {
+        await window.MeridianAPI.alerts.create(payload);
+        refresh();
+        setShow(false);
+        setForm({ name: '', type: 'team_budget', teamId: '', virtualKeyId: '', agentId: '', thresholdUsd: '', thresholdRpm: '', windowMinutes: '10' });
+      }
+    } catch (e) {
+      setCreateError(e.message || 'Create failed');
+    } finally {
+      setCreateBusy(false);
+    }
+  }
+
+  async function toggleAlert(id, currentState) {
+    const next = currentState === 'paused' ? 'active' : 'paused';
+    if (!window.MeridianAPI.live) {
+      const a = M.ALERTS.find(a => a.id === id);
+      if (a) a.state = next;
+      refresh();
+      return;
+    }
+    try {
+      await window.MeridianAPI.alerts.update(id, { state: next });
+      refresh();
+    } catch (e) {
+      console.error('Toggle alert failed', e.message);
+    }
+  }
+
+  const triggeredCount = alerts.filter(a => a.state === 'triggered' || a.state === 'warning').length;
+
   return (
     <div className="content" data-screen-label="Alerts">
       <div className="between" style={{ marginBottom: 18 }}>
         <div>
-          <div style={{ fontSize: 13.5, color: 'var(--text-dim)', fontWeight: 300 }}>4 alerts configured · 2 currently triggered</div>
+          <div style={{ fontSize: 13.5, color: 'var(--text-dim)', fontWeight: 300 }}>
+            {alerts.length} alerts configured · {triggeredCount} currently triggered
+          </div>
         </div>
         <button className="btn btn-primary" onClick={() => setShow(true)}>{Icon.plus()} Create Alert</button>
       </div>
 
+      {listError && (
+        <div style={{ padding: '10px 16px', background: 'rgba(239,68,68,.08)', color: '#FCA5A5', fontSize: 13, borderRadius: 6, marginBottom: 12 }}>
+          Failed to load alerts: {listError.message}
+        </div>
+      )}
+
       <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
         {alerts.map(a => {
-          const s = stateConfig[a.state];
+          const s = stateConfig[a.state] || stateConfig.paused;
           return (
             <div key={a.id} className="card" style={{ padding: 18, borderColor: s.border, background: `linear-gradient(90deg, ${s.bg} 0%, transparent 60%), var(--surface)` }}>
               <div className="between">
@@ -32,7 +120,9 @@ function PageAlerts() {
                   <div>
                     <div style={{ fontSize: 14, fontWeight: 500 }}>{a.name}</div>
                     <div style={{ fontSize: 12, color: 'var(--text-dim)', fontWeight: 300, marginTop: 3 }}>
-                      {a.triggered} · Notify: {a.channel}
+                      {a.type ? a.type.replace(/_/g, ' ') : ''}
+                      {a.triggered ? ` · ${a.triggered}` : ''}
+                      {a.channel ? ` · Notify: ${a.channel}` : ''}
                     </div>
                   </div>
                 </div>
@@ -41,8 +131,14 @@ function PageAlerts() {
                     <span style={{ width: 6, height: 6, borderRadius: '50%', background: s.color, boxShadow: `0 0 5px ${s.color}` }}></span>
                     {s.label}
                   </span>
-                  <button className="btn btn-ghost">Edit</button>
-                  <div className={`toggle ${a.state !== 'paused' ? 'on' : ''}`}></div>
+                  <button className="btn btn-ghost" onClick={() => toggleAlert(a.id, a.state)}>
+                    {a.state === 'paused' ? 'Resume' : 'Pause'}
+                  </button>
+                  <div
+                    className={`toggle ${a.state !== 'paused' ? 'on' : ''}`}
+                    onClick={() => toggleAlert(a.id, a.state)}
+                    style={{ cursor: 'pointer' }}
+                  ></div>
                 </div>
               </div>
             </div>
@@ -55,13 +151,126 @@ function PageAlerts() {
           <div className="modal" onClick={e => e.stopPropagation()}>
             <h3>Create alert</h3>
             <p className="sub">Notify your team when thresholds are crossed.</p>
-            <div className="field"><label>Metric</label><select className="select"><option>Daily spend</option><option>Team budget</option><option>Agent session cost</option><option>API error rate</option><option>Loop risk</option></select></div>
-            <div className="field"><label>Condition</label><select className="select"><option>Exceeds</option><option>Drops below</option><option>Equals</option></select></div>
-            <div className="field"><label>Threshold</label><input className="input" placeholder="$3,000" /></div>
-            <div className="field"><label>Notification channel</label><select className="select"><option>Slack</option><option>Email</option><option>PagerDuty</option><option>Slack + PagerDuty</option></select></div>
+
+            <div className="field">
+              <label>Alert name</label>
+              <input
+                className="input"
+                placeholder="e.g. Engineering over 90% budget"
+                value={form.name}
+                onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
+              />
+            </div>
+
+            <div className="field">
+              <label>Type</label>
+              <select
+                className="select"
+                value={form.type}
+                onChange={e => setForm(f => ({ ...f, type: e.target.value }))}
+              >
+                <option value="team_budget">Team budget</option>
+                <option value="key_budget">Key budget</option>
+                <option value="agent_loop">Agent loop</option>
+                <option value="spike">Spend spike</option>
+              </select>
+            </div>
+
+            {/* Conditional fields per type */}
+            {form.type === 'team_budget' && (
+              <>
+                <div className="field">
+                  <label>Team ID</label>
+                  <input
+                    className="input"
+                    placeholder="Team ID (number)"
+                    value={form.teamId}
+                    onChange={e => setForm(f => ({ ...f, teamId: e.target.value }))}
+                  />
+                </div>
+                <div className="field">
+                  <label>Threshold (USD)</label>
+                  <input
+                    className="input"
+                    type="number"
+                    placeholder="e.g. 3000"
+                    value={form.thresholdUsd}
+                    onChange={e => setForm(f => ({ ...f, thresholdUsd: e.target.value }))}
+                  />
+                </div>
+              </>
+            )}
+
+            {form.type === 'key_budget' && (
+              <>
+                <div className="field">
+                  <label>Virtual Key ID</label>
+                  <input
+                    className="input"
+                    placeholder="Virtual key ID (number)"
+                    value={form.virtualKeyId}
+                    onChange={e => setForm(f => ({ ...f, virtualKeyId: e.target.value }))}
+                  />
+                </div>
+                <div className="field">
+                  <label>Threshold (USD)</label>
+                  <input
+                    className="input"
+                    type="number"
+                    placeholder="e.g. 500"
+                    value={form.thresholdUsd}
+                    onChange={e => setForm(f => ({ ...f, thresholdUsd: e.target.value }))}
+                  />
+                </div>
+              </>
+            )}
+
+            {form.type === 'spike' && (
+              <>
+                <div className="field">
+                  <label>Requests per minute threshold</label>
+                  <input
+                    className="input"
+                    type="number"
+                    placeholder="e.g. 100"
+                    value={form.thresholdRpm}
+                    onChange={e => setForm(f => ({ ...f, thresholdRpm: e.target.value }))}
+                  />
+                </div>
+                <div className="field">
+                  <label>Window (minutes)</label>
+                  <input
+                    className="input"
+                    type="number"
+                    placeholder="e.g. 10"
+                    value={form.windowMinutes}
+                    onChange={e => setForm(f => ({ ...f, windowMinutes: e.target.value }))}
+                  />
+                </div>
+              </>
+            )}
+
+            {form.type === 'agent_loop' && (
+              <div className="field">
+                <label>Agent ID</label>
+                <input
+                  className="input"
+                  placeholder="Agent ID (number)"
+                  value={form.agentId}
+                  onChange={e => setForm(f => ({ ...f, agentId: e.target.value }))}
+                />
+              </div>
+            )}
+
+            {createError && (
+              <div style={{ color: '#FCA5A5', fontSize: 13, marginBottom: 8 }}>{createError}</div>
+            )}
+
             <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', marginTop: 18 }}>
-              <button className="btn btn-ghost" onClick={() => setShow(false)}>Cancel</button>
-              <button className="btn btn-primary" onClick={() => setShow(false)}>Create</button>
+              <button className="btn btn-ghost" onClick={() => { setShow(false); setCreateError(null); }}>Cancel</button>
+              <button className="btn btn-primary" onClick={createAlert} disabled={createBusy}>
+                {createBusy ? 'Creating…' : 'Create'}
+              </button>
             </div>
           </div>
         </div>

@@ -82,5 +82,27 @@
     },
   };
 
+  /**
+   * Shared list-resource hook. Fetches from `loader` when live, returns `fallback` in demo mode.
+   * Exposes `refresh()` so create/delete handlers can re-fetch without a page reload.
+   * @param {() => Promise<any>} loader - async function that returns the resource list
+   * @param {any} fallback - value to use in demo mode (window.MERIDIAN.* slice)
+   * @returns {{ items: any, error: Error|null, refresh: () => void }}
+   */
+  API.useList = function useList(loader, fallback) {
+    const [items, setItems] = React.useState(fallback);
+    const [error, setError] = React.useState(null);
+    const [version, setVersion] = React.useState(0);
+    React.useEffect(() => {
+      if (!API.live) { setItems(fallback); return; }
+      let alive = true;
+      loader()
+        .then(d => { if (alive) setItems(d); })
+        .catch(e => { if (alive) setError(e); });
+      return () => { alive = false; };
+    }, [version, API.live]);
+    return { items, error, refresh: () => setVersion(v => v + 1) };
+  };
+
   window.MeridianAPI = API;
 })();
