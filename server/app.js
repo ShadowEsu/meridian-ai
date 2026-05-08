@@ -30,8 +30,12 @@ function createApp({ store }) {
   app.use('/api', apiLimiter);
 
   const { createAuditLog } = require('./services/audit-log');
+  const { createBudgetEngine } = require('./services/budget-engine');
   const ctx = { store };
   ctx.audit = createAuditLog({ store });
+  ctx.budget = createBudgetEngine({ store });
+  ctx.alerts = { onRequest: async () => {} };
+  require('./routes/requests').register(app, ctx);
   authRoutes.register(app, ctx);
   providerKeysRoutes.register(app, ctx);
   auditLogRoutes.register(app, ctx);

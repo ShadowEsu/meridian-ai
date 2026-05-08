@@ -228,7 +228,64 @@ function createJsonStore(opts) {
     agents: notImplemented('agents'),
     agentRuns: notImplemented('agentRuns'),
     alerts: notImplemented('alerts'),
-    requests: notImplemented('requests'),
+    requests: {
+      add: (row) => {
+        const r = {
+          id: data.nextRequestId++,
+          userId: Number(row.userId),
+          virtualKeyId: Number(row.virtualKeyId),
+          teamId: row.teamId == null ? null : Number(row.teamId),
+          agentId: row.agentId == null ? null : Number(row.agentId),
+          provider: String(row.provider),
+          model: String(row.model),
+          promptTokens: Number(row.promptTokens || 0),
+          completionTokens: Number(row.completionTokens || 0),
+          latencyMs: Number(row.latencyMs || 0),
+          costUsd: Number(row.costUsd || 0),
+          status: String(row.status || 'ok'),
+          taskType: row.taskType ? String(row.taskType) : null,
+          timestamp: row.timestamp || nowIso(),
+        };
+        data.requests.push(r);
+        persist();
+        return wrap(r);
+      },
+      query: ({ userId, from, to, teamId, virtualKeyId, agentId, status, page = 1, limit = 50 }) => {
+        let rows = data.requests.filter(r => String(r.userId) === String(userId));
+        if (from)         rows = rows.filter(r => r.timestamp >= from);
+        if (to)           rows = rows.filter(r => r.timestamp <= to);
+        if (teamId)       rows = rows.filter(r => String(r.teamId) === String(teamId));
+        if (virtualKeyId) rows = rows.filter(r => String(r.virtualKeyId) === String(virtualKeyId));
+        if (agentId)      rows = rows.filter(r => String(r.agentId) === String(agentId));
+        if (status)       rows = rows.filter(r => r.status === status);
+        rows.sort((a, b) => b.id - a.id);
+        const lim = Math.max(1, Math.min(500, Number(limit) || 50));
+        const pg  = Math.max(1, Number(page) || 1);
+        const total = rows.length;
+        const slice = rows.slice((pg - 1) * lim, pg * lim);
+        return wrap({ rows: slice, page: pg, limit: lim, total });
+      },
+      recentForKey: (userId, virtualKeyId, since) => wrap(
+        data.requests.filter(r =>
+          String(r.userId) === String(userId) &&
+          String(r.virtualKeyId) === String(virtualKeyId) &&
+          r.timestamp >= since
+        )
+      ),
+      countSince: (userId, since) => wrap(
+        data.requests.filter(r => String(r.userId) === String(userId) && r.timestamp >= since).length
+      ),
+      totalsSince: (userId, since) => {
+        const rows = data.requests.filter(r => String(r.userId) === String(userId) && r.timestamp >= since);
+        const tot = { count: rows.length, costUsd: 0, promptTokens: 0, completionTokens: 0 };
+        for (const r of rows) {
+          tot.costUsd += r.costUsd || 0;
+          tot.promptTokens += r.promptTokens || 0;
+          tot.completionTokens += r.completionTokens || 0;
+        }
+        return wrap(tot);
+      },
+    },
     auditLog: {
       append: ({ userId, action, target, meta, ip }) => {
         const row = {
