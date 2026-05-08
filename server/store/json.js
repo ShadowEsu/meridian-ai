@@ -130,7 +130,39 @@ function createJsonStore(opts) {
     },
 
     // Stubs filled in by later tasks; methods throw so callers fail loudly.
-    teams: notImplemented('teams'),
+    teams: {
+      list: (userId) => wrap(
+        data.teams.filter(t => String(t.userId) === String(userId)).sort((a, b) => a.id - b.id)
+      ),
+      get: (userId, id) => wrap(
+        data.teams.find(t => String(t.userId) === String(userId) && t.id === Number(id)) || null
+      ),
+      add: (userId, { name, monthlyBudgetUsd }) => {
+        const row = {
+          id: data.nextTeamId++, userId: Number(userId),
+          name: String(name), monthlyBudgetUsd: monthlyBudgetUsd == null ? null : Number(monthlyBudgetUsd),
+          createdAt: nowIso(),
+        };
+        data.teams.push(row);
+        persist();
+        return wrap(row);
+      },
+      update: (userId, id, patch) => {
+        const t = data.teams.find(t => String(t.userId) === String(userId) && t.id === Number(id));
+        if (!t) return wrap(null);
+        if ('name' in patch) t.name = String(patch.name);
+        if ('monthlyBudgetUsd' in patch) t.monthlyBudgetUsd = patch.monthlyBudgetUsd == null ? null : Number(patch.monthlyBudgetUsd);
+        persist();
+        return wrap(t);
+      },
+      delete: (userId, id) => {
+        const i = data.teams.findIndex(t => String(t.userId) === String(userId) && t.id === Number(id));
+        if (i === -1) return wrap(false);
+        data.teams.splice(i, 1);
+        persist();
+        return wrap(true);
+      },
+    },
     virtualKeys: notImplemented('virtualKeys'),
     agents: notImplemented('agents'),
     agentRuns: notImplemented('agentRuns'),
