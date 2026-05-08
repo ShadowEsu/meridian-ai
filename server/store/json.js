@@ -136,7 +136,28 @@ function createJsonStore(opts) {
     agentRuns: notImplemented('agentRuns'),
     alerts: notImplemented('alerts'),
     requests: notImplemented('requests'),
-    auditLog: notImplemented('auditLog'),
+    auditLog: {
+      append: ({ userId, action, target, meta, ip }) => {
+        const row = {
+          id: data.nextAuditId++,
+          userId: userId == null ? null : Number(userId),
+          action: String(action),
+          target: target || null,
+          meta: meta || null,
+          ip: ip || null,
+          timestamp: nowIso(),
+        };
+        data.auditLog.push(row);
+        persist();
+        return wrap(row);
+      },
+      list: ({ userId, limit = 100 } = {}) => wrap(
+        data.auditLog
+          .filter(r => userId == null || String(r.userId) === String(userId))
+          .sort((a, b) => b.id - a.id)
+          .slice(0, Math.max(1, Math.min(1000, Number(limit) || 100)))
+      ),
+    },
   };
 }
 

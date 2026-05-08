@@ -16,7 +16,7 @@ function maskKey(secret) {
   return s.slice(0, 4) + '···' + s.slice(-4);
 }
 
-function register(app, { store }) {
+function register(app, { store, audit }) {
   app.get('/api/provider-keys', requireUser, async (req, res) => {
     const rows = await store.providerKeys.list(req.user.id);
     res.json({
@@ -45,6 +45,7 @@ function register(app, { store }) {
         provider, label: label || null, mask: maskKey(apiKey),
         iv: enc.iv, ciphertext: enc.ciphertext, authTag: enc.authTag,
       });
+      if (audit) audit.append({ userId: req.user.id, action: 'provider_key.add', target: { id: row.id }, meta: { provider, label }, req }).catch(e => console.error('audit failed', e));
       res.status(201).json({ key: { id: row.id, provider, label, mask: row.mask } });
     }
   );
@@ -57,6 +58,7 @@ function register(app, { store }) {
     async (req, res) => {
       const ok = await store.providerKeys.delete(req.user.id, req.validated.params.id);
       if (!ok) return jsonError(res, 404, 'Not found');
+      if (audit) audit.append({ userId: req.user.id, action: 'provider_key.delete', target: { id: Number(req.validated.params.id) }, req }).catch(e => console.error('audit failed', e));
       res.json({ ok: true });
     }
   );

@@ -10,7 +10,7 @@ function normalizeEmail(email) {
   return String(email || '').trim().toLowerCase();
 }
 
-function register(app, { store }) {
+function register(app, { store, audit }) {
   app.post(
     '/api/auth/signup',
     authLimiter,
@@ -33,6 +33,7 @@ function register(app, { store }) {
           throw e;
         }
         signSession(res, { sub: String(user.id), email: user.email });
+        if (audit) audit.append({ userId: user.id, action: 'auth.signup', req }).catch(e => console.error('audit failed', e));
         res.status(201).json({ user: { id: user.id, email: user.email }, isNew: true });
       } catch (e) {
         console.error('[meridian] signup', e);
@@ -58,6 +59,7 @@ function register(app, { store }) {
           return jsonError(res, 401, 'Invalid email or password');
         }
         signSession(res, { sub: String(row.id), email: row.email });
+        if (audit) audit.append({ userId: row.id, action: 'auth.login', req }).catch(e => console.error('audit failed', e));
         res.json({ user: { id: row.id, email: row.email }, isNew: false });
       } catch (e) {
         console.error('[meridian] login', e);
@@ -66,8 +68,9 @@ function register(app, { store }) {
     }
   );
 
-  app.post('/api/auth/logout', (_req, res) => {
+  app.post('/api/auth/logout', (req, res) => {
     clearSession(res);
+    if (audit) audit.append({ userId: req.user?.id || null, action: 'auth.logout', req }).catch(e => console.error('audit failed', e));
     res.json({ ok: true });
   });
 
