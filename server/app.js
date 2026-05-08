@@ -32,11 +32,13 @@ function createApp({ store }) {
 
   const { createAuditLog } = require('./services/audit-log');
   const { createBudgetEngine } = require('./services/budget-engine');
+  const { createAlertEngine } = require('./services/alert-engine');
   const ctx = { store };
   ctx.audit = createAuditLog({ store });
   ctx.budget = createBudgetEngine({ store });
-  ctx.alerts = { onRequest: async () => {} };
+  ctx.alerts = createAlertEngine({ store });
   require('./routes/requests').register(app, ctx);
+  require('./routes/alerts').register(app, ctx);
   authRoutes.register(app, ctx);
   providerKeysRoutes.register(app, ctx);
   auditLogRoutes.register(app, ctx);
@@ -45,7 +47,7 @@ function createApp({ store }) {
   proxyRoutes.register(app, ctx);
   kpiRoutes.register(app, ctx);
   // Later tasks register more routes here:
-  //   agents, alerts
+  //   agents
 
   // 404 fallthrough for /api/* must be JSON, not the static file 404 page.
   app.use('/api', (_req, res) => jsonError(res, 404, 'Not found', { code: 'NOT_FOUND' }));

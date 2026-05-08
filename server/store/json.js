@@ -227,7 +227,52 @@ function createJsonStore(opts) {
     },
     agents: notImplemented('agents'),
     agentRuns: notImplemented('agentRuns'),
-    alerts: notImplemented('alerts'),
+    alerts: {
+      list: (userId) => wrap(
+        data.alerts.filter(a => String(a.userId) === String(userId)).sort((a, b) => b.id - a.id)
+      ),
+      add: (userId, row) => {
+        const r = {
+          id: data.nextAlertId++, userId: Number(userId),
+          name: String(row.name), type: String(row.type),
+          target: row.target || null,
+          thresholdUsd: row.thresholdUsd == null ? null : Number(row.thresholdUsd),
+          thresholdRpm: row.thresholdRpm == null ? null : Number(row.thresholdRpm),
+          windowMinutes: row.windowMinutes == null ? null : Number(row.windowMinutes),
+          state: 'active', lastTriggeredAt: null, createdAt: nowIso(),
+        };
+        data.alerts.push(r);
+        persist();
+        return wrap(r);
+      },
+      update: (userId, id, patch) => {
+        const a = data.alerts.find(a => String(a.userId) === String(userId) && a.id === Number(id));
+        if (!a) return wrap(null);
+        for (const f of ['name', 'state', 'thresholdUsd', 'thresholdRpm', 'windowMinutes', 'lastTriggeredAt']) {
+          if (f in patch) a[f] = patch[f];
+        }
+        persist();
+        return wrap(a);
+      },
+      delete: (userId, id) => {
+        const i = data.alerts.findIndex(a => String(a.userId) === String(userId) && a.id === Number(id));
+        if (i === -1) return wrap(false);
+        data.alerts.splice(i, 1);
+        persist();
+        return wrap(true);
+      },
+      setTriggered: (id, when = nowIso()) => {
+        const a = data.alerts.find(a => a.id === Number(id));
+        if (!a) return wrap(null);
+        a.state = 'triggered';
+        a.lastTriggeredAt = when;
+        persist();
+        return wrap(a);
+      },
+      forUser: (userId, predicate) => wrap(
+        data.alerts.filter(a => String(a.userId) === String(userId) && a.state === 'active' && predicate(a))
+      ),
+    },
     requests: {
       add: (row) => {
         const r = {
