@@ -163,7 +163,68 @@ function createJsonStore(opts) {
         return wrap(true);
       },
     },
-    virtualKeys: notImplemented('virtualKeys'),
+    virtualKeys: {
+      list: (userId) => wrap(
+        data.virtualKeys
+          .filter(k => String(k.userId) === String(userId))
+          .map(k => ({ ...k }))             // shallow copy; keyHash is included for internal use
+          .sort((a, b) => b.id - a.id)
+      ),
+      get: (userId, id) => wrap(
+        data.virtualKeys.find(k => String(k.userId) === String(userId) && k.id === Number(id)) || null
+      ),
+      add: (userId, row) => {
+        const r = {
+          id: data.nextVirtualKeyId++, userId: Number(userId),
+          teamId: row.teamId == null ? null : Number(row.teamId),
+          providerKeyId: Number(row.providerKeyId),
+          label: String(row.label || ''),
+          prefix: String(row.prefix),
+          keyHash: String(row.keyHash),
+          monthlyBudgetUsd: row.monthlyBudgetUsd == null ? null : Number(row.monthlyBudgetUsd),
+          status: 'active',
+          spentMtdUsd: 0,
+          lastUsedAt: null,
+          createdAt: nowIso(),
+        };
+        data.virtualKeys.push(r);
+        persist();
+        return wrap(r);
+      },
+      update: (userId, id, patch) => {
+        const k = data.virtualKeys.find(k => String(k.userId) === String(userId) && k.id === Number(id));
+        if (!k) return wrap(null);
+        for (const f of ['label', 'status', 'teamId', 'monthlyBudgetUsd']) {
+          if (f in patch) k[f] = patch[f];
+        }
+        persist();
+        return wrap(k);
+      },
+      delete: (userId, id) => {
+        const i = data.virtualKeys.findIndex(k => String(k.userId) === String(userId) && k.id === Number(id));
+        if (i === -1) return wrap(false);
+        data.virtualKeys.splice(i, 1);
+        persist();
+        return wrap(true);
+      },
+      // Used by ingestion: looks up by prefix, then bcrypt-compares the rest.
+      findByPrefix: (prefix) => wrap(
+        data.virtualKeys.filter(k => k.prefix === prefix && k.status === 'active')
+      ),
+      recordSpend: (id, deltaUsd) => {
+        const k = data.virtualKeys.find(k => k.id === Number(id));
+        if (!k) return wrap(null);
+        k.spentMtdUsd = Number((k.spentMtdUsd || 0) + Number(deltaUsd || 0));
+        k.lastUsedAt = nowIso();
+        persist();
+        return wrap(k);
+      },
+      resetMtd: () => {
+        for (const k of data.virtualKeys) k.spentMtdUsd = 0;
+        persist();
+        return wrap(true);
+      },
+    },
     agents: notImplemented('agents'),
     agentRuns: notImplemented('agentRuns'),
     alerts: notImplemented('alerts'),

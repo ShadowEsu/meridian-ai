@@ -11,6 +11,7 @@ const authRoutes         = require('./routes/auth');
 const providerKeysRoutes = require('./routes/provider-keys');
 const auditLogRoutes     = require('./routes/audit-log');
 const teamsRoutes        = require('./routes/teams');
+const virtualKeysRoutes  = require('./routes/virtual-keys');
 const proxyRoutes        = require('./routes/proxy');
 
 function createApp({ store }) {
@@ -35,9 +36,10 @@ function createApp({ store }) {
   providerKeysRoutes.register(app, ctx);
   auditLogRoutes.register(app, ctx);
   teamsRoutes.register(app, ctx);
+  virtualKeysRoutes.register(app, ctx);
   proxyRoutes.register(app, ctx);
   // Later tasks register more routes here:
-  //   virtualKeys, agents, alerts, requests, kpi
+  //   agents, alerts, requests, kpi
 
   // 404 fallthrough for /api/* must be JSON, not the static file 404 page.
   app.use('/api', (_req, res) => jsonError(res, 404, 'Not found', { code: 'NOT_FOUND' }));
