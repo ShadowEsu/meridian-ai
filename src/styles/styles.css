@@ -372,6 +372,18 @@ body {
 }
 .app.collapsed .who { opacity: 0; max-width: 0; }
 
+/* Auto-collapse sidebar on small screens — mobile gets icon-only rail */
+@media (max-width: 900px) {
+  .app { grid-template-columns: 64px 1fr; }
+  .brand-name { opacity: 0; max-width: 0; }
+  .side-head { flex-direction: column; gap: 8px; }
+  .side-toggle { display: none; }
+  .side-section { opacity: 0; height: 14px; padding: 8px 0 0; overflow: hidden; }
+  .nav-item { justify-content: center; padding: 0; }
+  .nav-item .label, .nav-item .nav-badge { opacity: 0; max-width: 0; margin: 0; }
+  .who { opacity: 0; max-width: 0; }
+}
+
 /* MAIN */
 .main {
   display: flex; flex-direction: column;
@@ -1545,10 +1557,8 @@ code, kbd {
 
 @media (max-width: 860px) {
   :root { --ui: 0.88; }
-  .app { grid-template-columns: 220px 1fr; }
+  /* .app grid handled by the dedicated mobile rule (64px 1fr at <900px) */
   .content { padding: 18px; }
-  .nav-item { font-size: 13px; padding: 12px 12px; min-height: 44px; }
-  .brand-name { font-size: 15px; }
   .brand-tag { font-size: 9.5px; }
   .header {
     gap: 10px;
@@ -1583,10 +1593,7 @@ code, kbd {
 
 @media (max-width: 720px) {
   :root { --ui: 0.84; }
-  body { overflow: auto; }
-  .app { grid-template-columns: 1fr; height: auto; }
-  .sidebar { position: sticky; top: 0; z-index: 50; height: auto; }
-  .main { min-height: calc(100vh - 1px); }
+  /* .app grid handled by the dedicated mobile rule above (64px sidebar) */
   .header { position: sticky; top: 0; z-index: 1000; }
   .content { overflow: visible; }
   .glass-panel,
