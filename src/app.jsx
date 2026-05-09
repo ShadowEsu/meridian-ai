@@ -36,6 +36,7 @@ function AuthenticatedApp({ user }) {
   const [page, setPage] = React.useState('overview');
   const [keysFilter, setKeysFilter] = React.useState('');
   const [showSetup, setShowSetup] = React.useState(false);
+  const [collapsed, setCollapsed] = React.useState(false);
 
   React.useEffect(() => {
     const k = 'meridian_setup_v1_' + user.id;
@@ -45,6 +46,18 @@ function AuthenticatedApp({ user }) {
       setShowSetup(true);
     }
   }, [user.id]);
+
+  // ⌘B / Ctrl+B toggles the sidebar
+  React.useEffect(() => {
+    const onKey = (e) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'b') {
+        e.preventDefault();
+        setCollapsed(c => !c);
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, []);
 
   const titles = {
     overview: { title: 'Overview', sub: 'AI spend across all providers · May 2026' },
@@ -59,14 +72,15 @@ function AuthenticatedApp({ user }) {
   const M = window.MERIDIAN;
 
   return (
-    <div className="app">
+    <div className={`app${collapsed ? ' collapsed' : ''}`}>
       <a href="#main-content" className="skip-link">Skip to main content</a>
       {showSetup ? <SetupWizard user={user} onDone={() => setShowSetup(false)} /> : null}
       <Sidebar
         page={page}
         setPage={(p) => { setPage(p); if (p !== 'keys') setKeysFilter(''); }}
         user={user}
-        onLogout={undefined}
+        collapsed={collapsed}
+        onToggle={() => setCollapsed(c => !c)}
       />
       <main className="main" id="main-content" tabIndex="-1">
         {M.uiDemoSampleData ? (
@@ -75,12 +89,15 @@ function AuthenticatedApp({ user }) {
             <span className="demo-data-text">Dollar amounts and volumes are illustrative examples. Backend and sign-in are off for now.</span>
           </div>
         ) : null}
-        <Header
-          title={meta.title}
-          sub={meta.sub}
-          demo={M.uiDemoSampleData}
-          search={<GlobalSearch setPage={setPage} setKeysFilter={setKeysFilter} setFleetSelected={() => {}} />}
-        />
+        {/* Overview renders its own page header (variant-i style); other pages still use the shared Header */}
+        {page !== 'overview' ? (
+          <Header
+            title={meta.title}
+            sub={meta.sub}
+            demo={M.uiDemoSampleData}
+            search={<GlobalSearch setPage={setPage} setKeysFilter={setKeysFilter} setFleetSelected={() => {}} />}
+          />
+        ) : null}
         {page === 'overview' && <PageOverview />}
         {page === 'feed' && <PageLiveFeed />}
         {page === 'logs' && <PageRequestLogs />}
