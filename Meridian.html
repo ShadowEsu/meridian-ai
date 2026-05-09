@@ -6,16 +6,14 @@
 <title>Meridian — AI Cost Intelligence</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<!-- Crimson Pro: explicit weights (variable range sometimes fails to apply in dev tools / strict networks) -->
-<link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&display=swap" rel="stylesheet">
-<!-- Stitch screens also use Newsreader + Manrope -->
-<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,200..800;1,6..72,200..800&family=Manrope:wght@200..800&display=swap" rel="stylesheet">
+<!-- Refined system: Inter Tight (display + body) + Geist Mono (data, IDs, axis labels) -->
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="src/styles/styles.css" />
 </head>
 <body>
 <div id="root">
   <!-- Inline styles so this shows even if styles.css or CSS variables fail -->
-  <div class="meridian-boot-fallback" style="min-height:100vh;display:grid;place-content:center;justify-items:center;gap:14px;padding:32px 24px;text-align:center;max-width:440px;margin:0 auto;background:#0a0b0d;color:#e6e8ec;font-family:'Crimson Pro',Georgia,'Times New Roman',serif">
+  <div class="meridian-boot-fallback" style="min-height:100vh;display:grid;place-content:center;justify-items:center;gap:14px;padding:32px 24px;text-align:center;max-width:440px;margin:0 auto;background:#0a0b0d;color:#e6e8ec;font-family:'Inter Tight',-apple-system,BlinkMacSystemFont,system-ui,sans-serif">
     <p style="margin:0;font-size:17px;font-weight:600">Starting Meridian…</p>
     <p style="margin:0;font-size:13px;line-height:1.55;color:#9097a3">Open this folder with <strong style="color:#e6e8ec">npm start</strong> or <strong style="color:#e6e8ec">Live Server</strong> (not <code style="background:#161922;padding:2px 8px;border-radius:4px;font-size:12px">file://</code>) so JSX and <code style="background:#161922;padding:2px 8px;border-radius:4px;font-size:12px">/node_modules/</code> scripts load.</p>
   </div>
