@@ -1,0 +1,70 @@
+/* Shared mockup styles — extends Meridian tokens with mockup-only helpers. */
+body {
+  overflow: auto !important;  /* mockups are scrollable */
+  padding: 32px;
+  background: var(--bg);
+  background-image: radial-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 0);
+  background-size: 24px 24px;
+}
+.mockup-frame { max-width: 1280px; margin: 0 auto; display: grid; gap: 16px; }
+.mockup-label {
+  position: fixed; top: 12px; right: 12px;
+  background: var(--indigo); color: #fff;
+  padding: 6px 12px; border-radius: 6px;
+  font: 600 11px/1 var(--font-sans); letter-spacing: 0.14em; text-transform: uppercase;
+  z-index: 100;
+}
+.glass-panel {
+  background: var(--glass);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  backdrop-filter: blur(12px);
+  padding: 20px;
+}
+.kpi-label {
+  font-size: 11px; font-weight: 500; letter-spacing: 0.14em;
+  text-transform: uppercase; color: var(--text-mute);
+}
+.between { display: flex; justify-content: space-between; align-items: flex-start; }
+.hero-metric {
+  font-family: var(--font-display);
+  font-weight: 500;
+  letter-spacing: -0.025em;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+.delta-up { color: var(--green-2); }
+.delta-down { color: var(--red); }
+.delta-flat { color: var(--text-mute); }
+.tiny-cap {
+  font-size: 10.5px; letter-spacing: 0.09em;
+  text-transform: uppercase; font-weight: 500;
+}
+.mockup-h1 {
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: 28px;
+  margin: 0;
+  letter-spacing: -0.02em;
+  color: var(--text);
+}
+.mockup-sub {
+  margin: 4px 0 0;
+  font-size: 13px;
+  color: var(--text-dim);
+  font-weight: 300;
+}
+.row { display: grid; gap: 16px; }
+table.tx { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+table.tx th, table.tx td {
+  padding: 14px 18px; text-align: left; white-space: nowrap;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+table.tx th {
+  color: var(--text-mute); font-weight: 500;
+  font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase;
+}
+table.tx td.mono { font-family: var(--font-sans); color: var(--indigo-2); font-weight: 500; }
+.status-dot { width: 6px; height: 6px; display: inline-block; vertical-align: middle; margin-right: 8px; }
+.bar-track { height: 6px; background: rgba(255,255,255,0.06); border-radius: 4px; overflow: hidden; }
+.bar-fill { height: 100%; border-radius: 4px; }

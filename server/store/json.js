@@ -98,6 +98,33 @@ function createJsonStore(opts) {
         persist();
         return wrap(true);
       },
+      // Link a Supabase user to a local user, creating one if needed.
+      // Match by email first (auto-link); if no match, insert a new user with the
+      // supabaseUserId set and no passwordHash.
+      findOrCreateBySupabase: ({ supabaseUserId, email, name, avatarUrl }) => {
+        const em = String(email).toLowerCase();
+        let u = data.users.find(u => u.email.toLowerCase() === em);
+        if (u) {
+          let dirty = false;
+          if (!u.supabaseUserId)             { u.supabaseUserId = supabaseUserId; dirty = true; }
+          if (name && u.name !== name)        { u.name = name; dirty = true; }
+          if (avatarUrl && u.avatarUrl !== avatarUrl) { u.avatarUrl = avatarUrl; dirty = true; }
+          if (dirty) persist();
+          return wrap(u);
+        }
+        u = {
+          id: data.nextUserId++,
+          email: String(email),
+          passwordHash: null,
+          supabaseUserId: String(supabaseUserId),
+          name: name || null,
+          avatarUrl: avatarUrl || null,
+          createdAt: nowIso(),
+        };
+        data.users.push(u);
+        persist();
+        return wrap(u);
+      },
     },
 
     providerKeys: {

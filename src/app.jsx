@@ -1,6 +1,37 @@
 // Frontend-only demo: sample data in data.jsx (no sign-in, no backend).
 const DEMO_USER = { id: 'demo', email: 'demo@meridian.local' };
 
+// In live mode (?live=1 or localStorage meridian_live=1) the app calls
+// /api/auth/me on boot and shows PageAuth until the user is signed in.
+// In demo mode it renders straight to the dashboard with DEMO_USER.
+function useAuthGate() {
+  const live = !!(window.MeridianAPI && window.MeridianAPI.live);
+  const [state, setState] = React.useState(
+    live ? { phase: 'loading', user: null } : { phase: 'ready', user: DEMO_USER }
+  );
+
+  const refresh = React.useCallback(() => {
+    if (!live) return;
+    setState({ phase: 'loading', user: null });
+    window.MeridianAPI.auth.me()
+      .then(d => setState({ phase: 'ready', user: d.user }))
+      .catch(e => {
+        if (e && e.status === 401) setState({ phase: 'signin', user: null });
+        else setState({ phase: 'error', user: null, error: e });
+      });
+  }, [live]);
+
+  React.useEffect(() => {
+    if (!live) return;
+    refresh();
+    const onChange = () => refresh();
+    window.addEventListener('meridian:auth-changed', onChange);
+    return () => window.removeEventListener('meridian:auth-changed', onChange);
+  }, [live, refresh]);
+
+  return { state, refresh };
+}
+
 function AuthenticatedApp({ user }) {
   const [page, setPage] = React.useState('overview');
   const [keysFilter, setKeysFilter] = React.useState('');
@@ -62,7 +93,26 @@ function AuthenticatedApp({ user }) {
 }
 
 function App() {
-  return <AuthenticatedApp user={DEMO_USER} />;
+  const { state, refresh } = useAuthGate();
+  if (state.phase === 'loading') {
+    return (
+      <div style={{ minHeight: '100vh', display: 'grid', placeContent: 'center', color: '#9097a3', fontFamily: 'Crimson Pro, serif' }}>
+        Loading…
+      </div>
+    );
+  }
+  if (state.phase === 'signin') {
+    return <PageAuth onAuthed={() => refresh()} />;
+  }
+  if (state.phase === 'error') {
+    return (
+      <div style={{ minHeight: '100vh', display: 'grid', placeContent: 'center', padding: 24, color: '#fda4af', fontFamily: 'Crimson Pro, serif', textAlign: 'center' }}>
+        <p style={{ margin: '0 0 8px', fontWeight: 600 }}>Could not reach the API</p>
+        <p style={{ margin: 0, fontSize: 13, color: '#9097a3' }}>{(state.error && state.error.message) || 'unknown error'}</p>
+      </div>
+    );
+  }
+  return <AuthenticatedApp user={state.user} />;
 }
 
 (function boot() {

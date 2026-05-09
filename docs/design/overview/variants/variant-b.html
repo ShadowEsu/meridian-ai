@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Meridian Overview — Variant B: Operator Grid</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@400;500;600;700&family=Newsreader:opsz,wght@6..72,200..800&family=Manrope:wght@200..800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../../../src/styles/styles.css">
+<link rel="stylesheet" href="_shared.css">
+</head>
+<body>
+
+<div class="mockup-label">Variant B · Operator Grid</div>
+
+<div class="mockup-frame">
+
+  <header>
+    <h1 class="mockup-h1">Overview</h1>
+    <p class="mockup-sub">AI spend across all providers · May 2026</p>
+  </header>
+
+  <!-- Alerts strip (operator-first) -->
+  <div style="display:grid; grid-template-columns: repeat(2, 1fr); gap:16px;">
+    <div class="glass-panel" style="border-left: 3px solid var(--amber); padding:14px 18px; display:flex; justify-content:space-between; align-items:center;">
+      <div>
+        <div class="tiny-cap" style="color:var(--amber-2);">Budget warning</div>
+        <div style="margin-top:4px; font-size:13px;">Engineering will exceed cap in <strong>~6 days</strong> at current burn</div>
+      </div>
+      <button class="btn btn-ghost" style="font-size:11px;letter-spacing:0.14em;text-transform:uppercase;">Investigate</button>
+    </div>
+    <div class="glass-panel" style="border-left: 3px solid var(--red); padding:14px 18px; display:flex; justify-content:space-between; align-items:center;">
+      <div>
+        <div class="tiny-cap" style="color:#FDA4AF;">Anomaly</div>
+        <div style="margin-top:4px; font-size:13px;">Agent <strong>data-science/grader</strong> 4.2× normal call rate</div>
+      </div>
+      <button class="btn btn-ghost" style="font-size:11px;letter-spacing:0.14em;text-transform:uppercase;">Pause</button>
+    </div>
+  </div>
+
+  <!-- 4-up KPI grid -->
+  <div style="display:grid; grid-template-columns: repeat(4, 1fr); gap:16px;">
+    <div class="glass-panel">
+      <div class="between">
+        <div class="kpi-label">Total Spend</div>
+        <span class="tiny-cap delta-up">↑ 12.4%</span>
+      </div>
+      <div class="hero-metric" style="font-size:38px; margin-top:12px;">$93,450</div>
+      <div class="tiny-cap" style="margin-top:8px; color:var(--text-mute);">May 1 – 24</div>
+    </div>
+    <div class="glass-panel">
+      <div class="between">
+        <div class="kpi-label">Calls / 30d</div>
+        <span class="tiny-cap delta-up">↑ 8.1%</span>
+      </div>
+      <div class="hero-metric" style="font-size:38px; margin-top:12px;">1.84M</div>
+      <div class="tiny-cap" style="margin-top:8px; color:var(--text-mute);">avg $0.051 / call</div>
+    </div>
+    <div class="glass-panel">
+      <div class="between">
+        <div class="kpi-label">Savings</div>
+        <span class="tiny-cap delta-up">smart-route on</span>
+      </div>
+      <div class="hero-metric" style="font-size:38px; margin-top:12px; color:var(--green-2);">$14,200</div>
+      <div class="tiny-cap" style="margin-top:8px; color:var(--text-mute);">vs gpt-4-only baseline</div>
+    </div>
+    <div class="glass-panel" style="border-color: rgba(245,158,11,0.4);">
+      <div class="between">
+        <div class="kpi-label" style="color:var(--amber-2);">Projected EOM</div>
+        <span class="tiny-cap delta-down">↑ 37% over</span>
+      </div>
+      <div class="hero-metric" style="font-size:38px; margin-top:12px; color:var(--amber-2);">$109.4k</div>
+      <div class="tiny-cap" style="margin-top:8px; color:var(--text-mute);">cap $80,000</div>
+    </div>
+  </div>
+
+  <!-- Charts row 7/3 -->
+  <div style="display:grid; grid-template-columns: 7fr 3fr; gap:16px;">
+    <div class="glass-panel">
+      <div class="between">
+        <div class="kpi-label" style="color:var(--text);">Cumulative spend · May</div>
+        <div style="display:flex; gap:14px; font-size:10.5px; color:var(--text-dim); letter-spacing:0.09em; text-transform:uppercase;">
+          <span><span style="display:inline-block;width:7px;height:7px;background:#818CF8;margin-right:8px"></span>Spend</span>
+          <span><span style="display:inline-block;width:7px;height:7px;background:#F59E0B;margin-right:8px"></span>Budget pace</span>
+        </div>
+      </div>
+      <svg viewBox="0 0 700 260" style="width:100%; height:260px; margin-top:14px;" preserveAspectRatio="none">
+        <defs><linearGradient id="ga" x1="0" x2="0" y1="0" y2="1">
+          <stop offset="0%" stop-color="#6366F1" stop-opacity="0.5"/>
+          <stop offset="100%" stop-color="#6366F1" stop-opacity="0"/>
+        </linearGradient></defs>
+        <!-- gridlines -->
+        <line x1="0" y1="50"  x2="700" y2="50"  stroke="rgba(255,255,255,.06)"/>
+        <line x1="0" y1="110" x2="700" y2="110" stroke="rgba(255,255,255,.06)"/>
+        <line x1="0" y1="170" x2="700" y2="170" stroke="rgba(255,255,255,.06)"/>
+        <line x1="0" y1="230" x2="700" y2="230" stroke="rgba(255,255,255,.06)"/>
+        <!-- budget pace (linear amber) -->
+        <line x1="0" y1="240" x2="700" y2="50" stroke="#F59E0B" stroke-width="1.5" stroke-dasharray="4,4" fill="none"/>
+        <!-- cumulative spend (curve) -->
+        <path d="M0,250 L40,242 L80,232 L120,218 L160,202 L200,184 L240,170 L280,158 L320,140 L360,122 L400,104 L440,90 L480,76 L520,62 L560,48 L600,38 L640,28 L680,18 L700,10 L700,260 L0,260 Z"
+              fill="url(#ga)"/>
+        <path d="M0,250 L40,242 L80,232 L120,218 L160,202 L200,184 L240,170 L280,158 L320,140 L360,122 L400,104 L440,90 L480,76 L520,62 L560,48 L600,38 L640,28 L680,18 L700,10"
+              stroke="#818CF8" stroke-width="2" fill="none"/>
+      </svg>
+      <div style="display:flex; justify-content:space-between; font-size:10.5px; color:var(--text-mute); letter-spacing:0.09em; text-transform:uppercase; margin-top:6px;">
+        <span>1</span><span>5</span><span>10</span><span>15</span><span>20</span><span>24</span><span>31</span>
+      </div>
+    </div>
+
+    <div class="glass-panel">
+      <div class="kpi-label" style="color:var(--text);">Top models</div>
+      <div style="margin-top:18px; display:grid; gap:12px;">
+        <div>
+          <div class="between"><span style="font-size:13px;">gpt-4o</span><span class="tiny-cap" style="color:var(--text);font-weight:500;letter-spacing:0;">$31.2k</span></div>
+          <div class="bar-track" style="margin-top:6px;"><div class="bar-fill" style="width:80%; background: rgba(99,102,241,.95);"></div></div>
+        </div>
+        <div>
+          <div class="between"><span style="font-size:13px; font-style:italic;">claude-3.5-sonnet</span><span class="tiny-cap" style="color:var(--text);font-weight:500;letter-spacing:0;">$22.8k</span></div>
+          <div class="bar-track" style="margin-top:6px;"><div class="bar-fill" style="width:60%; background: #F59E0B;"></div></div>
+        </div>
+        <div>
+          <div class="between"><span style="font-size:13px;">gemini-1.5-pro</span><span class="tiny-cap" style="color:var(--text);font-weight:500;letter-spacing:0;">$15.2k</span></div>
+          <div class="bar-track" style="margin-top:6px;"><div class="bar-fill" style="width:40%; background: #10B981;"></div></div>
+        </div>
+        <div>
+          <div class="between"><span style="font-size:13px;">gpt-4-turbo</span><span class="tiny-cap" style="color:var(--text);font-weight:500;letter-spacing:0;">$11.8k</span></div>
+          <div class="bar-track" style="margin-top:6px;"><div class="bar-fill" style="width:30%; background: rgba(255,255,255,.22);"></div></div>
+        </div>
+        <div>
+          <div class="between"><span style="font-size:13px; color:var(--text-dim);">claude-3-haiku</span><span class="tiny-cap" style="color:var(--text);font-weight:500;letter-spacing:0;">$5.8k</span></div>
+          <div class="bar-track" style="margin-top:6px;"><div class="bar-fill" style="width:15%; background: rgba(255,255,255,.18);"></div></div>
+        </div>
+        <div>
+          <div class="between"><span style="font-size:13px; color:var(--text-dim);">others (4)</span><span class="tiny-cap" style="color:var(--text-mute);font-weight:500;letter-spacing:0;">$6.6k</span></div>
+          <div class="bar-track" style="margin-top:6px;"><div class="bar-fill" style="width:18%; background: rgba(255,255,255,.12);"></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Team budgets + recent calls -->
+  <div style="display:grid; grid-template-columns: 1fr 1fr; gap:16px;">
+    <div class="glass-panel">
+      <div class="between">
+        <div class="kpi-label" style="color:var(--text);">Team budgets · May</div>
+        <span class="tiny-cap" style="color:var(--text-mute);">6 teams</span>
+      </div>
+      <div style="margin-top:18px; display:grid; gap:14px;">
+        <div>
+          <div class="between"><span style="font-size:13px;">Engineering</span><span style="font-variant-numeric:tabular-nums; font-size:11.5px;"><span style="color:var(--text);">$32.4k</span> <span style="color:var(--amber-2); font-weight:500; margin-left:8px;">108%</span></span></div>
+          <div class="bar-track" style="margin-top:6px;"><div class="bar-fill" style="width:100%; background: linear-gradient(90deg, #F59E0B, #EF4444);"></div></div>
+        </div>
+        <div>
+          <div class="between"><span style="font-size:13px;">Data Science</span><span style="font-variant-numeric:tabular-nums; font-size:11.5px;"><span style="color:var(--text);">$24.8k</span> <span style="color:var(--amber-2); font-weight:500; margin-left:8px;">82%</span></span></div>
+          <div class="bar-track" style="margin-top:6px;"><div class="bar-fill" style="width:82%; background: #FBBF24;"></div></div>
+        </div>
+        <div>
+          <div class="between"><span style="font-size:13px;">Marketing</span><span style="font-variant-numeric:tabular-nums; font-size:11.5px;"><span style="color:var(--text);">$14.2k</span> <span style="color:var(--text-mute); font-weight:500; margin-left:8px;">63%</span></span></div>
+          <div class="bar-track" style="margin-top:6px;"><div class="bar-fill" style="width:63%; background: #EC4899;"></div></div>
+        </div>
+        <div>
+          <div class="between"><span style="font-size:13px;">Product</span><span style="font-variant-numeric:tabular-nums; font-size:11.5px;"><span style="color:var(--text);">$11.6k</span> <span style="color:var(--text-mute); font-weight:500; margin-left:8px;">48%</span></span></div>
+          <div class="bar-track" style="margin-top:6px;"><div class="bar-fill" style="width:48%; background: #10B981;"></div></div>
+        </div>
+        <div>
+          <div class="between"><span style="font-size:13px;">Sales</span><span style="font-variant-numeric:tabular-nums; font-size:11.5px;"><span style="color:var(--text);">$6.4k</span> <span style="color:var(--text-mute); font-weight:500; margin-left:8px;">32%</span></span></div>
+          <div class="bar-track" style="margin-top:6px;"><div class="bar-fill" style="width:32%; background: #F59E0B;"></div></div>
+        </div>
+        <div>
+          <div class="between"><span style="font-size:13px;">DevOps</span><span style="font-variant-numeric:tabular-nums; font-size:11.5px;"><span style="color:var(--text);">$4.0k</span> <span style="color:var(--text-mute); font-weight:500; margin-left:8px;">20%</span></span></div>
+          <div class="bar-track" style="margin-top:6px;"><div class="bar-fill" style="width:20%; background: #14B8A6;"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="glass-panel" style="padding:0;">
+      <div style="padding:16px 20px; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
+        <div class="kpi-label" style="color:var(--text);">Recent expensive calls</div>
+        <button class="btn btn-ghost" style="font-size:11px;letter-spacing:0.14em;text-transform:uppercase;">View all</button>
+      </div>
+      <table class="tx" style="font-size:12.5px;">
+        <thead><tr><th>Request</th><th>Model</th><th>Cost</th><th style="text-align:right;">When</th></tr></thead>
+        <tbody style="color:var(--text);">
+          <tr><td class="mono">req_8a3c9f</td><td>gpt-4o</td><td style="font-weight:500">$3.82</td><td style="text-align:right; color:var(--text-mute);">12s ago</td></tr>
+          <tr><td class="mono">req_8a3c9e</td><td style="font-style:italic;">claude-3.5</td><td style="font-weight:500">$2.14</td><td style="text-align:right; color:var(--text-mute);">38s ago</td></tr>
+          <tr><td class="mono">req_8a3c9d</td><td>gemini-1.5</td><td style="font-weight:500">$1.92</td><td style="text-align:right; color:var(--text-mute);">52s ago</td></tr>
+          <tr><td class="mono">req_8a3c9c</td><td>gpt-4o</td><td style="font-weight:500">$1.40</td><td style="text-align:right; color:var(--text-mute);">1m ago</td></tr>
+          <tr><td class="mono">req_8a3c9b</td><td style="font-style:italic;">claude-3.5</td><td style="font-weight:500">$1.28</td><td style="text-align:right; color:var(--text-mute);">2m ago</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Meridian Overview — Variant Viewer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@400;500;600;700&family=Manrope:wght@200..800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0A0A0B;
+    --surface: #141416;
+    --border: rgba(255,255,255,0.10);
+    --text: #E6E8EC;
+    --text-dim: #9097A3;
+    --text-mute: #7A8190;
+    --indigo: #6366F1;
+    --indigo-2: #818CF8;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; height: 100%; background: var(--bg); color: var(--text); font-family: Manrope, system-ui, sans-serif; }
+  body { display: flex; flex-direction: column; }
+  header {
+    display: flex; align-items: center; gap: 18px;
+    padding: 14px 22px;
+    border-bottom: 1px solid var(--border);
+    background: rgba(10,10,11,0.85);
+    backdrop-filter: blur(12px);
+    z-index: 10;
+  }
+  .brand {
+    font-family: 'Crimson Pro', serif;
+    font-weight: 600;
+    font-size: 14px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #fff;
+  }
+  .brand-sub {
+    font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--text-mute);
+    margin-left: 14px;
+  }
+  .seg {
+    margin-left: auto;
+    display: inline-flex;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 3px;
+    gap: 2px;
+  }
+  .seg button {
+    appearance: none;
+    background: transparent;
+    color: var(--text-dim);
+    border: 0;
+    padding: 7px 14px;
+    border-radius: 6px;
+    font: 500 12.5px Manrope, sans-serif;
+    letter-spacing: 0.02em;
+    cursor: pointer;
+    transition: background 150ms, color 150ms;
+  }
+  .seg button:hover { color: var(--text); }
+  .seg button.active {
+    background: var(--indigo);
+    color: #fff;
+  }
+  .seg button:focus-visible { outline: 2px solid var(--indigo-2); outline-offset: 2px; }
+
+  .actions { display: flex; gap: 8px; }
+  .actions a {
+    appearance: none;
+    text-decoration: none;
+    background: transparent;
+    color: var(--text-dim);
+    border: 1px solid var(--border);
+    padding: 6px 12px;
+    border-radius: 6px;
+    font: 500 11.5px Manrope, sans-serif;
+    letter-spacing: 0.04em;
+  }
+  .actions a:hover { color: var(--text); border-color: var(--indigo-2); }
+
+  .legend {
+    display: flex; gap: 12px;
+    padding: 10px 22px;
+    background: rgba(99,102,241,0.05);
+    border-bottom: 1px solid var(--border);
+    font-size: 12.5px;
+    color: var(--text-dim);
+    line-height: 1.5;
+  }
+  .legend strong { color: var(--text); font-weight: 600; }
+
+  iframe {
+    flex: 1;
+    border: 0;
+    width: 100%;
+    background: var(--bg);
+  }
+
+  @media (max-width: 720px) {
+    header { flex-wrap: wrap; }
+    .seg { margin-left: 0; }
+    .legend { font-size: 11.5px; }
+  }
+</style>
+</head>
+<body>
+  <header>
+    <span class="brand">Meridian</span>
+    <span class="brand-sub">Overview · Variant viewer</span>
+
+    <div class="seg" role="tablist" aria-label="Choose variant">
+      <button type="button" data-v="a" role="tab">A · Spend Hero</button>
+      <button type="button" data-v="b" role="tab">B · Operator Grid</button>
+      <button type="button" data-v="c" role="tab">C · Editorial</button>
+      <button type="button" data-v="d" role="tab">D · Editorial Split</button>
+      <button type="button" data-v="e" role="tab">E · Cinematic ✦</button>
+    </div>
+
+    <div class="actions">
+      <a id="open-tab" href="variant-b.html" target="_blank" rel="noopener">Open in tab ↗</a>
+      <a id="open-png" href="variant-b.png" target="_blank" rel="noopener">PNG</a>
+    </div>
+  </header>
+
+  <div class="legend" id="legend"></div>
+
+  <iframe id="frame" src="variant-b.html" title="Variant preview"></iframe>
+
+<script>
+  const legends = {
+    a: '<strong>A · Spend Hero</strong> — Giant headline metric + 3 stacked secondary KPIs. Reads like a CFO exec view. Risk: too sparse for daily ops.',
+    b: '<strong>B · Operator Grid</strong> — Alert strip + 4-up KPIs + 7/3 chart split + team budgets and recent calls side-by-side. Most actionable.',
+    c: '<strong>C · Editorial</strong> — Massive serif number + prose blurb + single trend chart + provider/teams split. Premium narrative feel; best vibe match.',
+    d: '<strong>D · Editorial Split</strong> — Pravāh-style split: editorial panel left (pill nav, big number, prose, CTA) + atmospheric chart right with floating glass status callouts. Tables below.',
+    e: '<strong>E · Cinematic</strong> — Editorial panel left + dotted M monogram glowing center-stage, animated arcs flowing in, particles rising, scanline sweep, 4 floating glass cards, live request ticker scrolling at the bottom. Motion on everything.',
+  };
+
+  function setVariant(v) {
+    if (!['a','b','c','d','e'].includes(v)) v = 'e';
+    document.querySelectorAll('.seg button').forEach(b => {
+      b.classList.toggle('active', b.dataset.v === v);
+      b.setAttribute('aria-selected', b.dataset.v === v);
+    });
+    document.getElementById('frame').src = 'variant-' + v + '.html';
+    document.getElementById('open-tab').href = 'variant-' + v + '.html';
+    document.getElementById('open-png').href = 'variant-' + v + '.png';
+    document.getElementById('legend').innerHTML = legends[v];
+    history.replaceState(null, '', '#' + v);
+    try { localStorage.setItem('meridian_variant', v); } catch (e) {}
+  }
+
+  document.querySelectorAll('.seg button').forEach(b =>
+    b.addEventListener('click', () => setVariant(b.dataset.v))
+  );
+
+  // arrow-key nav between tabs
+  document.querySelector('.seg').addEventListener('keydown', (e) => {
+    if (!['ArrowLeft','ArrowRight'].includes(e.key)) return;
+    const order = ['a','b','c','d','e'];
+    const cur = order.indexOf(document.querySelector('.seg button.active').dataset.v);
+    const next = e.key === 'ArrowRight'
+      ? order[(cur + 1) % order.length]
+      : order[(cur - 1 + order.length) % order.length];
+    setVariant(next);
+    document.querySelector(`.seg button[data-v="${next}"]`).focus();
+    e.preventDefault();
+  });
+
+  const initial = (location.hash || '').replace('#','')
+    || (() => { try { return localStorage.getItem('meridian_variant') || 'e'; } catch (e) { return 'e'; } })();
+  setVariant(initial);
+</script>
+</body>
+</html>

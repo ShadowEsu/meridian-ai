@@ -47,11 +47,16 @@ window.MERIDIAN_LIVE = (function () {
 <script src="/node_modules/react-dom/umd/react-dom.development.js"></script>
 <script src="/node_modules/@babel/standalone/babel.min.js"></script>
 
+<!-- Supabase JS for Google OAuth. Optional — only needed when SUPABASE_URL is set. -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+
 <script type="text/babel" src="src/core/data.jsx"></script>
 <script type="text/babel" src="src/core/api.jsx"></script>
+<script type="text/babel" src="src/core/supabase-client.jsx"></script>
 <script type="text/babel" src="src/core/icons.jsx"></script>
 <script type="text/babel" src="src/core/charts.jsx"></script>
 <script type="text/babel" src="src/core/shell.jsx"></script>
+<script type="text/babel" src="src/pages/auth.jsx"></script>
 <script type="text/babel" src="src/pages/overview.jsx"></script>
 <script type="text/babel" src="src/pages/feed.jsx"></script>
 <script type="text/babel" src="src/pages/logs.jsx"></script>

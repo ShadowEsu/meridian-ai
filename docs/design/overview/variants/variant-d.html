@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Meridian Overview — Variant D: Editorial Split + Floating Glass</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@400;500;600;700&family=Newsreader:opsz,wght@6..72,200..800&family=Manrope:wght@200..800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../../../src/styles/styles.css">
+<link rel="stylesheet" href="_shared.css">
+<style>
+  body { padding: 0; }
+  .mockup-frame { max-width: none; padding: 0; gap: 0; }
+
+  /* Pill tab nav, Pravāh style */
+  .pill-nav {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid var(--border);
+    padding: 5px;
+    border-radius: 999px;
+  }
+  .pill-nav .brand-pill {
+    display:inline-flex; align-items:center; gap:8px;
+    padding: 8px 14px;
+    border-radius: 999px;
+    background: rgba(99,102,241,.14);
+    color: var(--text);
+    font: 500 13px var(--font-display);
+    letter-spacing: 0.02em;
+  }
+  .pill-nav .brand-pill::before {
+    content: "✦";
+    color: var(--indigo-2);
+    font-size: 12px;
+  }
+  .pill-nav button {
+    appearance: none;
+    background: transparent;
+    border: 0;
+    color: var(--text-dim);
+    padding: 8px 14px;
+    border-radius: 999px;
+    font: 500 13px var(--font-sans);
+    cursor: pointer;
+    transition: background 150ms, color 150ms;
+  }
+  .pill-nav button:hover { color: var(--text); background: rgba(255,255,255,0.04); }
+  .pill-nav button.active { background: rgba(255,255,255,0.06); color: var(--text); }
+
+  /* The big split */
+  .split {
+    display: grid;
+    grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+    min-height: calc(100vh - 32px);
+  }
+
+  /* Left editorial panel */
+  .editorial {
+    padding: 56px 56px 48px;
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+    border-right: 1px solid var(--border);
+    background: rgba(255,255,255,0.012);
+  }
+  .editorial-eyebrow {
+    font: 500 11px/1 var(--font-sans);
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    color: var(--text-mute);
+  }
+  .editorial-headline {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: clamp(40px, 4.4vw, 64px);
+    line-height: 1.05;
+    letter-spacing: -0.025em;
+    color: var(--text);
+    margin: 0;
+  }
+  .editorial-headline .dim { color: rgba(230,232,236,0.42); }
+  .editorial-number {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: clamp(80px, 9vw, 132px);
+    line-height: 0.9;
+    letter-spacing: -0.04em;
+    color: var(--text);
+    font-variant-numeric: tabular-nums;
+    margin: 0;
+  }
+  .editorial-blurb {
+    margin: 0;
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: 18px;
+    line-height: 1.6;
+    color: var(--text-dim);
+    max-width: 50ch;
+  }
+  .editorial-blurb strong { color: var(--text); font-weight: 500; }
+  .editorial-blurb .amber { color: var(--amber-2); font-weight: 500; }
+  .editorial-blurb .green { color: var(--green-2); font-weight: 500; }
+
+  .editorial-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    align-self: flex-start;
+    padding: 14px 22px;
+    border-radius: 999px;
+    background: var(--text);
+    color: var(--bg);
+    font: 500 14px var(--font-sans);
+    letter-spacing: 0.01em;
+    text-decoration: none;
+    cursor: pointer;
+    transition: transform 150ms, opacity 150ms;
+  }
+  .editorial-cta:hover { opacity: 0.9; }
+  .editorial-cta:focus-visible { outline: 2px solid var(--indigo-2); outline-offset: 4px; }
+
+  .editorial-mini {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0;
+    margin-top: auto;
+    padding-top: 28px;
+    border-top: 1px solid var(--border);
+  }
+  .editorial-mini > div { padding-right: 24px; }
+  .editorial-mini > div + div { border-left: 1px solid var(--border); padding-left: 24px; }
+  .editorial-mini .lbl {
+    font: 500 10.5px/1 var(--font-sans);
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--text-mute);
+  }
+  .editorial-mini .num {
+    margin-top: 8px;
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: 26px;
+    letter-spacing: -0.02em;
+    color: var(--text);
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Right atmospheric panel */
+  .atmosphere {
+    position: relative;
+    overflow: hidden;
+    background:
+      radial-gradient(at 30% 20%, rgba(99,102,241,0.18), transparent 55%),
+      radial-gradient(at 75% 70%, rgba(139,92,246,0.12), transparent 55%),
+      linear-gradient(180deg, #0F0F14 0%, #0A0A0B 100%);
+  }
+  .atmosphere::before {
+    /* fine dot grid */
+    content: "";
+    position: absolute; inset: 0;
+    background-image: radial-gradient(rgba(255,255,255,0.06) 1px, transparent 0);
+    background-size: 22px 22px;
+    pointer-events: none;
+    mask-image: radial-gradient(at 60% 50%, rgba(0,0,0,1) 0%, rgba(0,0,0,0.4) 70%, rgba(0,0,0,0) 100%);
+  }
+
+  .chart-bg {
+    position: absolute; inset: 0;
+    pointer-events: none;
+    opacity: 0.55;
+  }
+
+  /* Floating glass cards */
+  .glass-card {
+    position: absolute;
+    background: rgba(20, 20, 26, 0.6);
+    border: 1px solid rgba(255,255,255,0.10);
+    border-radius: 14px;
+    padding: 14px 18px;
+    backdrop-filter: blur(18px) saturate(120%);
+    -webkit-backdrop-filter: blur(18px) saturate(120%);
+    box-shadow: 0 30px 60px -20px rgba(0,0,0,0.6);
+    min-width: 220px;
+    max-width: 280px;
+  }
+  .glass-card .tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font: 600 9.5px/1 var(--font-sans);
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--text-mute);
+    margin-bottom: 10px;
+  }
+  .glass-card .tag .dot { width: 6px; height: 6px; border-radius: 50%; }
+  .glass-card .title {
+    font: 500 14px/1.35 var(--font-sans);
+    color: var(--text);
+    letter-spacing: -0.005em;
+  }
+  .glass-card .title strong { font-weight: 600; }
+  .glass-card .meta {
+    margin-top: 8px;
+    font: 400 12px/1.4 var(--font-sans);
+    color: var(--text-dim);
+  }
+  .glass-card .num-bar {
+    margin-top: 10px;
+    height: 4px;
+    background: rgba(255,255,255,0.06);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  .glass-card .num-bar div {
+    height: 100%;
+    border-radius: 4px;
+  }
+
+  /* Card positions */
+  .card-critical {
+    top: 18%;
+    left: 8%;
+  }
+  .card-critical .tag .dot { background: var(--red); box-shadow: 0 0 10px var(--red); }
+  .card-critical .tag { color: #FDA4AF; }
+
+  .card-anomaly {
+    top: 42%;
+    right: 12%;
+  }
+  .card-anomaly .tag .dot { background: var(--amber); box-shadow: 0 0 10px var(--amber); }
+  .card-anomaly .tag { color: var(--amber-2); }
+
+  .card-saved {
+    bottom: 18%;
+    left: 18%;
+  }
+  .card-saved .tag .dot { background: var(--green); box-shadow: 0 0 10px var(--green); }
+  .card-saved .tag { color: var(--green-2); }
+
+  .card-now {
+    bottom: 22%;
+    right: 8%;
+    min-width: 180px;
+  }
+  .card-now .tag { color: var(--indigo-2); }
+  .card-now .tag .dot { background: var(--indigo-2); box-shadow: 0 0 10px var(--indigo-2); }
+
+  .atmosphere-meta {
+    position: absolute;
+    bottom: 18px;
+    left: 24px;
+    font: 500 10.5px/1 var(--font-sans);
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--text-mute);
+    display: flex;
+    gap: 14px;
+  }
+  .atmosphere-meta strong { color: var(--text); font-weight: 600; }
+
+  /* Lower section: real-data tables/charts (kept for operability) */
+  .below {
+    padding: 24px 32px 40px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+  .below .panel {
+    background: var(--glass);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 24px;
+  }
+  .below .panel h3 {
+    margin: 0;
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: 16px;
+    letter-spacing: -0.005em;
+    color: var(--text);
+  }
+  .below .panel .panel-eyebrow {
+    font: 500 10.5px/1 var(--font-sans);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--text-mute);
+    margin-bottom: 6px;
+  }
+
+  /* Recent calls — minimal table */
+  table.tx-d { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; margin-top: 18px; }
+  table.tx-d th, table.tx-d td {
+    padding: 10px 0; text-align: left; white-space: nowrap;
+  }
+  table.tx-d th {
+    color: var(--text-mute); font-weight: 500;
+    font-size: 10.5px; letter-spacing: 0.18em; text-transform: uppercase;
+    border-bottom: 1px solid var(--border);
+  }
+  table.tx-d td {
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    color: var(--text);
+    font-size: 13px;
+  }
+  table.tx-d td.req { color: var(--indigo-2); font-weight: 500; }
+  table.tx-d td.muted { color: var(--text-mute); text-align: right; }
+  table.tx-d td.italic { font-style: italic; }
+
+  @media (max-width: 1024px) {
+    .split { grid-template-columns: 1fr; }
+    .editorial { border-right: 0; border-bottom: 1px solid var(--border); padding: 40px 32px; }
+    .atmosphere { min-height: 600px; }
+    .glass-card { min-width: 200px; max-width: 240px; }
+    .below { grid-template-columns: 1fr; padding: 16px 20px 32px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="mockup-label">Variant D · Editorial Split</div>
+
+<div class="mockup-frame">
+
+  <div class="split">
+
+    <!-- LEFT: editorial -->
+    <div class="editorial">
+      <div class="pill-nav" role="tablist" aria-label="Overview sections">
+        <span class="brand-pill">Meridian</span>
+        <button type="button" class="active">Spend</button>
+        <button type="button">Models</button>
+        <button type="button">Teams</button>
+        <button type="button">Live</button>
+      </div>
+
+      <div>
+        <div class="editorial-eyebrow">Spend · May 2026 · Month-to-date</div>
+        <p class="editorial-number">$93,450</p>
+      </div>
+
+      <h1 class="editorial-headline">
+        <span class="dim">Spending is up 12.4%.</span><br/>
+        Engineering will burn through<br/>
+        its cap <em>in six days.</em>
+      </h1>
+
+      <p class="editorial-blurb">
+        At the current rate, Engineering passes <strong>$32,400 / 108%</strong> of its monthly cap.
+        The <span class="amber">data-science / grader</span> agent is firing
+        <strong class="amber">4.2× its normal rate</strong> — that's most of the spike.
+        Smart-routing has saved <span class="green">$14,200</span> against a gpt-4-only baseline,
+        but it isn't enough at this burn.
+      </p>
+
+      <a class="editorial-cta" href="#">
+        Investigate Engineering →
+      </a>
+
+      <div class="editorial-mini">
+        <div>
+          <div class="lbl">Calls / 30d</div>
+          <div class="num">1.84M</div>
+        </div>
+        <div>
+          <div class="lbl">Saved</div>
+          <div class="num" style="color: var(--green-2);">$14.2k</div>
+        </div>
+        <div>
+          <div class="lbl">Cap</div>
+          <div class="num">$80k</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT: atmosphere -->
+    <div class="atmosphere">
+      <!-- Background chart (atmospheric, low opacity) -->
+      <svg class="chart-bg" viewBox="0 0 800 700" preserveAspectRatio="none">
+        <defs>
+          <linearGradient id="atmo-grad" x1="0" x2="0" y1="0" y2="1">
+            <stop offset="0%" stop-color="#818CF8" stop-opacity="0.55"/>
+            <stop offset="100%" stop-color="#6366F1" stop-opacity="0"/>
+          </linearGradient>
+          <linearGradient id="atmo-line" x1="0" x2="1" y1="0" y2="0">
+            <stop offset="0%" stop-color="#6366F1" stop-opacity="0.6"/>
+            <stop offset="60%" stop-color="#818CF8" stop-opacity="0.95"/>
+            <stop offset="100%" stop-color="#A5B4FC" stop-opacity="1"/>
+          </linearGradient>
+        </defs>
+        <!-- atmospheric area -->
+        <path d="M0,640 L80,610 L160,560 L240,510 L320,440 L400,380 L480,310 L560,240 L640,170 L720,110 L800,80 L800,700 L0,700 Z" fill="url(#atmo-grad)"/>
+        <!-- main line -->
+        <path d="M0,640 L80,610 L160,560 L240,510 L320,440 L400,380 L480,310 L560,240 L640,170 L720,110 L800,80"
+              stroke="url(#atmo-line)" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+        <!-- budget pace line (dashed amber) -->
+        <line x1="0" y1="650" x2="800" y2="50" stroke="#F59E0B" stroke-width="1.5" stroke-dasharray="6,8" stroke-opacity="0.55"/>
+        <!-- today marker -->
+        <line x1="640" y1="0" x2="640" y2="700" stroke="rgba(255,255,255,.18)" stroke-dasharray="2,5"/>
+      </svg>
+
+      <!-- Floating glass cards -->
+      <div class="glass-card card-critical">
+        <div class="tag"><span class="dot"></span>Critical</div>
+        <div class="title">Engineering will <strong>exceed cap</strong> in <strong>6 days</strong></div>
+        <div class="meta">$32,400 of $30,000 · 108%</div>
+        <div class="num-bar"><div style="width:100%; background: linear-gradient(90deg, #F59E0B, #EF4444);"></div></div>
+      </div>
+
+      <div class="glass-card card-anomaly">
+        <div class="tag"><span class="dot"></span>Anomaly · 12 min ago</div>
+        <div class="title"><strong>data-science / grader</strong> agent firing at 4.2× normal rate</div>
+        <div class="meta">+$1,840 / hr · ~$44k / day if sustained</div>
+      </div>
+
+      <div class="glass-card card-saved">
+        <div class="tag"><span class="dot"></span>Smart-route saved</div>
+        <div class="title"><strong>+$14,200</strong> this month vs gpt-4-only</div>
+        <div class="meta">312k calls auto-routed to claude-3.5 / gemini-1.5</div>
+      </div>
+
+      <div class="glass-card card-now">
+        <div class="tag"><span class="dot"></span>Live · 12s ago</div>
+        <div class="title"><strong>$3.82</strong> · gpt-4o</div>
+        <div class="meta">req_8a3c9f · Engineering</div>
+      </div>
+
+      <div class="atmosphere-meta">
+        <span><strong>Cumulative spend</strong> · May 1 – 24</span>
+        <span>Today: $93,450</span>
+        <span>Pace cap: $80,000</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- LOWER: operability section (provider mix + recent calls) -->
+  <div class="below">
+    <div class="panel">
+      <div class="panel-eyebrow">Provider mix</div>
+      <h3>Where the spend is going</h3>
+      <div style="margin-top: 18px; display: grid; gap: 14px;">
+        <div>
+          <div class="between" style="align-items:baseline;">
+            <span style="font-family:var(--font-display); font-size:18px;">OpenAI</span>
+            <span style="font-variant-numeric:tabular-nums; font-size:12.5px; color:var(--text-dim);">$42,180 · 45%</span>
+          </div>
+          <div class="bar-track" style="margin-top:8px; height:4px;"><div class="bar-fill" style="width:45%; background:#10B981;"></div></div>
+        </div>
+        <div>
+          <div class="between" style="align-items:baseline;">
+            <span style="font-family:var(--font-display); font-size:18px;">Anthropic</span>
+            <span style="font-variant-numeric:tabular-nums; font-size:12.5px; color:var(--text-dim);">$28,400 · 30%</span>
+          </div>
+          <div class="bar-track" style="margin-top:8px; height:4px;"><div class="bar-fill" style="width:30%; background:#F59E0B;"></div></div>
+        </div>
+        <div>
+          <div class="between" style="align-items:baseline;">
+            <span style="font-family:var(--font-display); font-size:18px;">Google</span>
+            <span style="font-variant-numeric:tabular-nums; font-size:12.5px; color:var(--text-dim);">$15,200 · 16%</span>
+          </div>
+          <div class="bar-track" style="margin-top:8px; height:4px;"><div class="bar-fill" style="width:16%; background:#6366F1;"></div></div>
+        </div>
+        <div>
+          <div class="between" style="align-items:baseline;">
+            <span style="font-family:var(--font-display); font-size:18px; color:var(--text-dim);">Other</span>
+            <span style="font-variant-numeric:tabular-nums; font-size:12.5px; color:var(--text-mute);">$7,670 · 9%</span>
+          </div>
+          <div class="bar-track" style="margin-top:8px; height:4px;"><div class="bar-fill" style="width:9%; background:rgba(255,255,255,0.25);"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-eyebrow">Live · last 5 minutes</div>
+      <h3>Recent expensive calls</h3>
+      <table class="tx-d">
+        <thead><tr><th>Request</th><th>Model</th><th>Team</th><th>Cost</th><th style="text-align:right;">When</th></tr></thead>
+        <tbody>
+          <tr><td class="req">req_8a3c9f</td><td>gpt-4o</td><td style="color:var(--text-dim);">Engineering</td><td style="font-weight:500">$3.82</td><td class="muted">12s</td></tr>
+          <tr><td class="req">req_8a3c9e</td><td class="italic">claude-3.5-sonnet</td><td style="color:var(--text-dim);">Data Science</td><td style="font-weight:500">$2.14</td><td class="muted">38s</td></tr>
+          <tr><td class="req">req_8a3c9d</td><td>gemini-1.5-pro</td><td style="color:var(--text-dim);">Marketing</td><td style="font-weight:500">$1.92</td><td class="muted">52s</td></tr>
+          <tr><td class="req">req_8a3c9c</td><td>gpt-4o</td><td style="color:var(--text-dim);">Product</td><td style="font-weight:500">$1.40</td><td class="muted">1m</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

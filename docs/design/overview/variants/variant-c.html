@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Meridian Overview — Variant C: Editorial</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@400;500;600;700&family=Newsreader:opsz,wght@6..72,200..800&family=Manrope:wght@200..800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../../../src/styles/styles.css">
+<link rel="stylesheet" href="_shared.css">
+<style>
+  .editorial-hero {
+    padding: 48px 40px 40px;
+    border-bottom: 1px solid var(--border);
+  }
+  .editorial-eyebrow {
+    font: 500 11px/1 var(--font-sans);
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    color: var(--text-mute);
+  }
+  .editorial-number {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: clamp(72px, 12vw, 144px);
+    line-height: 0.95;
+    letter-spacing: -0.04em;
+    color: var(--text);
+    font-variant-numeric: tabular-nums;
+  }
+  .editorial-blurb {
+    margin: 18px 0 0;
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: 18px;
+    line-height: 1.55;
+    color: var(--text-dim);
+    max-width: 60ch;
+  }
+  .editorial-blurb strong {
+    color: var(--text);
+    font-weight: 500;
+  }
+  .editorial-hl-amber { color: var(--amber-2); font-weight: 500; }
+  .editorial-hl-green { color: var(--green-2); font-weight: 500; }
+  .editorial-mini-stats {
+    display:flex; gap:42px;
+    margin-top: 32px;
+    padding-top: 28px;
+    border-top: 1px solid var(--border);
+  }
+  .editorial-mini-stats > div { display: flex; flex-direction: column; gap: 6px; }
+  .editorial-mini-stats .num {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: 28px;
+    letter-spacing: -0.02em;
+    color: var(--text);
+    font-variant-numeric: tabular-nums;
+  }
+  .col-rule { border-left: 1px solid var(--border); padding-left: 28px; }
+</style>
+</head>
+<body>
+
+<div class="mockup-label">Variant C · Editorial</div>
+
+<div class="mockup-frame" style="max-width:1100px;">
+
+  <!-- Editorial hero — single big spend story -->
+  <div class="glass-panel editorial-hero" style="padding: 56px 48px 44px;">
+    <div class="editorial-eyebrow">Spend · May 2026 · MTD</div>
+    <div class="editorial-number" style="margin-top: 18px;">$93,450</div>
+    <p class="editorial-blurb">
+      Spend is up <strong class="editorial-hl-green">12.4%</strong> over April, driven mostly by a
+      <strong>4.2× call-rate spike</strong> from <strong>data-science / grader</strong> agents.
+      At the current burn rate, Engineering is on track to exceed its monthly cap by
+      <strong class="editorial-hl-amber">~6 days</strong>. Smart-routing has saved
+      <strong class="editorial-hl-green">$14,200</strong> against a gpt-4-only baseline.
+    </p>
+    <div class="editorial-mini-stats">
+      <div>
+        <span class="editorial-eyebrow">Calls / 30d</span>
+        <span class="num">1.84M</span>
+      </div>
+      <div class="col-rule">
+        <span class="editorial-eyebrow">Savings</span>
+        <span class="num" style="color:var(--green-2);">$14.2k</span>
+      </div>
+      <div class="col-rule">
+        <span class="editorial-eyebrow">Projected EOM</span>
+        <span class="num" style="color:var(--amber-2);">$109.4k</span>
+      </div>
+      <div class="col-rule">
+        <span class="editorial-eyebrow">Cap</span>
+        <span class="num">$80,000</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Single trend chart, full bleed -->
+  <div class="glass-panel" style="padding: 28px 32px;">
+    <div class="between">
+      <div>
+        <div class="editorial-eyebrow" style="color: var(--text-mute);">Cumulative spend</div>
+        <div style="margin-top:6px; font-family: var(--font-display); font-size:20px; font-weight:500; color: var(--text);">May 1 – 24</div>
+      </div>
+      <div style="display:flex; gap:18px; font-size:11px; color:var(--text-dim); letter-spacing:0.12em; text-transform:uppercase;">
+        <span><span style="display:inline-block;width:10px;height:2px;background:#818CF8;margin-right:8px;vertical-align:middle"></span>Spend</span>
+        <span><span style="display:inline-block;width:10px;height:2px;background:#F59E0B;margin-right:8px;vertical-align:middle"></span>Budget pace</span>
+      </div>
+    </div>
+    <svg viewBox="0 0 900 240" style="width:100%; height:240px; margin-top:16px;" preserveAspectRatio="none">
+      <defs><linearGradient id="ge" x1="0" x2="0" y1="0" y2="1">
+        <stop offset="0%" stop-color="#6366F1" stop-opacity="0.5"/>
+        <stop offset="100%" stop-color="#6366F1" stop-opacity="0"/>
+      </linearGradient></defs>
+      <line x1="0" y1="40"  x2="900" y2="40"  stroke="rgba(255,255,255,.05)"/>
+      <line x1="0" y1="100" x2="900" y2="100" stroke="rgba(255,255,255,.05)"/>
+      <line x1="0" y1="160" x2="900" y2="160" stroke="rgba(255,255,255,.05)"/>
+      <line x1="0" y1="220" x2="900" y2="220" stroke="rgba(255,255,255,.05)"/>
+      <!-- budget pace -->
+      <line x1="0" y1="230" x2="900" y2="40" stroke="#F59E0B" stroke-width="1.5" stroke-dasharray="4,4" fill="none"/>
+      <!-- spend curve -->
+      <path d="M0,235 L60,225 L120,210 L180,192 L240,170 L300,150 L360,128 L420,108 L480,86 L540,68 L600,52 L660,40 L720,28 L780,22 L840,16 L900,8 L900,240 L0,240 Z" fill="url(#ge)"/>
+      <path d="M0,235 L60,225 L120,210 L180,192 L240,170 L300,150 L360,128 L420,108 L480,86 L540,68 L600,52 L660,40 L720,28 L780,22 L840,16 L900,8" stroke="#818CF8" stroke-width="2" fill="none"/>
+      <!-- today marker -->
+      <line x1="720" y1="0" x2="720" y2="240" stroke="rgba(255,255,255,.18)" stroke-dasharray="2,4"/>
+      <text x="720" y="14" fill="rgba(255,255,255,.5)" font-size="10" text-anchor="middle" font-family="Manrope" letter-spacing="2">TODAY</text>
+    </svg>
+  </div>
+
+  <!-- Two-column split: Provider + Teams -->
+  <div style="display:grid; grid-template-columns: 1fr 1fr; gap:16px;">
+
+    <div class="glass-panel" style="padding: 28px 32px;">
+      <div class="editorial-eyebrow">Provider mix</div>
+      <div style="margin-top:18px; display:grid; gap:18px;">
+        <div>
+          <div class="between" style="align-items:baseline;">
+            <span style="font-family:var(--font-display); font-size:22px; font-weight:500;">OpenAI</span>
+            <span style="font-variant-numeric:tabular-nums; font-size:13px; color:var(--text-dim);">$42,180 · 45%</span>
+          </div>
+          <div class="bar-track" style="margin-top:8px; height:4px;"><div class="bar-fill" style="width:45%; background:#10B981;"></div></div>
+        </div>
+        <div>
+          <div class="between" style="align-items:baseline;">
+            <span style="font-family:var(--font-display); font-size:22px; font-weight:500;">Anthropic</span>
+            <span style="font-variant-numeric:tabular-nums; font-size:13px; color:var(--text-dim);">$28,400 · 30%</span>
+          </div>
+          <div class="bar-track" style="margin-top:8px; height:4px;"><div class="bar-fill" style="width:30%; background:#F59E0B;"></div></div>
+        </div>
+        <div>
+          <div class="between" style="align-items:baseline;">
+            <span style="font-family:var(--font-display); font-size:22px; font-weight:500;">Google</span>
+            <span style="font-variant-numeric:tabular-nums; font-size:13px; color:var(--text-dim);">$15,200 · 16%</span>
+          </div>
+          <div class="bar-track" style="margin-top:8px; height:4px;"><div class="bar-fill" style="width:16%; background:#6366F1;"></div></div>
+        </div>
+        <div>
+          <div class="between" style="align-items:baseline;">
+            <span style="font-family:var(--font-display); font-size:22px; font-weight:500; color:var(--text-dim);">Other</span>
+            <span style="font-variant-numeric:tabular-nums; font-size:13px; color:var(--text-mute);">$7,670 · 9%</span>
+          </div>
+          <div class="bar-track" style="margin-top:8px; height:4px;"><div class="bar-fill" style="width:9%; background:rgba(255,255,255,.25);"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="glass-panel" style="padding: 28px 32px;">
+      <div class="editorial-eyebrow">Teams over budget</div>
+      <div style="margin-top:18px; display:grid; gap:14px;">
+        <div>
+          <div class="between" style="align-items:baseline;">
+            <span style="font-family:var(--font-display); font-size:18px; font-weight:500;">Engineering</span>
+            <span style="font-variant-numeric:tabular-nums; font-size:13px;"><span style="color:var(--text);">$32.4k</span> <span style="color:var(--amber-2); margin-left:10px;">108%</span></span>
+          </div>
+          <div class="bar-track" style="margin-top:6px;"><div class="bar-fill" style="width:100%; background:linear-gradient(90deg, #F59E0B, #EF4444);"></div></div>
+        </div>
+        <div>
+          <div class="between" style="align-items:baseline;">
+            <span style="font-family:var(--font-display); font-size:18px; font-weight:500;">Data Science</span>
+            <span style="font-variant-numeric:tabular-nums; font-size:13px;"><span style="color:var(--text);">$24.8k</span> <span style="color:var(--amber-2); margin-left:10px;">82%</span></span>
+          </div>
+          <div class="bar-track" style="margin-top:6px;"><div class="bar-fill" style="width:82%; background:#FBBF24;"></div></div>
+        </div>
+        <div>
+          <div class="between" style="align-items:baseline;">
+            <span style="font-family:var(--font-display); font-size:18px; font-weight:500;">Marketing</span>
+            <span style="font-variant-numeric:tabular-nums; font-size:13px;"><span style="color:var(--text);">$14.2k</span> <span style="color:var(--text-mute); margin-left:10px;">63%</span></span>
+          </div>
+          <div class="bar-track" style="margin-top:6px;"><div class="bar-fill" style="width:63%; background:#EC4899;"></div></div>
+        </div>
+        <div>
+          <div class="between" style="align-items:baseline;">
+            <span style="font-family:var(--font-display); font-size:18px; font-weight:500;">Product</span>
+            <span style="font-variant-numeric:tabular-nums; font-size:13px;"><span style="color:var(--text);">$11.6k</span> <span style="color:var(--text-mute); margin-left:10px;">48%</span></span>
+          </div>
+          <div class="bar-track" style="margin-top:6px;"><div class="bar-fill" style="width:48%; background:#10B981;"></div></div>
+        </div>
+        <div style="padding-top:10px; border-top:1px solid var(--border); margin-top:6px;">
+          <div class="between"><span class="editorial-eyebrow" style="color:var(--text-dim);">2 more under 35%</span><a href="#" style="font-size:12px; color: var(--indigo-2); text-decoration:none;">Show all →</a></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Recent expensive calls — minimal -->
+  <div class="glass-panel" style="padding: 0;">
+    <div style="padding:24px 32px 18px; display:flex; justify-content:space-between; align-items:baseline;">
+      <div>
+        <div class="editorial-eyebrow">Recent expensive calls</div>
+        <div style="margin-top:4px; font-family:var(--font-display); font-size:18px; font-weight:500; color:var(--text);">Last 5 minutes</div>
+      </div>
+      <a href="#" style="font-size:12px; color: var(--indigo-2); text-decoration:none; letter-spacing:0.14em; text-transform:uppercase;">View all logs →</a>
+    </div>
+    <table class="tx" style="font-size:13px;">
+      <thead><tr><th style="padding-left:32px;">Request</th><th>Model</th><th>Team</th><th>Cost</th><th style="text-align:right; padding-right:32px;">When</th></tr></thead>
+      <tbody style="color:var(--text);">
+        <tr><td class="mono" style="padding-left:32px;">req_8a3c9f</td><td>gpt-4o</td><td style="color:var(--text-dim);">Engineering</td><td style="font-weight:500">$3.82</td><td style="text-align:right; padding-right:32px; color:var(--text-mute);">12s ago</td></tr>
+        <tr><td class="mono" style="padding-left:32px;">req_8a3c9e</td><td style="font-style:italic;">claude-3.5-sonnet</td><td style="color:var(--text-dim);">Data Science</td><td style="font-weight:500">$2.14</td><td style="text-align:right; padding-right:32px; color:var(--text-mute);">38s ago</td></tr>
+        <tr><td class="mono" style="padding-left:32px;">req_8a3c9d</td><td>gemini-1.5-pro</td><td style="color:var(--text-dim);">Marketing</td><td style="font-weight:500">$1.92</td><td style="text-align:right; padding-right:32px; color:var(--text-mute);">52s ago</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+</div>
+</body>
+</html>

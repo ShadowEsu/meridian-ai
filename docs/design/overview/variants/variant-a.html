@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Meridian Overview — Variant A: Spend Hero</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@400;500;600;700&family=Newsreader:opsz,wght@6..72,200..800&family=Manrope:wght@200..800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../../../src/styles/styles.css">
+<link rel="stylesheet" href="_shared.css">
+</head>
+<body>
+
+<div class="mockup-label">Variant A · Spend Hero</div>
+
+<div class="mockup-frame">
+
+  <header>
+    <h1 class="mockup-h1">Overview</h1>
+    <p class="mockup-sub">AI spend across all providers · May 2026</p>
+  </header>
+
+  <!-- Hero row: one giant metric (60%) + 3 secondary stacked (40%) -->
+  <div style="display:grid; grid-template-columns: 1.5fr 1fr; gap:16px;">
+    <div class="glass-panel" style="padding:32px; display:flex; flex-direction:column; justify-content:space-between;">
+      <div class="between">
+        <div class="kpi-label">Total Spend · Month-to-date</div>
+        <div class="tiny-cap delta-up">↑ 12.4% vs Apr</div>
+      </div>
+      <div style="margin: 24px 0;">
+        <div class="hero-metric" style="font-size: clamp(56px, 9vw, 96px); line-height: 1;">$93,450</div>
+        <div class="tiny-cap" style="margin-top:14px; color: var(--text-dim);">
+          $58,200 used of $80,000 budget · projected $109,400 EOM
+        </div>
+      </div>
+      <!-- inline trend strip -->
+      <svg viewBox="0 0 600 80" preserveAspectRatio="none" style="width:100%; height:80px;">
+        <defs><linearGradient id="g1" x1="0" x2="0" y1="0" y2="1">
+          <stop offset="0%" stop-color="#6366F1" stop-opacity="0.45"/>
+          <stop offset="100%" stop-color="#6366F1" stop-opacity="0"/>
+        </linearGradient></defs>
+        <path d="M0,55 L40,52 L80,48 L120,42 L160,46 L200,38 L240,32 L280,28 L320,30 L360,22 L400,18 L440,24 L480,15 L520,12 L560,18 L600,8 L600,80 L0,80 Z" fill="url(#g1)"/>
+        <path d="M0,55 L40,52 L80,48 L120,42 L160,46 L200,38 L240,32 L280,28 L320,30 L360,22 L400,18 L440,24 L480,15 L520,12 L560,18 L600,8" stroke="#818CF8" stroke-width="1.5" fill="none"/>
+      </svg>
+    </div>
+
+    <div style="display:grid; gap:12px;">
+      <div class="glass-panel">
+        <div class="kpi-label">Calls · 30d</div>
+        <div class="hero-metric" style="font-size:34px; margin-top:8px;">1.84M</div>
+        <div class="tiny-cap delta-up" style="margin-top:6px;">↑ 8.1%</div>
+      </div>
+      <div class="glass-panel">
+        <div class="kpi-label">Savings vs baseline</div>
+        <div class="hero-metric" style="font-size:34px; margin-top:8px; color: var(--green-2);">$14,200</div>
+        <div class="tiny-cap" style="margin-top:6px; color: var(--text-mute);">smart-routing on</div>
+      </div>
+      <div class="glass-panel" style="border-color: rgba(245,158,11,0.4);">
+        <div class="kpi-label" style="color: var(--amber-2);">Projected EOM</div>
+        <div class="hero-metric" style="font-size:34px; margin-top:8px; color: var(--amber-2);">$109,400</div>
+        <div class="tiny-cap" style="margin-top:6px; color: var(--amber-2);">37% over budget</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Charts row -->
+  <div style="display:grid; grid-template-columns: 1.5fr 1fr; gap:16px;">
+    <div class="glass-panel">
+      <div class="between">
+        <div class="kpi-label" style="color:var(--text);">Daily spend · last 30 days</div>
+        <div style="display:flex; gap:14px; font-size:10.5px; color:var(--text-dim); letter-spacing:0.09em; text-transform:uppercase;">
+          <span><span style="display:inline-block;width:7px;height:7px;background:#818CF8;margin-right:8px"></span>Actual</span>
+          <span><span style="display:inline-block;width:7px;height:7px;background:rgba(255,255,255,.18);margin-right:8px"></span>Projected</span>
+        </div>
+      </div>
+      <div style="margin-top:18px; height:240px; display:grid; grid-template-columns:repeat(30, 1fr); gap:3px; align-items:end;">
+        <!-- 30 bars -->
+        <script>
+          // No JS needed — bars rendered as static below
+        </script>
+        <!-- bars (deterministic mock) -->
+        <div style="height:30%;background:rgba(99,102,241,.85);border-radius:2px;"></div>
+        <div style="height:38%;background:rgba(99,102,241,.85);border-radius:2px;"></div>
+        <div style="height:25%;background:rgba(99,102,241,.85);border-radius:2px;"></div>
+        <div style="height:42%;background:rgba(99,102,241,.85);border-radius:2px;"></div>
+        <div style="height:55%;background:rgba(99,102,241,.85);border-radius:2px;"></div>
+        <div style="height:48%;background:rgba(99,102,241,.85);border-radius:2px;"></div>
+        <div style="height:60%;background:rgba(99,102,241,.85);border-radius:2px;"></div>
+        <div style="height:52%;background:rgba(99,102,241,.85);border-radius:2px;"></div>
+        <div style="height:45%;background:rgba(99,102,241,.85);border-radius:2px;"></div>
+        <div style="height:65%;background:rgba(99,102,241,.85);border-radius:2px;"></div>
+        <div style="height:70%;background:rgba(99,102,241,.85);border-radius:2px;"></div>
+        <div style="height:58%;background:rgba(99,102,241,.85);border-radius:2px;"></div>
+        <div style="height:72%;background:rgba(99,102,241,.85);border-radius:2px;"></div>
+        <div style="height:80%;background:rgba(99,102,241,.85);border-radius:2px;"></div>
+        <div style="height:68%;background:rgba(99,102,241,.85);border-radius:2px;"></div>
+        <div style="height:75%;background:rgba(99,102,241,.85);border-radius:2px;"></div>
+        <div style="height:62%;background:rgba(99,102,241,.85);border-radius:2px;"></div>
+        <div style="height:78%;background:rgba(99,102,241,.85);border-radius:2px;"></div>
+        <div style="height:85%;background:rgba(99,102,241,.85);border-radius:2px;"></div>
+        <div style="height:72%;background:rgba(99,102,241,.85);border-radius:2px;"></div>
+        <div style="height:88%;background:rgba(99,102,241,.85);border-radius:2px;"></div>
+        <div style="height:82%;background:rgba(99,102,241,.85);border-radius:2px;"></div>
+        <div style="height:78%;background:rgba(99,102,241,.85);border-radius:2px;"></div>
+        <div style="height:92%;background:rgba(99,102,241,.85);border-radius:2px;"></div>
+        <div style="height:85%;background:rgba(99,102,241,.85);border-radius:2px;"></div>
+        <!-- last 5 = projected (lighter) -->
+        <div style="height:78%;background:rgba(255,255,255,.18);border-radius:2px;"></div>
+        <div style="height:88%;background:rgba(255,255,255,.18);border-radius:2px;"></div>
+        <div style="height:90%;background:rgba(255,255,255,.18);border-radius:2px;"></div>
+        <div style="height:84%;background:rgba(255,255,255,.18);border-radius:2px;"></div>
+        <div style="height:95%;background:rgba(255,255,255,.18);border-radius:2px;"></div>
+      </div>
+    </div>
+
+    <div class="glass-panel">
+      <div class="kpi-label" style="color:var(--text);">Provider mix</div>
+      <div style="margin-top: 22px; display:grid; gap:14px;">
+        <!-- Provider rows with bar -->
+        <div>
+          <div class="between"><span style="font-size:13px;">OpenAI</span><span class="tiny-cap" style="color:var(--text);font-weight:500;letter-spacing:0;">$42,180 · 45%</span></div>
+          <div class="bar-track" style="margin-top:8px;"><div class="bar-fill" style="width:45%; background: #10B981;"></div></div>
+        </div>
+        <div>
+          <div class="between"><span style="font-size:13px;">Anthropic</span><span class="tiny-cap" style="color:var(--text);font-weight:500;letter-spacing:0;">$28,400 · 30%</span></div>
+          <div class="bar-track" style="margin-top:8px;"><div class="bar-fill" style="width:30%; background: #F59E0B;"></div></div>
+        </div>
+        <div>
+          <div class="between"><span style="font-size:13px;">Google</span><span class="tiny-cap" style="color:var(--text);font-weight:500;letter-spacing:0;">$15,200 · 16%</span></div>
+          <div class="bar-track" style="margin-top:8px;"><div class="bar-fill" style="width:16%; background: #6366F1;"></div></div>
+        </div>
+        <div>
+          <div class="between"><span style="font-size:13px;color:var(--text-dim);">Others</span><span class="tiny-cap" style="color:var(--text-mute);font-weight:500;letter-spacing:0;">$7,670 · 9%</span></div>
+          <div class="bar-track" style="margin-top:8px;"><div class="bar-fill" style="width:9%; background: rgba(255,255,255,.25);"></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Recent calls table -->
+  <div class="glass-panel" style="padding:0;">
+    <div style="padding:18px 20px; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
+      <div class="kpi-label" style="color:var(--text);">Recent expensive calls</div>
+      <div style="display:flex; gap:8px;">
+        <button class="btn btn-ghost" style="font-size:11px;letter-spacing:0.14em;text-transform:uppercase;">View all</button>
+      </div>
+    </div>
+    <table class="tx">
+      <thead>
+        <tr>
+          <th>Request</th><th>Model</th><th>Team</th><th>Cost</th><th>Latency</th><th>When</th>
+        </tr>
+      </thead>
+      <tbody style="color:var(--text);">
+        <tr><td class="mono">req_8a3c9f</td><td>gpt-4o</td><td>Engineering</td><td style="font-weight:500">$3.82</td><td>2.4s</td><td style="color:var(--text-mute);">12s ago</td></tr>
+        <tr><td class="mono">req_8a3c9e</td><td style="font-style:italic;">claude-3.5-sonnet</td><td>Data Science</td><td style="font-weight:500">$2.14</td><td>1.8s</td><td style="color:var(--text-mute);">38s ago</td></tr>
+        <tr><td class="mono">req_8a3c9d</td><td>gemini-1.5-pro</td><td>Marketing</td><td style="font-weight:500">$1.92</td><td>3.1s</td><td style="color:var(--text-mute);">52s ago</td></tr>
+        <tr><td class="mono">req_8a3c9c</td><td>gpt-4o</td><td>Product</td><td style="font-weight:500">$1.40</td><td>2.0s</td><td style="color:var(--text-mute);">1m ago</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+</div>
+</body>
+</html>
