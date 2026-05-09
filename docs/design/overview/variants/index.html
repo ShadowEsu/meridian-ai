@@ -120,6 +120,10 @@
       <button type="button" data-v="c" role="tab">C · Editorial</button>
       <button type="button" data-v="d" role="tab">D · Editorial Split</button>
       <button type="button" data-v="e" role="tab">E · Cinematic ✦</button>
+      <button type="button" data-v="f" role="tab">F · Constellation ★</button>
+      <button type="button" data-v="g" role="tab">G · Terminal</button>
+      <button type="button" data-v="h" role="tab">H · Terminal + M ✦</button>
+      <button type="button" data-v="i" role="tab">I · Refined + M ✦</button>
     </div>
 
     <div class="actions">
@@ -139,10 +143,14 @@
     c: '<strong>C · Editorial</strong> — Massive serif number + prose blurb + single trend chart + provider/teams split. Premium narrative feel; best vibe match.',
     d: '<strong>D · Editorial Split</strong> — Pravāh-style split: editorial panel left (pill nav, big number, prose, CTA) + atmospheric chart right with floating glass status callouts. Tables below.',
     e: '<strong>E · Cinematic</strong> — Editorial panel left + dotted M monogram glowing center-stage, animated arcs flowing in, particles rising, scanline sweep, 4 floating glass cards, live request ticker scrolling at the bottom. Motion on everything.',
+    f: '<strong>F · Constellation</strong> — Claude-generated. Constellation of 7 model nodes orbit a dotted M sink, canvas packets travel between them, ticker rows fire particles up to their model node, hero $ counter ticks live, cards connect to core via animated bezier arcs. Instrument Serif + Geist.',
+    g: '<strong>G · Terminal</strong> — Matte charcoal palette (no rainbow, no pink). Inter Tight + Geist Mono only. Two embedded stream rails inside the hero. Spend flow as stacked provider/model bars (data-encoded, replaces decorative constellation). 4 KPIs surgical. Bloomberg Terminal vibe, less "AI demo".',
+    h: '<strong>H · Terminal + M</strong> — G but with the dotted sparkling M monogram restored in the brand mark (twinkling sparkles around it) + full left rail with all 10 nav items (Spend / Models / Teams / Routing rules / Alerts / API keys / Integrations / Billing / Audit log / Settings).',
+    i: '<strong>I · Refined + M</strong> — Latest. Refined desaturated palette (sage/clay/slate provider colors), collapsible sidebar (⌘B), time picker, breadcrumb. Logo: dotted halftone M (amber/cream) with 60 orbiting canvas sparkles around it. The M is visible through the dots; sparkles drift in/out continuously.',
   };
 
   function setVariant(v) {
-    if (!['a','b','c','d','e'].includes(v)) v = 'e';
+    if (!['a','b','c','d','e','f','g','h','i'].includes(v)) v = 'i';
     document.querySelectorAll('.seg button').forEach(b => {
       b.classList.toggle('active', b.dataset.v === v);
       b.setAttribute('aria-selected', b.dataset.v === v);
@@ -162,7 +170,7 @@
   // arrow-key nav between tabs
   document.querySelector('.seg').addEventListener('keydown', (e) => {
     if (!['ArrowLeft','ArrowRight'].includes(e.key)) return;
-    const order = ['a','b','c','d','e'];
+    const order = ['a','b','c','d','e','f','g','h','i'];
     const cur = order.indexOf(document.querySelector('.seg button.active').dataset.v);
     const next = e.key === 'ArrowRight'
       ? order[(cur + 1) % order.length]
@@ -173,7 +181,7 @@
   });
 
   const initial = (location.hash || '').replace('#','')
-    || (() => { try { return localStorage.getItem('meridian_variant') || 'e'; } catch (e) { return 'e'; } })();
+    || (() => { try { return localStorage.getItem('meridian_variant') || 'i'; } catch (e) { return 'i'; } })();
   setVariant(initial);
 </script>
 </body>
