@@ -59,6 +59,13 @@ function AuthenticatedApp({ user }) {
     return () => window.removeEventListener('keydown', onKey);
   }, []);
 
+  // Stub-page CTAs use a custom event to navigate (avoids prop-drilling).
+  React.useEffect(() => {
+    const onNav = (e) => { if (e.detail) setPage(e.detail); };
+    window.addEventListener('meridian:nav', onNav);
+    return () => window.removeEventListener('meridian:nav', onNav);
+  }, []);
+
   const titles = {
     overview: { title: 'Overview', sub: 'AI spend across all providers · May 2026' },
     feed: { title: 'Live Feed', sub: 'Real-time API call stream · all teams' },
@@ -89,8 +96,8 @@ function AuthenticatedApp({ user }) {
             <span className="demo-data-text">Dollar amounts and volumes are illustrative examples. Backend and sign-in are off for now.</span>
           </div>
         ) : null}
-        {/* Overview renders its own page header (variant-i style); other pages still use the shared Header */}
-        {page !== 'overview' ? (
+        {/* Overview + stubs render their own page header; legacy pages still use the shared one */}
+        {!['overview','models','routing','teams','cache','billing','integrations','settings'].includes(page) ? (
           <Header
             title={meta.title}
             sub={meta.sub}
@@ -104,6 +111,10 @@ function AuthenticatedApp({ user }) {
         {page === 'agents' && <PageAgents />}
         {page === 'keys' && <PageKeys keysFilter={keysFilter} />}
         {page === 'alerts' && <PageAlerts />}
+        {/* Stubs for new sidebar destinations */}
+        {['models','routing','teams','cache','billing','integrations','settings'].includes(page) && (
+          <PageStub page={page} />
+        )}
       </main>
     </div>
   );
