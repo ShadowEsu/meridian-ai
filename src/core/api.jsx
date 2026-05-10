@@ -1,6 +1,8 @@
 // Minimal fetch wrapper for the Meridian API. Loaded as raw JSX before pages.
 (function () {
-  const live = !!window.MERIDIAN_LIVE;
+  // Live mode is whatever MERIDIAN_LIVE is at call time (auto-detect in
+  // Meridian.html may flip it after this file loads — we check on every
+  // call rather than caching at module scope).
 
   async function call(method, path, body) {
     const init = {
@@ -23,7 +25,7 @@
   }
 
   const API = {
-    live,
+    get live() { return !!window.MERIDIAN_LIVE; },
     get:    (p)         => call('GET', p),
     post:   (p, b)      => call('POST', p, b),
     put:    (p, b)      => call('PUT', p, b),

@@ -31,12 +31,35 @@ window.addEventListener('error', function (e) {
 });
 </script>
 <script>
+// Default: demo mode. Override with ?live=1, localStorage, or auto-detect
+// (see below — if /api/auth/config responds 200 we flip to live so the
+// auth gate kicks in and Google sign-in is reachable).
 window.MERIDIAN_LIVE = (function () {
   try {
     if (new URLSearchParams(location.search).get('live') === '1') return true;
+    if (new URLSearchParams(location.search).get('demo') === '1') return false;
     if (localStorage.getItem('meridian_live') === '1') return true;
+    if (localStorage.getItem('meridian_demo') === '1') return false;
   } catch (_) { /* private mode etc. */ }
   return false;
+})();
+
+// Async detection: probe /api/auth/config. If reachable, the static-only
+// dev server isn't running — we're on the API server, so go live.
+// We dispatch a 'meridian:live-detected' event the React app listens to;
+// it re-runs its auth gate effect.
+(function detectLive() {
+  if (window.MERIDIAN_LIVE) return;
+  fetch('/api/auth/config', { credentials: 'include' })
+    .then(r => r.ok ? r.json() : null)
+    .then(cfg => {
+      if (!cfg) return;
+      window.MERIDIAN_LIVE = true;
+      // also surface the supabase config so supabase-client.jsx can pick it up
+      if (cfg.supabaseUrl) window.MERIDIAN_SUPABASE = cfg;
+      window.dispatchEvent(new Event('meridian:live-detected'));
+    })
+    .catch(() => { /* static-only server, stay in demo */ });
 })();
 </script>
 

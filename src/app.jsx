@@ -5,7 +5,15 @@ const DEMO_USER = { id: 'demo', email: 'demo@meridian.local' };
 // /api/auth/me on boot and shows PageAuth until the user is signed in.
 // In demo mode it renders straight to the dashboard with DEMO_USER.
 function useAuthGate() {
-  const live = !!(window.MeridianAPI && window.MeridianAPI.live);
+  // Track live mode reactively so the async auto-detect in Meridian.html
+  // can flip us from demo → live after first paint.
+  const [live, setLive] = React.useState(!!(window.MeridianAPI && window.MeridianAPI.live));
+  React.useEffect(() => {
+    const onLive = () => setLive(true);
+    window.addEventListener('meridian:live-detected', onLive);
+    return () => window.removeEventListener('meridian:live-detected', onLive);
+  }, []);
+
   const [state, setState] = React.useState(
     live ? { phase: 'loading', user: null } : { phase: 'ready', user: DEMO_USER }
   );
@@ -22,7 +30,11 @@ function useAuthGate() {
   }, [live]);
 
   React.useEffect(() => {
-    if (!live) return;
+    if (!live) {
+      // Demo mode → ensure we're showing the demo dashboard
+      setState({ phase: 'ready', user: DEMO_USER });
+      return;
+    }
     refresh();
     const onChange = () => refresh();
     window.addEventListener('meridian:auth-changed', onChange);
