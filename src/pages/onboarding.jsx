@@ -69,10 +69,10 @@ function ProviderKeyForm({ onSaved }) {
   if (saved) {
     return (
       <div className="setup-key-success">
-        <p style={{ color: 'var(--color-success, #22c55e)', marginBottom: 4 }}>
+        <p style={{ color: 'var(--good)', marginBottom: 4 }}>
           {live ? 'Provider key saved.' : 'Got it (demo mode — key not persisted).'}
         </p>
-        <p style={{ fontSize: 13, color: 'var(--color-muted, #888)' }}>
+        <p style={{ fontSize: 13, color: 'var(--text-mute)' }}>
           You can add more keys later from the Keys page.
         </p>
       </div>
@@ -82,7 +82,7 @@ function ProviderKeyForm({ onSaved }) {
   return (
     <form onSubmit={handleSubmit} style={{ marginTop: 12 }}>
       {!live && (
-        <p style={{ fontSize: 12, color: 'var(--color-muted, #888)', marginBottom: 8 }}>
+        <p style={{ fontSize: 12, color: 'var(--text-mute)', marginBottom: 8 }}>
           Demo mode — keys are not persisted to the backend.
         </p>
       )}
@@ -205,16 +205,16 @@ function SetupWizard({ user, onDone }) {
         <p className="setup-hint">{s.hint}</p>
         <div className="setup-actions">
           {step > 0 ? (
-            <button type="button" className="btn btn-ghost" onClick={back}>Back</button>
+            <button type="button" className="ghost-r" onClick={back}>Back</button>
           ) : (
             <span />
           )}
           <div style={{ display: 'flex', gap: 8 }}>
             {step !== 1 && (
-              <button type="button" className="btn btn-ghost" onClick={finish}>Skip</button>
+              <button type="button" className="ghost-r" onClick={finish}>Skip</button>
             )}
-            <button type="button" className="btn btn-primary" onClick={next}>
-              {primaryLabel}
+            <button type="button" className="cta-r" onClick={next}>
+              {primaryLabel} <span className="arrow" aria-hidden="true">→</span>
             </button>
           </div>
         </div>
