@@ -45,32 +45,41 @@ function PageAgents() {
   }
 
   return (
-    <div className="content" data-screen-label="Agent Monitor">
-      {/* Runaway alert bar (Stitch) */}
+    <div className="overview-r">
+      <PageHead title="Agents" eyebrow="Operations" right={
+        <span className="chip">
+          <span className="dot" style={{ background: riskCount > 0 ? 'var(--red)' : 'var(--good)' }}></span>
+          {activeCount || displayAgents.length} active
+          {riskCount > 0 ? <span style={{ color: 'var(--red)', marginLeft: 6 }}>· {riskCount} at risk</span> : null}
+        </span>
+      } />
+
+      {/* Runaway alert bar */}
       <div
+        className="card-r"
         style={{
-          margin: '-28px -28px 18px',
-          padding: '12px 28px',
+          padding: '12px 18px',
+          marginBottom: 14,
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
           gap: 16,
-          background: 'rgba(147,0,10,.20)',
-          borderBottom: '1px solid rgba(239,68,68,.30)',
+          background: 'linear-gradient(90deg, rgba(239,86,72,.10) 0%, rgba(239,86,72,.02) 60%), var(--surface)',
+          borderColor: 'rgba(239,86,72,.30)',
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: 12, minWidth: 0 }}>
           <div style={{ color: 'var(--red)', display: 'grid', placeItems: 'center' }}>
             {Icon.warning({ width: 16, height: 16 })}
           </div>
-          <div style={{ fontSize: 11, letterSpacing: '0.10em', fontWeight: 700, color: '#FCA5A5', textTransform: 'uppercase' }}>
-            Runaway risk detected
+          <div style={{ fontSize: 10.5, letterSpacing: '0.18em', fontWeight: 600, color: 'var(--red)', textTransform: 'uppercase', fontFamily: 'var(--font-mono)' }}>
+            Runaway risk
           </div>
-          <div style={{ fontSize: 13, color: 'rgba(255,218,214,.92)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-            Agent "{warnAgent?.name || 'Neural_Scraper_v4'}" is executing a recursive loop in Production environment.
+          <div style={{ fontSize: 13, color: 'var(--text-dim)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+            Agent "<b style={{ color: 'var(--text)' }}>{warnAgent?.name || 'Neural_Scraper_v4'}</b>" is executing a recursive loop in Production.
           </div>
         </div>
-        <button className="btn btn-danger" style={{ padding: '7px 12px', fontSize: 11, letterSpacing: '0.10em', textTransform: 'uppercase' }}>
+        <button type="button" className="cta-r" style={{ background: 'var(--red)', color: '#fff' }}>
           Intercept now
         </button>
       </div>

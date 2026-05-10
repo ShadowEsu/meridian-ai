@@ -124,7 +124,11 @@ function PageKeys({ keysFilter }) {
   const latest = velocity[velocity.length - 1];
 
   return (
-    <div className="content" data-screen-label="Virtual Keys">
+    <div className="overview-r">
+      <PageHead title="API keys" eyebrow="Operations" right={
+        <span className="chip">{allKeys.length} keys{filter ? ` · filtering "${filter}"` : ''}</span>
+      } />
+
       {/* Header section (Stitch) */}
       <div className="keys-hero">
         <div>

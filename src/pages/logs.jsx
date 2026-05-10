@@ -126,8 +126,12 @@ function PageRequestLogs() {
   if (error) return <div className="meridian-error">{error.message}</div>;
 
   return (
-    <div className="content" data-screen-label="Request Logs">
-      <div className="card" style={{ padding: 16, marginBottom: 18 }}>
+    <div className="overview-r">
+      <PageHead title="Audit log" eyebrow="Operations" right={
+        <span className="chip">{total.toLocaleString()} total · last 50 shown</span>
+      } />
+
+      <div className="card-r" style={{ padding: 16, marginBottom: 14 }}>
         <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center' }}>
           <input className="input" placeholder="Search request ID..." style={{ flex: '0 0 240px' }} value={query} onChange={e => setQuery(e.target.value)} />
           <select className="select" value={model} onChange={e => setModel(e.target.value)}>
@@ -144,18 +148,17 @@ function PageRequestLogs() {
             <option>Error</option>
             <option>Rate Limited</option>
           </select>
-          <div className="date-range" style={{ marginLeft: 'auto' }}>{Icon.cal()} May 1 – May 3{Icon.chevron()}</div>
-          <button className="btn">{Icon.download()} Export CSV</button>
+          <button type="button" className="ghost-r" style={{ marginLeft: 'auto' }}>Export CSV</button>
         </div>
       </div>
 
-      <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
-        <div className="between" style={{ padding: '16px 22px', borderBottom: '1px solid var(--border)' }}>
-          <div>
-            <div className="card-title">{rows.length} requests</div>
-            <div className="card-sub">Page 1 of {Math.max(1, Math.ceil(total / 50))} · 50 rows per page</div>
+      <div className="card-r" style={{ padding: 0, overflow: 'hidden' }}>
+        <header className="card-head">
+          <div className="l">
+            <h3>{rows.length} requests</h3>
+            <span className="sub">page 1 of {Math.max(1, Math.ceil(total / 50))} · 50 per page</span>
           </div>
-        </div>
+        </header>
         <div style={{ overflowX: 'auto' }}>
           <table className="tbl">
             <thead>
@@ -207,16 +210,13 @@ function PageRequestLogs() {
             </tbody>
           </table>
         </div>
-        <div style={{ padding: '14px 22px', borderTop: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: 12, color: 'var(--text-dim)' }}>
+        <div className="ex-foot" style={{ justifyContent: 'space-between' }}>
           <span>Showing 1–{rows.length} of {total.toLocaleString()}</span>
           <div style={{ display: 'flex', gap: 6 }}>
-            <button className="btn btn-ghost">‹ Prev</button>
-            <button className="btn">1</button>
-            <button className="btn btn-ghost">2</button>
-            <button className="btn btn-ghost">3</button>
-            <button className="btn btn-ghost">…</button>
-            <button className="btn btn-ghost">57</button>
-            <button className="btn btn-ghost">Next ›</button>
+            <button type="button" className="ghost-r">‹ Prev</button>
+            <button type="button" className="ghost-r" style={{ background: 'rgba(255,255,255,0.06)', color: 'var(--text)' }}>1</button>
+            <button type="button" className="ghost-r">2</button>
+            <button type="button" className="ghost-r">Next ›</button>
           </div>
         </div>
       </div>

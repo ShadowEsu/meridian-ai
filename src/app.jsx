@@ -96,8 +96,8 @@ function AuthenticatedApp({ user }) {
             <span className="demo-data-text">Dollar amounts and volumes are illustrative examples. Backend and sign-in are off for now.</span>
           </div>
         ) : null}
-        {/* Overview + stubs render their own page header; legacy pages still use the shared one */}
-        {!['overview','models','routing','teams','cache','billing','integrations','settings'].includes(page) ? (
+        {/* Overview + restyled pages + stubs render their own page header; remaining legacy pages still use the shared one */}
+        {!['overview','models','alerts','feed','logs','agents','keys','routing','teams','cache','billing','integrations','settings'].includes(page) ? (
           <Header
             title={meta.title}
             sub={meta.sub}

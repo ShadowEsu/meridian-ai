@@ -128,28 +128,34 @@ function PageLiveFeed() {
   }, [paused]);
 
   return (
-    <div className="content" data-screen-label="Live Feed">
-      <div className="grid-4" style={{ marginBottom: 18 }}>
-        <CounterCard label="Tokens / sec" value={counters.tps.toLocaleString()} accent="#6366F1" />
-        <CounterCard label="Requests / min" value={counters.rpm} accent="#10B981" />
-        <CounterCard label="Cost / min" value={'$' + counters.cpm.toFixed(2)} accent="#F59E0B" />
-        <CounterCard label="Saved / hour" value={'$' + counters.savedHr} accent="#34D399" emphasis />
+    <div className="overview-r">
+      <PageHead title="Live Feed" eyebrow="Workspace" right={
+        <span className="chip">
+          <span className="dot" style={{ background: paused ? 'var(--text-mute)' : 'var(--good)' }}></span>
+          {paused ? 'Paused' : 'Streaming'}
+        </span>
+      } />
+
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 14, marginBottom: 14 }}>
+        <CounterCard label="Tokens / sec" value={counters.tps.toLocaleString()} accent="var(--indigo)" />
+        <CounterCard label="Requests / min" value={counters.rpm} accent="var(--good)" />
+        <CounterCard label="Cost / min" value={'$' + counters.cpm.toFixed(2)} accent="var(--amber)" />
+        <CounterCard label="Saved / hour" value={'$' + counters.savedHr} accent="var(--good)" emphasis />
       </div>
 
-      <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
-        <div className="between" style={{ padding: '16px 22px', borderBottom: '1px solid var(--border)' }}>
-          <div>
-            <div className="card-title">Live API Call Stream</div>
-            <div className="card-sub">{paused ? 'Paused' : 'Live · streaming'} · last 60 calls</div>
+      <div className="card-r" style={{ padding: 0, overflow: 'hidden' }}>
+        <header className="card-head">
+          <div className="l">
+            <h3>Live API call stream</h3>
+            <span className="sub">{paused ? 'paused' : 'live · streaming'} · last 60 calls</span>
           </div>
-          <div style={{ display: 'flex', gap: 8 }}>
-            <button className="btn" onClick={() => setPaused(!paused)}>
-              {paused ? Icon.play() : Icon.pause()}
+          <div className="r">
+            <button type="button" className="ghost-r" onClick={() => setPaused(!paused)}>
               {paused ? 'Resume' : 'Pause'}
             </button>
-            <button className="btn btn-ghost">Filter</button>
+            <button type="button" className="ghost-r">Filter</button>
           </div>
-        </div>
+        </header>
 
         <div style={{ display: 'grid', gridTemplateColumns: '90px 1fr 90px 70px 70px 70px 110px 70px 80px', gap: 12, padding: '10px 14px', borderBottom: '1px solid var(--border)', fontSize: 10.5, color: 'var(--text-mute)', letterSpacing: '0.1em', textTransform: 'uppercase', fontWeight: 500 }}>
           <div>Time</div><div>Model · Routing</div><div style={{textAlign:'right'}}>Cost</div><div style={{textAlign:'right'}}>In tok</div><div style={{textAlign:'right'}}>Out tok</div><div style={{textAlign:'right'}}>Latency</div><div>Team</div><div>Status</div><div></div>
@@ -165,12 +171,16 @@ function PageLiveFeed() {
 
 function CounterCard({ label, value, accent, emphasis }) {
   return (
-    <div className="card" style={{ padding: 20, borderColor: emphasis ? 'rgba(52,211,153,.25)' : undefined, background: emphasis ? 'radial-gradient(ellipse at top right, rgba(16,185,129,.05), transparent), var(--surface)' : undefined }}>
-      <div className="kpi-label" style={{ color: emphasis ? 'var(--green-2)' : undefined }}>{label}</div>
-      <div style={{ fontSize: 32, fontWeight: 700, marginTop: 10, letterSpacing: '-0.02em', fontVariantNumeric: 'tabular-nums', color: emphasis ? 'var(--green-2)' : 'var(--text)' }}>{value}</div>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 7, marginTop: 8, fontSize: 11.5, color: 'var(--text-mute)', fontWeight: 300 }}>
-        <span style={{ width: 6, height: 6, borderRadius: '50%', background: accent, boxShadow: `0 0 6px ${accent}` }}></span>
-        Live · updating
+    <div className="card-r" style={{ padding: 18, borderColor: emphasis ? 'rgba(63,179,127,.30)' : undefined }}>
+      <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'var(--text-faint)' }}>
+        {label}
+      </div>
+      <div style={{ fontFamily: 'var(--font-display)', fontSize: 28, fontWeight: 600, marginTop: 8, letterSpacing: '-0.02em', fontVariantNumeric: 'tabular-nums', color: emphasis ? 'var(--good)' : 'var(--text)' }}>
+        {value}
+      </div>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 7, marginTop: 8, fontFamily: 'var(--font-mono)', fontSize: 10.5, color: 'var(--text-mute)' }}>
+        <span style={{ width: 5, height: 5, borderRadius: '50%', background: accent, boxShadow: `0 0 6px ${accent}` }}></span>
+        live
       </div>
     </div>
   );
