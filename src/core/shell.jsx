@@ -116,42 +116,6 @@ const NAV_OPS = [
 ];
 
 function Sidebar({ page, setPage, user, collapsed, onToggle }) {
-  const canvasRef = React.useRef(null);
-
-  // Orbiting sparkle particles around the M (60 amber→red points)
-  React.useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    const ctx = canvas.getContext('2d');
-    let raf = null;
-    function draw() {
-      const W = canvas.width, H = canvas.height;
-      ctx.clearRect(0, 0, W, H);
-      const t = performance.now() * 0.0008;
-      for (let i = 0; i < 60; i++) {
-        const ang = (i / 60) * Math.PI * 2 + t * (0.8 + (i % 5) * 0.12);
-        const wob = Math.sin(t * 3 + i * 0.7) * 4;
-        const radius = 22 + Math.sin(i * 1.7 + t * 2) * 10 + wob;
-        const x = W / 2 + Math.cos(ang) * radius;
-        const y = H / 2 + Math.sin(ang) * radius * 0.85;
-        const a = 0.18 + 0.32 * (Math.sin(t * 4 + i) * 0.5 + 0.5);
-        const sz = 0.6 + Math.sin(i * 2.1 + t * 3) * 0.5 + 0.6;
-        const k = (Math.sin(t * 1.5 + i * 0.3) + 1) / 2;
-        const r = Math.round(232 * (1 - k) + 217 * k);
-        const g = Math.round(181 * (1 - k) + 83 * k);
-        const b = Math.round(100 * (1 - k) + 74 * k);
-        ctx.fillStyle = `rgba(${r},${g},${b},${a})`;
-        ctx.shadowBlur = 4; ctx.shadowColor = `rgba(${r},${g},${b},${a * 0.8})`;
-        ctx.beginPath(); ctx.arc(x, y, sz, 0, Math.PI * 2); ctx.fill();
-      }
-      ctx.shadowBlur = 0;
-      if (!reduce) raf = requestAnimationFrame(draw);
-    }
-    draw();
-    return () => { if (raf) cancelAnimationFrame(raf); };
-  }, []);
-
   function renderItem(it) {
     const targetId = it.alias || it.id;
     const isActive = page === targetId;
@@ -198,7 +162,6 @@ function Sidebar({ page, setPage, user, collapsed, onToggle }) {
     <aside className="sidebar" aria-label="Primary navigation">
       <div className="side-head">
         <div className="logo" aria-hidden="true">
-          <canvas ref={canvasRef} width="116" height="116" />
           <span className="M">M</span>
         </div>
         <span className="brand-name">Meridian</span>

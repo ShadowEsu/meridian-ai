@@ -35,36 +35,36 @@
   --text-mute: #71747B;
   --text-faint:#4C4F57;
 
-  /* provider colors — desaturated, refined */
-  --oa:    #6B9080;   /* OpenAI — sage */
-  --oa-2:  #8AAB99;
-  --an:    #C28A6A;   /* Anthropic — clay */
-  --an-2:  #D6A687;
-  --go:    #7C8AAA;   /* Google — slate blue */
-  --go-2:  #9AA6BF;
-  --ot:    #7C7A78;   /* Other — warm gray */
+  /* provider colors — halfway vibrant (Linear / Vercel saturation) */
+  --oa:    #3FB37F;   /* OpenAI — emerald */
+  --oa-2:  #5EC994;
+  --an:    #E8A04A;   /* Anthropic — golden amber */
+  --an-2:  #F2BB73;
+  --go:    #7079E8;   /* Google — electric indigo */
+  --go-2:  #9097F0;
+  --ot:    #8B8987;   /* Other — warm gray */
 
-  /* signal colors (used only for state, not decoration) */
-  --red:        #D9534A;
-  --red-deep:   #A22B22;
-  --amber:      #D89B4A;
-  --amber-2:    #E8B564;
-  --green:      #6B9080;   /* alias to provider sage so .green tokens still work */
-  --green-2:    #8AAB99;
-  --good:       #6B9080;
+  /* signal colors */
+  --red:        #EF5648;
+  --red-deep:   #B23628;
+  --amber:      #F0A53D;
+  --amber-2:    #FAC368;
+  --green:      #3FB37F;
+  --green-2:    #5EC994;
+  --good:       #3FB37F;
 
-  /* legacy aliases — old indigo / violet / etc. now route to refined palette */
-  --indigo:     #7C8AAA;   /* slate-blue replaces neon indigo */
-  --indigo-2:   #9AA6BF;
-  --indigo-deep:#566380;
-  --violet:     #7C8AAA;   /* killed; aliased to slate */
-  --emerald:    #6B9080;   /* alias to sage */
-  --pink:       #C28A6A;   /* killed pink; aliased to clay */
-  --teal:       #6B9080;
+  /* legacy aliases — old indigo / violet / etc. now route to vibrant palette */
+  --indigo:     #7079E8;   /* electric blue */
+  --indigo-2:   #9097F0;
+  --indigo-deep:#4A52B8;
+  --violet:     #8E7CE8;
+  --emerald:    #3FB37F;
+  --pink:       #E8A04A;   /* aliased to amber */
+  --teal:       #3FB37F;
   --steel:      #71747B;
 
   /* warm signal gradient (used in headlines like "six days") */
-  --grad-hot:   linear-gradient(94deg, #E8B564 0%, #D89B4A 30%, #D67457 60%, #D9534A 100%);
+  --grad-hot:   linear-gradient(94deg, #FAC368 0%, #F0A53D 30%, #ED7E48 60%, #EF5648 100%);
 
   /* Responsive UI scale (used by Stitch-style pages) */
   --ui: 1;
@@ -206,49 +206,34 @@ body {
   padding: 6px 8px; margin-bottom: 14px; min-height: 36px;
 }
 
-/* logo box: 34x34 with halo + dotted M + canvas sparkles */
+/* logo: simple dotted M with pulsing glow (no box, no canvas) */
 .logo {
-  position: relative; width: 34px; height: 34px; flex: 0 0 auto;
+  position: relative; flex: 0 0 auto;
+  width: 32px; height: 32px;
   display: flex; align-items: center; justify-content: center;
-  border-radius: 8px;
-  background:
-    radial-gradient(circle at 30% 25%, rgba(216,155,74,0.16), transparent 70%),
-    linear-gradient(135deg, #1A1C24, #0E0F14);
-  border: 1px solid var(--line-2);
-  box-shadow: 0 1px 0 rgba(255,255,255,0.04) inset, 0 6px 18px rgba(0,0,0,0.4);
-  overflow: visible;
-}
-.logo canvas {
-  position: absolute; inset: -12px;
-  width: calc(100% + 24px); height: calc(100% + 24px);
-  pointer-events: none;
 }
 .logo .M {
   position: relative; z-index: 2;
   font-family: var(--font-display); font-weight: 700;
-  font-size: 22px; line-height: 1; letter-spacing: -0.05em;
+  font-size: 28px; line-height: 1; letter-spacing: -0.06em;
   color: transparent;
   background-image:
-    radial-gradient(rgba(248,230,194,0.95) 0.9px, transparent 1.1px),
-    radial-gradient(rgba(232,181,100,0.55) 0.7px, transparent 0.9px);
-  background-position: 0 0, 2.3px 2.3px;
-  background-size: 4.6px 4.6px, 4.6px 4.6px;
+    radial-gradient(rgba(244,244,245,0.98) 0.9px, transparent 1.1px),
+    radial-gradient(rgba(112,121,232,0.7)  0.7px, transparent 0.9px);
+  background-position: 0 0, 2.5px 2.5px;
+  background-size: 5px 5px, 5px 5px;
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
   filter:
-    drop-shadow(0 0 6px rgba(232,181,100,0.55))
-    drop-shadow(0 0 14px rgba(217,83,74,0.22));
-  animation: mPulse 3.4s ease-in-out infinite, mDrift 14s linear infinite;
+    drop-shadow(0 0 6px rgba(112,121,232,0.55))
+    drop-shadow(0 0 14px rgba(112,121,232,0.25));
+  animation: mPulse 3.4s ease-in-out infinite;
   user-select: none;
 }
 @keyframes mPulse {
-  0%,100% { filter: drop-shadow(0 0 5px rgba(232,181,100,0.45)) drop-shadow(0 0 12px rgba(217,83,74,0.20)); }
-  50%     { filter: drop-shadow(0 0 10px rgba(248,230,194,0.70)) drop-shadow(0 0 22px rgba(217,83,74,0.40)); }
-}
-@keyframes mDrift {
-  0%   { background-position: 0 0, 2.3px 2.3px; }
-  100% { background-position: 4.6px 0, 6.9px 2.3px; }
+  0%,100% { filter: drop-shadow(0 0 5px rgba(112,121,232,0.45)) drop-shadow(0 0 12px rgba(112,121,232,0.20)); }
+  50%     { filter: drop-shadow(0 0 12px rgba(244,244,245,0.70)) drop-shadow(0 0 24px rgba(112,121,232,0.50)); }
 }
 
 .brand-name {
