@@ -113,10 +113,12 @@ function AuthenticatedApp({ user }) {
         {page === 'alerts' && <PageAlerts />}
         {/* Real pages built on existing endpoints */}
         {page === 'models' && <PageModels />}
-        {/* Stubs for not-yet-built destinations */}
-        {['routing','teams','cache','billing','integrations','settings'].includes(page) && (
-          <PageStub page={page} />
-        )}
+        {page === 'teams' && <PageTeams />}
+        {page === 'routing' && <PageRoutingRules />}
+        {page === 'cache' && <PageCache />}
+        {page === 'billing' && <PageBilling />}
+        {page === 'integrations' && <PageIntegrations />}
+        {page === 'settings' && <PageSettings />}
       </main>
     </div>
   );
