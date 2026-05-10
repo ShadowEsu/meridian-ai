@@ -90,148 +90,116 @@ function PageAgents() {
         </div>
       )}
 
-      {/* Stitch bento layout */}
-      <div className="stitch-grid-12" style={{ marginBottom: 16 }}>
-        {/* Cost Avoidance */}
-        <div className="glass-panel" style={{ gridColumn: 'span 4', padding: `calc(18px * var(--ui))`, borderColor: 'rgba(45,45,49,1)', background: 'var(--surface)' }}>
-          <div className="between" style={{ marginBottom: 16 }}>
-            <div style={{ fontSize: `calc(14px * var(--ui))`, fontWeight: 600, color: 'var(--indigo-2)', fontFamily: 'var(--font-display)' }}>Cost Avoidance</div>
-            <div style={{ color: 'var(--indigo-2)' }}>{Icon.bell({ width: 16, height: 16 })}</div>
+      {/* 3-up stat cards */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 14, marginBottom: 14 }}>
+        <div className="card-r" style={{ padding: 18 }}>
+          <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'var(--text-faint)' }}>
+            Active sessions
           </div>
-          <div style={{ display: 'grid', gap: 12 }}>
-            <div>
-              <div className="kpi-label" style={{ color: 'rgba(255,255,255,.35)' }}>WITHOUT MERIDIAN (EST.)</div>
-              <div style={{ fontSize: `calc(32px * var(--ui))`, color: 'rgba(255,255,255,.28)', textDecoration: 'line-through', fontFamily: 'var(--font-display)', letterSpacing: '-0.01em' }}>
-                $14,282.50
-              </div>
-            </div>
-            <div>
-              <div className="kpi-label" style={{ color: 'var(--green-2)' }}>SAVED THIS MONTH</div>
-              <div style={{ fontSize: `calc(32px * var(--ui))`, color: 'var(--green-2)', fontFamily: 'var(--font-display)', letterSpacing: '-0.01em' }}>
-                $9,410.15
-              </div>
-            </div>
+          <div style={{ fontFamily: 'var(--font-display)', fontSize: 28, fontWeight: 600, marginTop: 8 }}>
+            {activeCount || 18}
           </div>
-          <div style={{ marginTop: 14, paddingTop: 14, borderTop: '1px solid rgba(45,45,49,.55)', color: 'rgba(255,255,255,.45)', fontStyle: 'italic', fontSize: 12.5 }}>
-            "Autonomous intercept triggered 42 times in last 24h."
+          <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10.5, color: 'var(--text-mute)', marginTop: 6 }}>
+            running now
           </div>
         </div>
-
-        {/* Critical Active Sessions */}
-        <div style={{ gridColumn: 'span 8', display: 'grid', gap: 12 }}>
-          <div className="between">
-            <div style={{ fontSize: `calc(15px * var(--ui))`, fontWeight: 600, color: '#fff', fontFamily: 'var(--font-display)' }}>Critical Active Sessions</div>
-            <div style={{ display: 'flex', gap: 8 }}>
-              <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '6px 10px', background: 'var(--surface-2)', border: '1px solid var(--border-2)', fontSize: 11, letterSpacing: '0.09em', textTransform: 'uppercase', color: 'rgba(255,255,255,.5)' }}>
-                <span style={{ width: 6, height: 6, borderRadius: 999, background: 'var(--green)' }} />
-                {activeCount || 18} active
-              </div>
-              <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '6px 10px', background: 'var(--surface-2)', border: '1px solid var(--border-2)', fontSize: 11, letterSpacing: '0.09em', textTransform: 'uppercase', color: 'var(--amber-2)' }}>
-                <span style={{ width: 6, height: 6, borderRadius: 999, background: 'var(--amber)' }} />
-                {riskCount || 2} at risk
-              </div>
-            </div>
+        <div className="card-r" style={{ padding: 18, borderColor: riskCount > 0 ? 'rgba(232,160,74,.30)' : undefined }}>
+          <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: '0.18em', textTransform: 'uppercase', color: riskCount > 0 ? 'var(--amber-2)' : 'var(--text-faint)' }}>
+            At risk
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: 12 }}>
-            {(displayAgents.length > 0 ? displayAgents : M.AGENTS).slice(0, 4).map(a => (
-              <StitchAgentCard key={a.name || a.id} a={a} onStartRun={startRun} />
-            ))}
+          <div style={{ fontFamily: 'var(--font-display)', fontSize: 28, fontWeight: 600, marginTop: 8, color: riskCount > 0 ? 'var(--amber-2)' : 'var(--text)' }}>
+            {riskCount || 2}
+          </div>
+          <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10.5, color: 'var(--text-mute)', marginTop: 6 }}>
+            loop / cap thresholds
+          </div>
+        </div>
+        <div className="card-r" style={{ padding: 18 }}>
+          <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'var(--text-faint)' }}>
+            Cost avoided · MTD
+          </div>
+          <div style={{ fontFamily: 'var(--font-display)', fontSize: 28, fontWeight: 600, marginTop: 8, color: 'var(--good)' }}>
+            $9,410
+          </div>
+          <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10.5, color: 'var(--text-mute)', marginTop: 6 }}>
+            42 autonomous intercepts · last 24h
           </div>
         </div>
       </div>
 
-      {/* Middle row: kill switch + table */}
-      <div className="stitch-grid-12" style={{ marginBottom: 16 }}>
-        <div className="glass-panel" style={{ gridColumn: 'span 3', padding: `calc(18px * var(--ui))` }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14 }}>
-            <div style={{ color: 'var(--red)' }}>{Icon.warning({ width: 16, height: 16 })}</div>
-            <div style={{ fontSize: `calc(14.5px * var(--ui))`, fontWeight: 600, color: '#fff', fontFamily: 'var(--font-display)' }}>Kill Switch Protocol</div>
+      {/* Active sessions list */}
+      <article className="card-r" style={{ padding: 0, marginBottom: 14 }}>
+        <header className="card-head">
+          <div className="l">
+            <h3>Active sessions</h3>
+            <span className="sub">long-running agents · loop protection on</span>
           </div>
-          <div style={{ display: 'grid', gap: 10 }}>
-            <KillCheck label="Lock Virtual Keys" sub="Revoke all active session auth" />
-            <KillCheck label="Pause Loop Agents" sub="Suspend sessions > 70% risk" />
-            <KillCheck label="Global Shutdown" sub="Full operational cessation" />
-            <button className="btn btn-danger" style={{ marginTop: 6, width: '100%', justifyContent: 'center', letterSpacing: '0.10em', textTransform: 'uppercase', fontSize: 11 }}>
-              Execute selected override
-            </button>
+          <div className="r">
+            <span className="chip"><span className="dot"></span>{activeCount || 18} active</span>
+            {riskCount > 0 ? <span className="chip amber"><span className="dot"></span>{riskCount} at risk</span> : null}
           </div>
+        </header>
+        <div style={{ padding: 16, display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 12 }}>
+          {(displayAgents.length > 0 ? displayAgents : M.AGENTS).slice(0, 4).map(a => (
+            <StitchAgentCard key={a.name || a.id} a={a} onStartRun={startRun} />
+          ))}
         </div>
+      </article>
 
-        <div className="glass-panel" style={{ gridColumn: 'span 9', padding: 0, overflow: 'hidden' }}>
-          <div style={{ padding: '14px 18px', borderBottom: '1px solid var(--border-2)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <div style={{ fontSize: `calc(14.5px * var(--ui))`, fontWeight: 600, color: '#fff', fontFamily: 'var(--font-display)' }}>Historical Cost Anomalies</div>
-            <button className="btn btn-ghost" style={{ padding: '6px 10px' }}>{Icon.download()}</button>
+      {/* Historical runs */}
+      <article className="card-r" style={{ padding: 0 }}>
+        <header className="card-head">
+          <div className="l">
+            <h3>Historical runs</h3>
+            <span className="sub">{M.AGENT_HISTORY.length} sessions · last 14 days</span>
           </div>
-          <div style={{ overflowX: 'auto' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
-              <thead>
-                <tr style={{ color: 'rgba(255,255,255,.35)', background: 'rgba(255,255,255,.04)', borderBottom: '1px solid var(--border-2)' }}>
-                  <th style={th}>Agent name</th>
-                  <th style={th}>Completion status</th>
-                  <th style={{ ...th, textAlign: 'right' }}>Duration</th>
-                  <th style={{ ...th, textAlign: 'right' }}>Total cost</th>
-                  <th style={{ ...th, textAlign: 'center' }}>Action</th>
-                </tr>
-              </thead>
-              <tbody>
-                {M.AGENT_HISTORY.slice(0, 4).map((h, i) => (
-                  <tr key={i} style={{ borderBottom: '1px solid rgba(45,45,49,.55)' }}>
-                    <td style={td}><span style={{ color: 'rgba(255,255,255,.88)', fontWeight: 600 }}>{h.name}</span></td>
-                    <td style={td}>
-                      <StatusPill status={h.status} />
-                    </td>
-                    <td style={{ ...td, textAlign: 'right', color: 'rgba(255,255,255,.45)' }}>{h.duration}</td>
-                    <td style={{ ...td, textAlign: 'right', color: '#fff', fontWeight: 700 }}>${h.cost}</td>
-                    <td style={{ ...td, textAlign: 'center' }}>
-                      <button className="btn btn-ghost" style={{ padding: '6px 10px', color: 'var(--indigo-2)' }}>View log</button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          <div className="r">
+            <button type="button" className="ghost-r">Export</button>
           </div>
-        </div>
-      </div>
-
-      {/* History */}
-      <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
-        <div className="between" style={{ padding: '16px 22px', borderBottom: '1px solid var(--border)' }}>
-          <div>
-            <div className="card-title">Historical Agent Runs</div>
-            <div className="card-sub">{M.AGENT_HISTORY.length} sessions · last 14 days</div>
-          </div>
-          <button className="btn">{Icon.download()} Export</button>
-        </div>
-        <table className="tbl">
+        </header>
+        <table className="models-table">
           <thead>
-            <tr><th>Agent</th><th>Team</th><th>Start</th><th>Duration</th><th style={{textAlign:'right'}}>Calls</th><th style={{textAlign:'right'}}>Cost</th><th>Status</th><th>Loop</th><th style={{textAlign:'right'}}>Cost Avoided</th></tr>
+            <tr>
+              <th style={{ paddingLeft: 22 }}>Agent</th>
+              <th>Team</th>
+              <th>Start</th>
+              <th>Duration</th>
+              <th style={{ textAlign: 'right' }}>Calls</th>
+              <th style={{ textAlign: 'right' }}>Cost</th>
+              <th style={{ textAlign: 'center' }}>Status</th>
+              <th style={{ textAlign: 'right', paddingRight: 22 }}>Avoided</th>
+            </tr>
           </thead>
           <tbody>
-            {M.AGENT_HISTORY.map((h, i) => (
-              <tr key={i}>
-                <td style={{ fontWeight: 400 }}>{h.name}</td>
-                <td className="dim">{h.team}</td>
-                <td className="mono dim" style={{ fontSize: 11 }}>{h.start}</td>
-                <td>{h.duration}</td>
-                <td style={{ textAlign: 'right' }}>{h.calls.toLocaleString()}</td>
-                <td style={{ textAlign: 'right' }}>${h.cost}</td>
-                <td>
-                  <span className={`dot-status status-${h.status === 'completed' ? 'green' : h.status === 'warning' ? 'amber' : 'red'}`}></span>
-                  <span style={{ fontSize: 11.5, textTransform: 'capitalize' }}>{h.status}</span>
-                </td>
-                <td>
-                  {h.loop === 'Yes'
-                    ? <span style={{ color: '#FCA5A5', fontWeight: 500, fontSize: 11.5 }}>● Yes</span>
-                    : <span className="dim">No</span>}
-                </td>
-                <td style={{ textAlign: 'right', color: h.avoided > 0 ? 'var(--green-2)' : 'var(--text-mute)', fontWeight: h.avoided > 0 ? 600 : 300, fontSize: h.avoided > 0 ? 14 : 12.5 }}>
-                  {h.avoided > 0 ? '$' + h.avoided.toLocaleString() : '—'}
-                </td>
-              </tr>
-            ))}
+            {M.AGENT_HISTORY.map((h, i) => {
+              const statusColor = h.status === 'completed' ? 'var(--good)' : h.status === 'warning' ? 'var(--amber-2)' : 'var(--red)';
+              return (
+                <tr key={i}>
+                  <td style={{ paddingLeft: 22, fontWeight: 500 }}>{h.name}</td>
+                  <td style={{ color: 'var(--text-mute)' }}>{h.team}</td>
+                  <td className="mono-cell" style={{ fontSize: 11, color: 'var(--text-mute)' }}>{h.start}</td>
+                  <td className="mono-cell">{h.duration}</td>
+                  <td className="mono-cell" style={{ textAlign: 'right' }}>{h.calls.toLocaleString()}</td>
+                  <td className="mono-cell" style={{ textAlign: 'right' }}>${h.cost}</td>
+                  <td style={{ textAlign: 'center' }}>
+                    <span className="chip" style={{
+                      color: statusColor,
+                      borderColor: `color-mix(in oklch, ${statusColor} 30%, transparent)`,
+                      background: `color-mix(in oklch, ${statusColor} 10%, transparent)`,
+                    }}>
+                      <span className="dot" style={{ background: statusColor }}></span>
+                      {h.status}
+                    </span>
+                  </td>
+                  <td className="mono-cell" style={{ textAlign: 'right', paddingRight: 22, color: h.avoided > 0 ? 'var(--good)' : 'var(--text-mute)', fontWeight: h.avoided > 0 ? 500 : 400 }}>
+                    {h.avoided > 0 ? '$' + h.avoided.toLocaleString() : '—'}
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
-      </div>
+      </article>
     </div>
   );
 }

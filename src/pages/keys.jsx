@@ -123,191 +123,167 @@ function PageKeys({ keysFilter }) {
   const totalWeeklySaved = velocity.reduce((sum, v) => sum + v.saved, 0);
   const latest = velocity[velocity.length - 1];
 
+  const overBudget = filteredKeys.filter(k => (Number(k.spend) || 0) > (Number(k.budget) || Infinity)).length;
+  const totalSpend = filteredKeys.reduce((s, k) => s + (Number(k.spend) || 0), 0);
+
   return (
     <div className="overview-r">
       <PageHead title="API keys" eyebrow="Operations" right={
-        <span className="chip">{allKeys.length} keys{filter ? ` · filtering "${filter}"` : ''}</span>
+        <>
+          <span className="chip">
+            {allKeys.length} keys
+            {overBudget > 0 ? <span style={{ color: 'var(--red)', marginLeft: 6 }}>· {overBudget} over</span> : null}
+            {filter ? ` · "${filter}"` : ''}
+          </span>
+          <button type="button" className="cta-r" onClick={() => setShowCreate(true)}>+ New key</button>
+        </>
       } />
 
-      {/* Header section (Stitch) */}
-      <div className="keys-hero">
-        <div>
-          <div className="kpi-label" style={{ color: 'var(--indigo-2)' }}>Operational overview</div>
-          <div style={{ fontFamily: 'var(--font-display)', fontSize: `calc(28px * var(--ui))`, letterSpacing: '-0.02em', color: '#fff', marginTop: 6 }}>
-            Budgets &amp; Allocation
+      {/* Stat row */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 14, marginBottom: 14 }}>
+        <div className="card-r" style={{ padding: 18 }}>
+          <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'var(--text-faint)' }}>
+            Total spend MTD
           </div>
-          <div style={{ marginTop: 8, maxWidth: 720, color: 'rgba(255,255,255,.55)', lineHeight: 1.6 }}>
-            Financial governance for agent infrastructure. Monitor token consumption, liquidity reserves, and attribution across virtual team environments.
+          <div style={{ fontFamily: 'var(--font-display)', fontSize: 28, fontWeight: 600, marginTop: 8 }}>
+            ${totalSpend.toLocaleString()}
           </div>
-        </div>
-        <div className="keys-hero-stats">
-          <div className="glass-panel" style={{ padding: 14, minWidth: 160 }}>
-            <div className="kpi-label" style={{ color: 'rgba(255,255,255,.45)' }}>Total spend</div>
-            <div style={{ fontFamily: 'var(--font-display)', fontSize: 18, color: '#fff', marginTop: 8 }}>$14,204.50</div>
-          </div>
-          <div className="glass-panel" style={{ padding: 14, minWidth: 160 }}>
-            <div className="kpi-label" style={{ color: 'rgba(255,255,255,.45)' }}>Est. savings</div>
-            <div style={{ fontFamily: 'var(--font-display)', fontSize: 18, color: 'var(--green-2)', marginTop: 8 }}>+$2,840.12</div>
+          <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10.5, color: 'var(--text-mute)', marginTop: 6 }}>
+            across {allKeys.length} keys
           </div>
         </div>
-      </div>
-
-      {/* Bento stats */}
-      <div className="stitch-grid-3" style={{ marginBottom: 16 }}>
-        <div className="glass-panel velocity-card">
-          <div className="velocity-head">
-            <div>
-              <div style={{ fontFamily: 'var(--font-display)', fontSize: 15, color: '#fff', fontWeight: 600 }}>Consumption Velocity</div>
-              <div style={{ marginTop: 4, color: 'rgba(255,255,255,.55)' }}>7-day spend, request load, and savings across all active virtual clusters.</div>
-            </div>
-            <div className="velocity-summary">
-              <div>
-                <span>Week spend</span>
-                <strong>${totalWeeklySpend.toLocaleString()}</strong>
-              </div>
-              <div>
-                <span>Saved</span>
-                <strong style={{ color: 'var(--green-2)' }}>${totalWeeklySaved.toLocaleString()}</strong>
-              </div>
-              <div>
-                <span>Today</span>
-                <strong>{latest.requests}</strong>
-              </div>
-            </div>
+        <div className="card-r" style={{ padding: 18 }}>
+          <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'var(--text-faint)' }}>
+            Est. savings
           </div>
-          <div className="velocity-chart" aria-label="Consumption velocity over the last seven days">
-            <div className="velocity-limit">Budget guardrail $1.6k/day</div>
-            {velocity.map((v, i) => {
-              const pct = Math.max(18, Math.round((v.spend / peakSpend) * 100));
-              const overGuardrail = v.spend >= 1600;
-              return (
-                <div className="velocity-bar-wrap" key={v.day}>
-                  <div className="velocity-tooltip">
-                    <strong>{v.day}: ${v.spend.toLocaleString()}</strong>
-                    <span>{v.requests} requests</span>
-                    <span>${v.saved} saved · {v.risk} risk</span>
-                  </div>
-                  <div
-                    className={`velocity-bar ${overGuardrail ? 'hot' : ''} ${i === velocity.length - 1 ? 'current' : ''}`}
-                    style={{ height: `${pct}%` }}
-                  />
-                  <div className="velocity-value">${(v.spend / 1000).toFixed(1)}k</div>
-                  <div className="velocity-label">{v.day}</div>
-                </div>
-              );
-            })}
+          <div style={{ fontFamily: 'var(--font-display)', fontSize: 28, fontWeight: 600, marginTop: 8, color: 'var(--good)' }}>
+            +$2,840
           </div>
-          <div className="velocity-foot">
-            <span><b style={{ color: 'var(--indigo-2)' }}>Current:</b> Sunday is ${latest.spend.toLocaleString()} with {latest.requests} requests.</span>
-            <span><b style={{ color: 'var(--amber-2)' }}>Watch:</b> bars above the guardrail can trigger budget alerts.</span>
+          <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10.5, color: 'var(--text-mute)', marginTop: 6 }}>
+            via smart-route
           </div>
         </div>
-
-        <div className="glass-panel" style={{ padding: 18, background: 'var(--surface-2)' }}>
-          <div style={{ fontFamily: 'var(--font-display)', fontSize: 15, color: '#fff', fontWeight: 600 }}>Risk Profile</div>
-          <div style={{ marginTop: 12, display: 'grid', gap: 10 }}>
-            <RiskRow label="Over Budget" value="3 keys" tone="red" />
-            <RiskRow label="Idle Resources" value="12% fleet" tone="amber" />
-            <RiskRow label="Healthy Status" value="42 keys" tone="green" />
+        <div className="card-r" style={{ padding: 18 }}>
+          <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'var(--text-faint)' }}>
+            Healthy
           </div>
-          <button className="btn btn-ghost" style={{ marginTop: 14, width: '100%', justifyContent: 'center', letterSpacing: '0.10em', textTransform: 'uppercase', fontSize: 11 }}>
-            Reconcile all
-          </button>
+          <div style={{ fontFamily: 'var(--font-display)', fontSize: 28, fontWeight: 600, marginTop: 8 }}>
+            {allKeys.length - overBudget}
+          </div>
+          <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10.5, color: 'var(--good)', marginTop: 6 }}>
+            within budget
+          </div>
+        </div>
+        <div className="card-r" style={{ padding: 18, borderColor: overBudget > 0 ? 'rgba(239,86,72,.30)' : undefined }}>
+          <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: '0.18em', textTransform: 'uppercase', color: overBudget > 0 ? 'var(--red)' : 'var(--text-faint)' }}>
+            Over budget
+          </div>
+          <div style={{ fontFamily: 'var(--font-display)', fontSize: 28, fontWeight: 600, marginTop: 8, color: overBudget > 0 ? 'var(--red)' : 'var(--text)' }}>
+            {overBudget}
+          </div>
+          <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10.5, color: 'var(--text-mute)', marginTop: 6 }}>
+            keys at risk
+          </div>
         </div>
       </div>
 
-      {/* Dense table */}
-      <div className="glass-panel" style={{ padding: 0, overflow: 'hidden' }}>
-        <div className="keys-table-toolbar">
-          <div className="keys-tabs">
-            <button type="button" style={tabBtnActive}>ALL TEAMS</button>
-            <button type="button" style={tabBtn}>ENGINEERING</button>
-            <button type="button" style={tabBtn}>MARKETING</button>
+      {/* Keys table */}
+      <article className="card-r" style={{ padding: 0, overflow: 'hidden' }}>
+        <header className="card-head">
+          <div className="l">
+            <h3>Virtual keys</h3>
+            <span className="sub">{filteredKeys.length} of {allKeys.length} shown</span>
           </div>
-          <div style={{ display: 'flex', gap: 8 }}>
-            <button className="btn btn-ghost" style={{ padding: '6px 10px' }}>{Icon.warning({ width: 14, height: 14 })}</button>
-            <button className="btn btn-ghost" style={{ padding: '6px 10px' }}>{Icon.download()}</button>
-            <button className="btn btn-primary" style={{ padding: '6px 12px', fontSize: 12 }} onClick={() => setShowCreate(true)}>
-              {Icon.plus()} New Key
-            </button>
+          <div className="r">
+            <input
+              className="input"
+              placeholder="Filter…"
+              value={filter}
+              onChange={e => setFilter(e.target.value)}
+              style={{ height: 30, fontSize: 12, padding: '0 10px', width: 160 }}
+            />
+            <button type="button" className="ghost-r">Export</button>
           </div>
-        </div>
+        </header>
 
         {listError && (
-          <div style={{ padding: '10px 16px', background: 'rgba(239,68,68,.08)', color: '#FCA5A5', fontSize: 13, borderBottom: '1px solid rgba(239,68,68,.2)' }}>
+          <div style={{ padding: '10px 16px', background: 'rgba(239,86,72,.10)', color: 'var(--red)', fontSize: 13, borderBottom: '1px solid rgba(239,86,72,.2)' }}>
             Failed to load keys: {listError.message}
           </div>
         )}
 
-        <div style={{ overflowX: 'auto' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-            <thead>
-              <tr style={{ borderBottom: '1px solid var(--border-2)' }}>
-                <th style={th}>Key ID / Identifier</th>
-                <th style={th}>Team entity</th>
-                <th style={{ ...th, textAlign: 'right' }}>Spend (MTD)</th>
-                <th style={th}>Budget allocation</th>
-                <th style={{ ...th, textAlign: 'right' }}>Efficiency</th>
-                <th style={{ ...th, textAlign: 'center' }}>Status</th>
-                <th style={{ ...th, textAlign: 'center' }}>Actions</th>
-              </tr>
-            </thead>
-            <tbody style={{ fontSize: 13 }}>
-              {filteredKeys.slice(0, 8).map(k => {
-                const budget = Number(k.budget) || 1;
-                const spend = Number(k.spend) || 0;
-                const pct = budget > 0 ? (spend / budget) * 100 : 0;
-                const tone = pct > 100 ? 'red' : pct > 90 ? 'amber' : 'indigo';
-                return (
-                  <tr key={k.id || k.name} style={{ borderBottom: '1px solid rgba(45,45,49,.55)' }}>
-                    <td style={td}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                        <span style={{ color: 'rgba(129,140,248,.95)' }}>{Icon.key({ width: 16, height: 16 })}</span>
-                        <span style={{ color: '#fff', fontWeight: 600 }}>{k.name}</span>
-                      </div>
-                    </td>
-                    <td style={{ ...td, color: 'rgba(255,255,255,.55)' }}>{k.team}</td>
-                    <td style={{ ...td, textAlign: 'right', color: '#fff', fontVariantNumeric: 'tabular-nums' }}>${Number(k.spend).toLocaleString()}</td>
-                    <td style={td}>
-                      <div style={{ display: 'grid', gap: 6 }}>
-                        <div style={{ fontSize: 10.5, color: tone === 'amber' ? 'var(--amber-2)' : tone === 'red' ? '#FCA5A5' : 'rgba(255,255,255,.45)', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
-                          {pct.toFixed(0)}% of ${Math.round(budget / 1000)}k
-                        </div>
-                        <div style={{ height: 4, background: 'var(--border-2)', borderRadius: 999, overflow: 'hidden' }}>
-                          <div style={{ height: '100%', width: `${Math.min(100, pct)}%`, background: tone === 'amber' ? 'var(--amber)' : tone === 'red' ? 'var(--red)' : 'var(--indigo)' }} />
-                        </div>
-                      </div>
-                    </td>
-                    <td style={{ ...td, textAlign: 'right', color: tone === 'red' ? 'var(--red)' : 'var(--green-2)', fontWeight: 600 }}>—</td>
-                    <td style={{ ...td, textAlign: 'center' }}>
-                      <KeyStatus pct={pct} status={k.status} />
-                    </td>
-                    <td style={{ ...td, textAlign: 'center' }}>
-                      <button
-                        className="btn btn-ghost"
-                        style={{ padding: '4px 8px', fontSize: 11, color: '#FCA5A5' }}
-                        onClick={() => deleteKey(k.id || k.name)}
-                      >
-                        Revoke
-                      </button>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
+        <table className="models-table">
+          <thead>
+            <tr>
+              <th style={{ paddingLeft: 22 }}>Key</th>
+              <th>Team</th>
+              <th style={{ textAlign: 'right' }}>Spend MTD</th>
+              <th>Budget</th>
+              <th style={{ textAlign: 'center' }}>Status</th>
+              <th style={{ textAlign: 'right', paddingRight: 22 }}></th>
+            </tr>
+          </thead>
+          <tbody>
+            {filteredKeys.length === 0 ? (
+              <tr><td colSpan="6" style={{ padding: 36, textAlign: 'center', color: 'var(--text-mute)' }}>
+                {filter ? 'No matching keys.' : 'No keys yet — create one above.'}
+              </td></tr>
+            ) : filteredKeys.slice(0, 12).map(k => {
+              const budget = Number(k.budget) || 1;
+              const spend = Number(k.spend) || 0;
+              const pct = budget > 0 ? (spend / budget) * 100 : 0;
+              const over = pct > 100;
+              const warn = pct > 90 && !over;
+              const barColor = over ? 'var(--red)' : warn ? 'var(--amber)' : 'var(--good)';
+              return (
+                <tr key={k.id || k.name}>
+                  <td style={{ paddingLeft: 22 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                      <span style={{ color: 'var(--indigo-2)' }}>{Icon.key({ width: 14, height: 14 })}</span>
+                      <span style={{ fontWeight: 500 }}>{k.name}</span>
+                    </div>
+                  </td>
+                  <td style={{ color: 'var(--text-mute)' }}>{k.team}</td>
+                  <td className="mono-cell" style={{ textAlign: 'right' }}>${spend.toLocaleString()}</td>
+                  <td>
+                    <div style={{ height: 4, background: 'rgba(255,255,255,0.05)', borderRadius: 3, overflow: 'hidden', marginBottom: 4 }}>
+                      <div style={{ height: '100%', width: Math.min(100, pct) + '%', background: barColor, boxShadow: `0 0 6px ${barColor}` }} />
+                    </div>
+                    <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10.5, color: over ? 'var(--red)' : warn ? 'var(--amber-2)' : 'var(--text-mute)' }}>
+                      {pct.toFixed(0)}% of ${budget.toLocaleString()}
+                    </div>
+                  </td>
+                  <td style={{ textAlign: 'center' }}>
+                    <span className="chip" style={{
+                      color: over ? 'var(--red)' : warn ? 'var(--amber-2)' : 'var(--good)',
+                      borderColor: over ? 'rgba(239,86,72,.30)' : warn ? 'rgba(232,160,74,.30)' : 'rgba(63,179,127,.25)',
+                      background: over ? 'rgba(239,86,72,.10)' : warn ? 'rgba(232,160,74,.07)' : 'rgba(63,179,127,.07)',
+                    }}>
+                      <span className="dot" style={{ background: over ? 'var(--red)' : warn ? 'var(--amber-2)' : 'var(--good)' }}></span>
+                      {over ? 'over' : warn ? 'at risk' : 'active'}
+                    </span>
+                  </td>
+                  <td style={{ textAlign: 'right', paddingRight: 22 }}>
+                    <button
+                      type="button"
+                      className="ghost-r"
+                      onClick={() => deleteKey(k.id || k.name)}
+                      style={{ color: 'var(--red)' }}
+                    >
+                      Revoke
+                    </button>
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
 
-        <div style={{ padding: '12px 16px', borderTop: '1px solid var(--border-2)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', color: 'rgba(255,255,255,.45)', fontSize: 12 }}>
-          <span>Showing 1-{Math.min(8, filteredKeys.length)} of {allKeys.length} virtual keys</span>
-          <div style={{ display: 'flex', gap: 8 }}>
-            <button className="btn btn-ghost" style={{ padding: '6px 10px' }}>Prev</button>
-            <button className="btn" style={{ padding: '6px 10px', background: '#fff', color: '#000', borderColor: '#fff' }}>1</button>
-            <button className="btn btn-ghost" style={{ padding: '6px 10px' }}>2</button>
-            <button className="btn btn-ghost" style={{ padding: '6px 10px' }}>Next</button>
-          </div>
+        <div className="ex-foot">
+          <span>Showing {Math.min(12, filteredKeys.length)} of {allKeys.length}</span>
+          <span style={{ color: 'var(--text-mute)' }}>Keys are bcrypt-hashed; only prefixes are shown.</span>
         </div>
-      </div>
+      </article>
 
       {/* Create Key Modal */}
       {showCreate && (

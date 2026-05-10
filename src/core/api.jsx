@@ -83,6 +83,11 @@
     models: {
       list: () => call('GET', '/api/models'),
     },
+    router: {
+      catalog: () => call('GET', '/api/router/catalog'),
+      preview: (prompt, taskTypeHint, constraints) =>
+        call('POST', '/api/router/preview', { prompt, taskTypeHint, constraints }),
+    },
   };
 
   /**
