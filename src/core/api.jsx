@@ -80,6 +80,9 @@
     auditLog: {
       list: (limit) => call('GET', `/api/audit-log${limit ? `?limit=${limit}` : ''}`),
     },
+    models: {
+      list: () => call('GET', '/api/models'),
+    },
   };
 
   /**

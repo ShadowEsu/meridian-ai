@@ -111,8 +111,10 @@ function AuthenticatedApp({ user }) {
         {page === 'agents' && <PageAgents />}
         {page === 'keys' && <PageKeys keysFilter={keysFilter} />}
         {page === 'alerts' && <PageAlerts />}
-        {/* Stubs for new sidebar destinations */}
-        {['models','routing','teams','cache','billing','integrations','settings'].includes(page) && (
+        {/* Real pages built on existing endpoints */}
+        {page === 'models' && <PageModels />}
+        {/* Stubs for not-yet-built destinations */}
+        {['routing','teams','cache','billing','integrations','settings'].includes(page) && (
           <PageStub page={page} />
         )}
       </main>

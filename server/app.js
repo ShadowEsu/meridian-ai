@@ -47,6 +47,7 @@ function createApp({ store }) {
   proxyRoutes.register(app, ctx);
   kpiRoutes.register(app, ctx);
   require('./routes/agents').register(app, ctx);
+  require('./routes/models').register(app, ctx);
 
   // 404 fallthrough for /api/* must be JSON, not the static file 404 page.
   app.use('/api', (_req, res) => jsonError(res, 404, 'Not found', { code: 'NOT_FOUND' }));
