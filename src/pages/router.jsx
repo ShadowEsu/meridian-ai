@@ -184,6 +184,9 @@ function PageRouter() {
         </table>
       </div>
 
+      {/* MLP PLAYGROUND — live router preview powered by the trained MLP */}
+      <MlpPlayground />
+
       {/* EFFECTIVENESS + BANK */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.1fr', gap: 18 }}>
         <div className="card">
@@ -268,6 +271,184 @@ function SavingsBank({ amount }) {
           </div>
         </div>
       </div>
+    </div>
+  );
+}
+
+function MlpPlayground() {
+  const [prompt, setPrompt] = React.useState('Design an end-to-end ML system that detects wasteful LLM API calls in real time across heterogeneous providers; include feature schema, online vs offline components, drift handling, and a cost model.');
+  const [hint, setHint] = React.useState('');
+  const [busy, setBusy] = React.useState(false);
+  const [out, setOut] = React.useState(null);
+  const [err, setErr] = React.useState(null);
+  const [mlpStatus, setMlpStatus] = React.useState({ enabled: null, ready: null });
+
+  React.useEffect(() => {
+    let alive = true;
+    fetch('/api/router/mlp/status', { credentials: 'include' })
+      .then(r => r.json())
+      .then(d => { if (alive) setMlpStatus(d); })
+      .catch(() => { if (alive) setMlpStatus({ enabled: false, ready: false, error: 'unreachable' }); });
+    return () => { alive = false; };
+  }, []);
+
+  const submit = async () => {
+    if (!prompt.trim()) return;
+    setBusy(true);
+    setErr(null);
+    setOut(null);
+    try {
+      const body = { prompt };
+      if (hint) body.taskTypeHint = hint;
+      const r = await window.MeridianAPI.router.preview(body.prompt, body.taskTypeHint);
+      setOut(r);
+      // Refresh status after the call (spawns python on first hit).
+      const s = await (await fetch('/api/router/mlp/status', { credentials: 'include' })).json();
+      setMlpStatus(s);
+    } catch (e) {
+      setErr(e.message || String(e));
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const HINTS = [
+    '', 'simple_chat', 'general_chat', 'classification', 'summary_short',
+    'code_completion', 'multi_file_refactor', 'deep_reasoning', 'formal_math',
+    'long_doc_analysis', 'tool_orchestration', 'multilingual',
+  ];
+
+  const TierBar = ({ probs }) => {
+    if (!probs) return null;
+    const order = ['cheap', 'mid', 'premium'];
+    const colors = { cheap: '#10B981', mid: '#F59E0B', premium: '#EF4444' };
+    return (
+      <div style={{ display: 'flex', height: 22, borderRadius: 6, overflow: 'hidden', border: '1px solid var(--border)' }}>
+        {order.map(t => (
+          <div key={t}
+               title={`${t}: ${(probs[t] * 100).toFixed(1)}%`}
+               style={{
+                 flex: probs[t],
+                 background: colors[t],
+                 minWidth: probs[t] > 0.01 ? 'auto' : 0,
+                 display: 'flex', alignItems: 'center', justifyContent: 'center',
+                 fontSize: 10.5, fontWeight: 600, color: '#0a0a0a',
+                 fontVariantNumeric: 'tabular-nums',
+               }}>
+            {probs[t] > 0.12 ? `${t} ${(probs[t] * 100).toFixed(0)}%` : ''}
+          </div>
+        ))}
+      </div>
+    );
+  };
+
+  return (
+    <div className="card" style={{ marginBottom: 18 }}>
+      <div className="between">
+        <div>
+          <div className="card-title">MLP Router Playground</div>
+          <div className="card-sub">
+            Live tier prediction from the trained MLP + which model the router would call.
+          </div>
+        </div>
+        <div style={{ fontSize: 11.5, color: mlpStatus.ready ? 'var(--green-2)' : 'var(--text-mute)', display: 'flex', alignItems: 'center', gap: 6 }}>
+          <span style={{ width: 8, height: 8, borderRadius: '50%', background: mlpStatus.ready ? 'var(--green-2)' : '#6b7280', display: 'inline-block' }} />
+          MLP {mlpStatus.ready ? 'ready' : (mlpStatus.enabled ? 'spawning…' : 'disabled')}
+        </div>
+      </div>
+
+      <div style={{ marginTop: 14 }}>
+        <textarea
+          value={prompt}
+          onChange={e => setPrompt(e.target.value)}
+          rows={4}
+          placeholder="Paste a prompt the router would see..."
+          style={{
+            width: '100%', padding: 10, background: 'var(--bg-1)',
+            color: 'var(--text)', border: '1px solid var(--border)',
+            borderRadius: 6, fontFamily: 'inherit', fontSize: 13, lineHeight: 1.45,
+            resize: 'vertical',
+          }}
+        />
+      </div>
+
+      <div style={{ display: 'flex', gap: 10, alignItems: 'center', marginTop: 10 }}>
+        <select value={hint} onChange={e => setHint(e.target.value)}
+          style={{ padding: '7px 10px', background: 'var(--bg-1)', color: 'var(--text)', border: '1px solid var(--border)', borderRadius: 6, fontSize: 12.5 }}>
+          {HINTS.map(h => <option key={h} value={h}>{h || '(no task hint)'}</option>)}
+        </select>
+        <button className="btn btn-primary" onClick={submit} disabled={busy || !prompt.trim()}>
+          {busy ? 'Routing…' : 'Route this prompt'}
+        </button>
+        <div style={{ fontSize: 11, color: 'var(--text-mute)' }}>
+          POST /api/router/preview
+        </div>
+      </div>
+
+      {err && (
+        <div style={{ marginTop: 14, padding: 10, background: 'rgba(239,68,68,.08)', border: '1px solid rgba(239,68,68,.3)', borderRadius: 6, color: '#fca5a5', fontSize: 12.5 }}>
+          {err}
+        </div>
+      )}
+
+      {out && (
+        <div style={{ marginTop: 18, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 18 }}>
+          <div>
+            <div style={{ fontSize: 11, color: 'var(--text-mute)', letterSpacing: '0.1em', textTransform: 'uppercase', fontWeight: 600, marginBottom: 8 }}>
+              MLP prediction
+            </div>
+            {out.mlp && out.mlp.tier ? (
+              <>
+                <div style={{ fontSize: 22, fontWeight: 600, color: 'var(--text)' }}>
+                  {out.mlp.tier} <span style={{ color: 'var(--text-mute)', fontSize: 14, fontWeight: 400 }}>
+                    ({(out.mlp.confidence * 100).toFixed(1)}% · {out.mlp.elapsedMs}ms)
+                  </span>
+                </div>
+                <div style={{ marginTop: 10 }}>
+                  <TierBar probs={out.mlp.probs} />
+                </div>
+                <div style={{ marginTop: 6, fontSize: 11.5, color: 'var(--text-mute)' }}>
+                  Task heuristic also says: <code style={{ color: 'var(--text-dim)' }}>{out.classifiedAs}</code>
+                </div>
+              </>
+            ) : (
+              <div style={{ fontSize: 12.5, color: 'var(--text-mute)' }}>
+                MLP unavailable: {out.mlp && out.mlp.error ? out.mlp.error : 'no signal'}.<br/>
+                Heuristic task class: <code>{out.classifiedAs}</code>
+              </div>
+            )}
+          </div>
+
+          <div>
+            <div style={{ fontSize: 11, color: 'var(--text-mute)', letterSpacing: '0.1em', textTransform: 'uppercase', fontWeight: 600, marginBottom: 8 }}>
+              Picked model
+            </div>
+            {out.model ? (
+              <>
+                <div style={{ fontSize: 17, fontWeight: 600, color: 'var(--text)', fontFamily: 'monospace' }}>
+                  {out.model}
+                </div>
+                <div style={{ fontSize: 12, color: 'var(--text-mute)', marginTop: 4 }}>
+                  {out.provider} · catalog tier <strong style={{ color: 'var(--text-dim)' }}>{out.tier}</strong> · confidence {out.confidence}
+                </div>
+                {out.catalogEntry && (
+                  <div style={{ marginTop: 10, fontSize: 11.5, color: 'var(--text-mute)', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 4 }}>
+                    <div>ctx <strong>{out.catalogEntry.contextK}K</strong></div>
+                    <div>p50 <strong>{out.catalogEntry.latencyP50ms}ms</strong></div>
+                    <div>in <strong>${out.catalogEntry.inUsdM}/M</strong></div>
+                    <div>out <strong>${out.catalogEntry.outUsdM}/M</strong></div>
+                  </div>
+                )}
+                <div style={{ marginTop: 10, fontSize: 11.5, color: 'var(--text-dim)', fontStyle: 'italic', lineHeight: 1.5 }}>
+                  {out.reason}
+                </div>
+              </>
+            ) : (
+              <div style={{ fontSize: 12.5, color: 'var(--text-mute)' }}>No model picked: {out.reason}</div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -75,20 +75,25 @@ def health():
 
 @app.post("/v1/route", response_model=RouteResponse)
 def route(req: RouteRequest):
-    from features import extract_features, vectorize
+    from features import extract_features, vectorize, vectorize_rich
 
     feats_dict = extract_features(req.prompt, req.task_hint)
     api_feats = {k: float(v) for k, v in feats_dict.items() if not str(k).startswith("task_")}
 
     b = _load_bundle()
     if b is not None:
-        vec = vectorize(feats_dict)
+        if b.get("vectorizer") == "features.vectorize_rich":
+            vec = vectorize_rich(req.prompt, req.task_hint)
+            source = "mlp_v1 (train_mlp.py)"
+        else:
+            vec = vectorize(feats_dict)
+            source = "legacy GBM (train.py)"
         tier_idx = b["pipeline"].predict([vec])[0]
         tier = str(b["label_encoder"].inverse_transform([tier_idx])[0])
         return RouteResponse(
             recommended_tier=tier,
             features=api_feats,
-            note="Loaded from MERIDIAN_ROUTER_MODEL (train.py output).",
+            note=f"Loaded from MERIDIAN_ROUTER_MODEL — {source}.",
         )
 
     hfeats, tier = _heuristic_fallback(req.prompt)

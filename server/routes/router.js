@@ -10,6 +10,7 @@
 const { z } = require('zod');
 const { validate } = require('../lib/validate');
 const { pickModel, classifyPrompt, TASK_DEFAULTS, CATALOG } = require('../services/manual-router');
+const { getMlpRouter } = require('../services/mlp-router');
 
 const previewBody = z.object({
   prompt:       z.string().min(1).max(50_000),
@@ -28,13 +29,32 @@ function register(app /*, ctx */) {
   // POST /api/router/preview — what would the router pick?
   app.post('/api/router/preview',
     validate(z.object({ body: previewBody })),
-    (req, res) => {
+    async (req, res) => {
       const { prompt, taskTypeHint, constraints } = req.validated.body;
-      const result = pickModel({ prompt, taskTypeHint, constraints });
-      // Include enough context for the UI to show the why
+
+      // Call the MLP if available; tolerate failure (fall back to JS heuristic).
+      let mlp = null;
+      const mlpRouter = getMlpRouter();
+      if (mlpRouter && mlpRouter.isReady()) {
+        try {
+          mlp = await mlpRouter.classifyTier(prompt, taskTypeHint);
+        } catch (e) {
+          mlp = { tier: null, error: String(e.message || e) };
+        }
+      } else if (mlpRouter) {
+        mlp = { tier: null, error: 'mlp not ready', lastError: mlpRouter.lastError() };
+      }
+
+      const result = pickModel({
+        prompt,
+        taskTypeHint,
+        constraints,
+        mlpTier: mlp && mlp.tier ? mlp.tier : null,
+      });
       res.json({
         ...result,
         classifiedAs: classifyPrompt(prompt),
+        mlp, // { tier, confidence, probs, elapsedMs } or { tier: null, error }
         catalogEntry: result.catalogEntry ? {
           id: result.catalogEntry.id,
           provider: result.catalogEntry.provider,
@@ -48,6 +68,13 @@ function register(app /*, ctx */) {
       });
     }
   );
+
+  // GET /api/router/mlp/status — health probe for the Python child process
+  app.get('/api/router/mlp/status', (_req, res) => {
+    const r = getMlpRouter();
+    if (!r) return res.json({ enabled: false, ready: false, reason: 'MLP_ROUTER_DISABLE=1' });
+    res.json({ enabled: true, ready: r.isReady(), lastError: r.lastError() });
+  });
 
   // GET /api/router/catalog — full model catalogue used by the router
   app.get('/api/router/catalog', (_req, res) => {

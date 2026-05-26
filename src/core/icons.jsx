@@ -1,6 +1,20 @@
 // Inline SVG icons
 const Icon = {
-  logo: (p) => <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...p}><path d="M3 12c3-7 15-7 18 0"/><path d="M3 12c3 7 15 7 18 0"/><circle cx="12" cy="12" r="2.5" fill="white"/></svg>,
+  logo: (p) => (
+    <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" {...p}>
+      <defs>
+        <linearGradient id="meridianLogoStroke" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stopColor="#D9DCFA"/>
+          <stop offset="55%" stopColor="#9097F0"/>
+          <stop offset="100%" stopColor="#7079E8"/>
+        </linearGradient>
+      </defs>
+      <circle cx="16" cy="16" r="12" stroke="url(#meridianLogoStroke)"/>
+      <line x1="16" y1="2.5" x2="16" y2="29.5" stroke="url(#meridianLogoStroke)"/>
+      <line x1="3.5" y1="16" x2="28.5" y2="16" stroke="url(#meridianLogoStroke)" strokeOpacity="0.45" strokeDasharray="1.5 2.5"/>
+      <circle cx="16" cy="16" r="1.6" fill="#9097F0" stroke="none"/>
+    </svg>
+  ),
   overview: (p) => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" {...p}><path d="M3 12h4l3-8 4 16 3-8h4"/></svg>,
   intelligence: (p) => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" {...p}><path d="M4 18V6l4 4 4-6 4 8 4-5v11"/><circle cx="4" cy="18" r="1.5" fill="currentColor"/><circle cx="8" cy="10" r="1.5" fill="currentColor"/><circle cx="12" cy="16" r="1.5" fill="currentColor"/><circle cx="16" cy="8" r="1.5" fill="currentColor"/><circle cx="20" cy="18" r="1.5" fill="currentColor"/></svg>,
   feed: (p) => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" {...p}><path d="M2 12c4-4 6-4 10 0s6 4 10 0"/><circle cx="12" cy="12" r="1.5" fill="currentColor"/></svg>,

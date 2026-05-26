@@ -36,7 +36,7 @@ MeridianCode/
 │   ├── index.with-api.js      # Express API: auth + provider keys + proxy
 │   ├── auth-middleware.js     # JWT cookie session helpers
 │   ├── crypto-secret.js       # AES-256-GCM for provider keys
-│   └── json-store.js          # Flat-file JSON store (dev backend)
+│   └── store/json.js          # Flat-file JSON store (dev backend)
 ├── python/
 │   └── router_service/        # FastAPI tier-routing model
 │       ├── main.py            # POST /v1/route

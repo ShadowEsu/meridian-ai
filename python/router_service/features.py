@@ -1,20 +1,40 @@
 """
 Feature extraction for router / waste classifiers.
-Extend with tiktoken, language detection, embeddings, etc.
+
+Two feature surfaces:
+- `vectorize(extract_features(...))` → 24-d structural-only vector
+  (used by the legacy HistGradientBoosting router)
+- `vectorize_rich(prompt, task_type)` → 24 + N_HASH = 536-d vector
+  (used by the MLP router — structural + hashed char n-gram embedding)
+
+`vectorize_rich` is fully deterministic and stateless: the HashingVectorizer
+uses MurmurHash3 with a fixed seed, so identical input → identical output on
+any machine, no fit step required.
 """
 from __future__ import annotations
 
 import re
 from typing import Any
 
+from sklearn.feature_extraction.text import HashingVectorizer
+
 TASK_TYPES = [
     "unknown",
+    "qa",
     "summarization",
     "coding",
     "translation",
     "classification",
     "reasoning",
     "creative",
+    "writing",
+    "brainstorming",
+    "explanation",
+    "formatting",
+    "architecture",
+    "math",
+    "research",
+    "legal",
 ]
 
 
@@ -71,3 +91,33 @@ def _non_ascii_ratio(text: str) -> float:
         return 0.0
     n = sum(1 for c in text if ord(c) > 127)
     return n / float(len(text))
+
+
+# ── Rich features (structural + hashed char n-grams) for the MLP router ──────
+
+N_HASH = 512
+
+_HASHER = HashingVectorizer(
+    analyzer="char_wb",
+    ngram_range=(3, 5),
+    n_features=N_HASH,
+    alternate_sign=False,
+    norm="l2",
+    lowercase=True,
+)
+
+
+def _hash_embed(prompt: str) -> list[float]:
+    text = prompt or " "
+    vec = _HASHER.transform([text]).toarray()[0]
+    return vec.tolist()
+
+
+def vectorize_rich(prompt: str, task_type: str | None = None) -> list[float]:
+    """Concat 24-d structural features + 512-d hashed char n-gram embedding."""
+    structural = vectorize(extract_features(prompt, task_type))
+    return structural + _hash_embed(prompt)
+
+
+def rich_feature_dim() -> int:
+    return len(feature_names()) + N_HASH

@@ -162,7 +162,7 @@ function Sidebar({ page, setPage, user, collapsed, onToggle }) {
     <aside className="sidebar" aria-label="Primary navigation">
       <div className="side-head">
         <div className="logo" aria-hidden="true">
-          <span className="M">M</span>
+          {Icon.logo()}
         </div>
         <span className="brand-name">Meridian</span>
         <button

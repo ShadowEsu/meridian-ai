@@ -148,6 +148,12 @@ function filterCandidates(candidates, constraints = {}) {
   });
 }
 
+/** Map MLP tier label → CATALOG tier label. */
+const MLP_TIER_TO_CATALOG = { cheap: 'cheap', mid: 'mid', premium: 'frontier' };
+
+/** Tier preference order when escalating: cheap < mid < frontier. */
+const TIER_RANK = { cheap: 0, mid: 1, frontier: 2 };
+
 /**
  * Pick the cheapest model in the candidate list whose tier is at least
  * the bar required by the task (no point using a frontier model for a
@@ -161,27 +167,89 @@ function rankAndPick(candidates) {
 
 /**
  * Main routing entry point. Sync — heuristics only, no I/O.
+ *
+ * If `mlpTier` ∈ {'cheap','mid','premium'} is provided, it acts as a tier
+ * preference: the curated default is honored only when its tier matches the
+ * MLP prediction; otherwise the router escalates/de-escalates by walking
+ * CATALOG for the cheapest model that (a) lists the task in bestFor and
+ * (b) matches the MLP-requested catalog tier.
  */
-function pickModel({ prompt, taskTypeHint, constraints = {} } = {}) {
+function pickModel({ prompt, taskTypeHint, constraints = {}, mlpTier = null } = {}) {
   // 1. Classify (use hint if provided, else heuristic)
   const taskType = (taskTypeHint && TASK_DEFAULTS[taskTypeHint]) ? taskTypeHint : classifyPrompt(prompt || '');
 
   // 2. Default route for that task
   const preferredIds = TASK_DEFAULTS[taskType] || TASK_DEFAULTS.general_chat;
+  const wantCatalogTier = mlpTier ? MLP_TIER_TO_CATALOG[mlpTier] : null;
 
-  // 3. Look up each preferred model and apply constraints in order
+  // 3. Look up each preferred model and apply constraints in order.
+  //    When MLP supplied a tier, accept the curated pick only if its tier
+  //    matches (or is a safer escalation upward when MLP says premium).
   for (const id of preferredIds) {
     const candidate = CATALOG.find(m => m.id === id);
     if (!candidate) continue;
     const allowed = filterCandidates([candidate], constraints);
-    if (allowed.length) {
+    if (!allowed.length) continue;
+
+    if (wantCatalogTier) {
+      const sameTier = candidate.tier === wantCatalogTier;
+      // For premium-mlp signals, also accept frontier escalations above the curated tier;
+      // for cheap-mlp signals, only accept curated picks that are already cheap-tier.
+      const acceptableEscalation =
+        mlpTier === 'premium' && TIER_RANK[candidate.tier] >= TIER_RANK.frontier;
+      if (!sameTier && !acceptableEscalation) continue;
+    }
+
+    return {
+      tier: candidate.tier,
+      model: candidate.id,
+      provider: candidate.provider,
+      confidence: mlpTier ? 'high (mlp+curated)' : 'high',
+      reason: mlpTier
+        ? `mlp=${mlpTier} ∧ task=${taskType} → ${candidate.id} (curated, tier match)`
+        : `task=${taskType} → ${candidate.id} (curated default${taskTypeHint ? ', hint matched' : ''})`,
+      catalogEntry: candidate,
+    };
+  }
+
+  // 3b. If MLP supplied a tier but no curated default matched, pick the cheapest
+  //     CATALOG model at that tier (or above for premium) that lists the task.
+  if (wantCatalogTier) {
+    const taskMatches = CATALOG.filter(m =>
+      m.bestFor.includes(taskType) && (
+        m.tier === wantCatalogTier
+        || (mlpTier === 'premium' && TIER_RANK[m.tier] >= TIER_RANK.frontier)
+      )
+    );
+    const filtered = filterCandidates(taskMatches, constraints);
+    if (filtered.length) {
+      const pick = rankAndPick(filtered);
       return {
-        tier: candidate.tier,
-        model: candidate.id,
-        provider: candidate.provider,
-        confidence: 'high',
-        reason: `task=${taskType} → ${candidate.id} (curated default${taskTypeHint ? ', hint matched' : ''})`,
-        catalogEntry: candidate,
+        tier: pick.tier,
+        model: pick.id,
+        provider: pick.provider,
+        confidence: 'medium (mlp tier match)',
+        reason: `mlp=${mlpTier} → ${pick.id} (cheapest model at ${wantCatalogTier} that supports ${taskType})`,
+        catalogEntry: pick,
+      };
+    }
+    // Last resort within tier: cheapest catalog entry at the requested tier.
+    const tierOnly = filterCandidates(
+      CATALOG.filter(m =>
+        m.tier === wantCatalogTier
+        || (mlpTier === 'premium' && TIER_RANK[m.tier] >= TIER_RANK.frontier)
+      ),
+      constraints,
+    );
+    if (tierOnly.length) {
+      const pick = rankAndPick(tierOnly);
+      return {
+        tier: pick.tier,
+        model: pick.id,
+        provider: pick.provider,
+        confidence: 'low (mlp tier match, task-agnostic)',
+        reason: `mlp=${mlpTier} → ${pick.id} (cheapest at ${wantCatalogTier}; task=${taskType} had no specific match)`,
+        catalogEntry: pick,
       };
     }
   }
