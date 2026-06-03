@@ -1,5 +1,4 @@
-// Chart labels — same serif stack as Claude-style UI
-const CHART_FONT = "Crimson Pro, Georgia, Times New Roman, serif";
+const CHART_FONT = '"Geist Mono", ui-monospace, monospace';
 
 function Sparkline({ data, color = '#6366F1', width = 80, height = 24, fill = false }) {
   if (!data || data.length < 2) return null;
@@ -123,7 +122,109 @@ function HBar({ value, max, color = '#F59E0B', height = 6 }) {
   );
 }
 
+function StackedAreaChart({ series, labels, height = 240, animate = true }) {
+  const [drawn, setDrawn] = React.useState(!animate);
+  React.useEffect(() => {
+    if (!animate) return;
+    const t = requestAnimationFrame(() => setDrawn(true));
+    return () => cancelAnimationFrame(t);
+  }, [animate, series]);
+
+  const w = 720;
+  const h = height;
+  const pad = { l: 48, r: 12, t: 16, b: 28 };
+  const innerW = w - pad.l - pad.r;
+  const innerH = h - pad.t - pad.b;
+  const n = series[0]?.data?.length || 0;
+  if (!n) return null;
+
+  const stacks = [];
+  for (let i = 0; i < n; i++) {
+    let acc = 0;
+    stacks[i] = series.map(s => {
+      const v = s.data[i] || 0;
+      const bottom = acc;
+      acc += v;
+      return { bottom, top: acc, v };
+    });
+  }
+  const max = Math.max(...stacks.map(st => st[st.length - 1].top)) * 1.12 || 1;
+
+  function yAt(val) {
+    return pad.t + innerH - (val / max) * innerH;
+  }
+
+  function areaPath(layerIdx) {
+    const ptsTop = stacks.map((st, i) => [pad.l + (i / (n - 1)) * innerW, yAt(st[layerIdx].top)]);
+    const ptsBot = stacks.map((st, i) => [pad.l + (i / (n - 1)) * innerW, yAt(st[layerIdx].bottom)]).reverse();
+    const top = ptsTop.map((p, i) => (i === 0 ? 'M' : 'L') + p[0].toFixed(1) + ',' + p[1].toFixed(1)).join(' ');
+    const bot = ptsBot.map(p => 'L' + p[0].toFixed(1) + ',' + p[1].toFixed(1)).join(' ');
+    return top + ' ' + bot + ' Z';
+  }
+
+  const yTicks = 4;
+  const fmt = v => '$' + (v >= 1000 ? (v / 1000).toFixed(1) + 'k' : Math.round(v));
+
+  return (
+    <svg
+      viewBox={`0 0 ${w} ${h}`}
+      className="w-full"
+      style={{
+        height: 'auto',
+        display: 'block',
+        fontFamily: CHART_FONT,
+        opacity: drawn ? 1 : 0,
+        transition: 'opacity 0.55s ease',
+      }}
+      preserveAspectRatio="none"
+      role="img"
+      aria-label="Stacked spend by model"
+    >
+      {[...Array(yTicks)].map((_, i) => {
+        const y = pad.t + (innerH * i) / (yTicks - 1);
+        const v = max - (max * i) / (yTicks - 1);
+        return (
+          <g key={i}>
+            <line x1={pad.l} x2={pad.l + innerW} y1={y} y2={y} stroke="#1C2130" strokeDasharray="2 4" />
+            <text x={pad.l - 8} y={y + 3} fill="#64748B" fontSize="10" textAnchor="end">{fmt(v)}</text>
+          </g>
+        );
+      })}
+      {labels && labels.map((l, i) => l ? (
+        <text key={i} x={pad.l + (i / (labels.length - 1)) * innerW} y={h - 8} fill="#64748B" fontSize="10" textAnchor="middle">{l}</text>
+      ) : null)}
+      {series.map((s, li) => (
+        <g key={s.id}>
+          <defs>
+            <linearGradient id={`sg-${s.id}`} x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor={s.color} stopOpacity="0.45" />
+              <stop offset="100%" stopColor={s.color} stopOpacity="0" />
+            </linearGradient>
+          </defs>
+          <path d={areaPath(li)} fill={`url(#sg-${s.id})`} stroke="none" />
+          <path
+            d={stacks.map((st, i) => {
+              const y = yAt(st[li].top);
+              const x = pad.l + (i / (n - 1)) * innerW;
+              return (i === 0 ? 'M' : 'L') + x.toFixed(1) + ',' + y.toFixed(1);
+            }).join(' ')}
+            fill="none"
+            stroke={s.color}
+            strokeWidth="1.2"
+            strokeOpacity="0.85"
+            pathLength="1"
+            strokeDasharray={drawn ? 'none' : '1'}
+            strokeDashoffset={drawn ? '0' : '1'}
+            style={{ transition: drawn ? 'stroke-dashoffset 0.9s ease' : 'none' }}
+          />
+        </g>
+      ))}
+    </svg>
+  );
+}
+
 window.Sparkline = Sparkline;
 window.AreaChart = AreaChart;
+window.StackedAreaChart = StackedAreaChart;
 window.Donut = Donut;
 window.HBar = HBar;

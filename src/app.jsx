@@ -59,22 +59,17 @@ function AuthenticatedApp({ user }) {
   const [collapsed, setCollapsed] = React.useState(() => {
     try { return localStorage.getItem('meridian_sidebar_collapsed') === '1'; } catch { return false; }
   });
-  const [sideWidth, setSideWidth] = React.useState(() => {
-    try {
-      const w = parseInt(localStorage.getItem('meridian_sidebar_w'), 10);
-      return Number.isFinite(w) && w >= 200 && w <= 320 ? w : 248;
-    } catch { return 248; }
-  });
+  const [sideWidth, setSideWidth] = React.useState(220);
+  const [modelFilter, setModelFilter] = React.useState('all');
+
+  const onModelFilter = React.useCallback((id) => {
+    setModelFilter(id);
+    window.dispatchEvent(new CustomEvent('meridian:model-filter', { detail: id }));
+  }, []);
 
   React.useEffect(() => {
     try { localStorage.setItem('meridian_sidebar_collapsed', collapsed ? '1' : '0'); } catch {}
   }, [collapsed]);
-
-  React.useEffect(() => {
-    if (!collapsed) {
-      try { localStorage.setItem('meridian_sidebar_w', String(sideWidth)); } catch {}
-    }
-  }, [sideWidth, collapsed]);
 
   React.useEffect(() => {
     const k = 'meridian_setup_v1_' + user.id;
@@ -116,56 +111,63 @@ function AuthenticatedApp({ user }) {
 
   const M = window.MERIDIAN;
 
-  const sidebarPx = collapsed ? 68 : sideWidth;
+  const setPageNav = (p) => { setPage(p); if (p !== 'keys') setKeysFilter(''); };
+
+  const legacyWrap = (node) => (
+    <div className="m-page-legacy mx-auto w-full max-w-[1600px] px-4 py-4 sm:px-6 sm:py-6">
+      {node}
+    </div>
+  );
+
+  const pageContent = (
+    <>
+      {page === 'overview' && <PageOverview />}
+      {page === 'feed' && legacyWrap(<PageLiveFeed />)}
+      {page === 'logs' && legacyWrap(<PageRequestLogs />)}
+      {page === 'agents' && legacyWrap(<PageAgents />)}
+      {page === 'keys' && legacyWrap(<PageKeys keysFilter={keysFilter} />)}
+      {page === 'alerts' && <PageAlerts />}
+      {page === 'models' && <PageModels />}
+      {page === 'teams' && legacyWrap(<PageTeams />)}
+      {page === 'routing' && <PageRoutingRules />}
+      {page === 'cache' && <PageCache />}
+      {page === 'billing' && legacyWrap(<PageBilling />)}
+      {page === 'integrations' && legacyWrap(<PageIntegrations />)}
+      {page === 'settings' && legacyWrap(<PageSettings />)}
+    </>
+  );
+
+  if (window.DashboardShell) {
+    return (
+      <>
+        {typeof ToastHost !== 'undefined' ? <ToastHost /> : null}
+        {showSetup ? <SetupWizard user={user} onDone={() => setShowSetup(false)} /> : null}
+        <DashboardShell
+          page={page}
+          setPage={setPageNav}
+          setKeysFilter={setKeysFilter}
+          user={user}
+          collapsed={collapsed}
+          onToggle={() => setCollapsed(c => !c)}
+          sideWidth={sideWidth}
+          demo={M.uiDemoSampleData}
+          spendLabel={spendLabel}
+          modelFilter={modelFilter}
+          onModelFilter={onModelFilter}
+        >
+          {pageContent}
+        </DashboardShell>
+      </>
+    );
+  }
 
   return (
-    <div
-      className={`app${collapsed ? ' collapsed' : ''}`}
-      style={{ '--sidebar-w': sidebarPx + 'px' }}
-    >
+    <div className={`app${collapsed ? ' collapsed' : ''}`} style={{ '--sidebar-w': (collapsed ? 64 : sideWidth) + 'px' }}>
       <a href="#main-content" className="skip-link">Skip to main content</a>
       {typeof ToastHost !== 'undefined' ? <ToastHost /> : null}
       {showSetup ? <SetupWizard user={user} onDone={() => setShowSetup(false)} /> : null}
-      <Sidebar
-        page={page}
-        setPage={(p) => { setPage(p); if (p !== 'keys') setKeysFilter(''); }}
-        user={user}
-        collapsed={collapsed}
-        onToggle={() => setCollapsed(c => !c)}
-        sideWidth={sideWidth}
-        onSideResize={setSideWidth}
-      />
-      <main className="main" id="main-content" tabIndex="-1">
-        {M.uiDemoSampleData ? (
-          <div className="demo-data-ribbon">
-            <span className="demo-data-pill">Sample data</span>
-            <span className="demo-data-text">Dollar amounts and volumes are illustrative examples. Backend and sign-in are off for now.</span>
-          </div>
-        ) : null}
-        {/* Overview + restyled pages + stubs render their own page header; remaining legacy pages still use the shared one */}
-        {!['overview','models','alerts','feed','logs','agents','keys','routing','teams','cache','billing','integrations','settings'].includes(page) ? (
-          <Header
-            title={meta.title}
-            sub={meta.sub}
-            demo={M.uiDemoSampleData}
-            search={<GlobalSearch setPage={setPage} setKeysFilter={setKeysFilter} setFleetSelected={() => {}} />}
-          />
-        ) : null}
-        {page === 'overview' && <PageOverview />}
-        {page === 'feed' && <PageLiveFeed />}
-        {page === 'logs' && <PageRequestLogs />}
-        {page === 'agents' && <PageAgents />}
-        {page === 'keys' && <PageKeys keysFilter={keysFilter} />}
-        {page === 'alerts' && <PageAlerts />}
-        {/* Real pages built on existing endpoints */}
-        {page === 'models' && <PageModels />}
-        {page === 'teams' && <PageTeams />}
-        {page === 'routing' && <PageRoutingRules />}
-        {page === 'cache' && <PageCache />}
-        {page === 'billing' && <PageBilling />}
-        {page === 'integrations' && <PageIntegrations />}
-        {page === 'settings' && <PageSettings />}
-      </main>
+      <Sidebar page={page} setPage={setPageNav} user={user} collapsed={collapsed} onToggle={() => setCollapsed(c => !c)} sideWidth={sideWidth} onSideResize={setSideWidth} />
+      <main className="main" id="main-content" tabIndex="-1" key={page}>{pageContent}</main>
     </div>
   );
 }
@@ -174,8 +176,8 @@ function App() {
   const { state, refresh } = useAuthGate();
   if (state.phase === 'loading') {
     return (
-      <div style={{ minHeight: '100vh', display: 'grid', placeContent: 'center', color: '#9097a3', fontFamily: 'Crimson Pro, serif' }}>
-        Loading…
+      <div className="flex min-h-screen items-center justify-center bg-base text-txt-secondary font-sans text-sm">
+        <div className="h-4 w-32 animate-shimmer rounded bg-white/[0.06]" aria-label="Loading" />
       </div>
     );
   }

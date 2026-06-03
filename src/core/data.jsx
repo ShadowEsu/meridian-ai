@@ -134,6 +134,62 @@ const SPEND_30 = (() => {
   return arr;
 })();
 
+const SPEND_STACK_MODELS = [
+  { id: 'claude', name: 'Claude', color: '#6366F1', share: 0.42 },
+  { id: 'gpt', name: 'GPT-4o', color: '#22D3EE', share: 0.28 },
+  { id: 'gemini', name: 'Gemini', color: '#10B981', share: 0.18 },
+  { id: 'other', name: 'Other', color: '#64748B', share: 0.12 },
+];
+
+function buildStackedSeries(days, jitter) {
+  const r = mulberry32(jitter);
+  return SPEND_STACK_MODELS.map(m => {
+    const data = [];
+    for (let i = 0; i < days; i++) {
+      const base = (2400 + i * (days > 10 ? 25 : 320)) * m.share;
+      data.push(Math.max(120, Math.round(base * (0.88 + r() * 0.24))));
+    }
+    return { ...m, data };
+  });
+}
+
+const SPEND_STACKED = {
+  daily: {
+    labels: Array.from({ length: 30 }, (_, i) => (i % 5 === 0 ? `D${i + 1}` : '')),
+    series: buildStackedSeries(30, 41),
+  },
+  weekly: {
+    labels: ['W1', 'W2', 'W3', 'W4', 'W5', 'W6', 'W7', 'W8'],
+    series: buildStackedSeries(8, 42),
+  },
+  monthly: {
+    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May'],
+    series: buildStackedSeries(5, 43),
+  },
+};
+
+const KPI_SPARKS = {
+  spend: SPEND_30.slice(-7).map(v => v / 100),
+  tokens: [16.2, 16.8, 17.1, 17.4, 17.9, 18.1, 18.4],
+  cpr: [0.031, 0.029, 0.028, 0.027, 0.026, 0.025, 0.024],
+  models: [4, 4, 5, 5, 5, 6, 6],
+};
+
+const KPI_DELTAS = {
+  spend: { pct: 8.4, up: true },
+  tokens: { pct: 12.1, up: true },
+  cpr: { pct: 6.2, up: false },
+  models: { pct: 0, up: true },
+};
+
+const ANOMALIES = [
+  { id: 'a1', severity: 'critical', model: 'o1-preview', amount: 842.1, time: '4m ago', explain: 'Engineering grader loop at 4.2× baseline — router kept premium path.' },
+  { id: 'a2', severity: 'critical', model: 'claude-opus', amount: 412.0, time: '18m ago', explain: 'Research batch crossed $400/hr — no cap on long-ctx calls.' },
+  { id: 'a3', severity: 'warn', model: 'gpt-4o', amount: 186.4, time: '42m ago', explain: 'Support ticket classifier spike; Haiku would save ~74%.' },
+  { id: 'a4', severity: 'warn', model: 'gemini-1.5-pro', amount: 94.2, time: '1h ago', explain: 'Duplicate embeddings job — cache miss rate jumped to 12%.' },
+  { id: 'a5', severity: 'warn', model: 'claude-3.5-sonnet', amount: 61.8, time: '2h ago', explain: 'Product summarizer retry storm after 429 from provider.' },
+];
+
 // Historical agent runs
 const AGENT_HISTORY = (() => {
   const names = ['ResearchBot', 'ContentAgent', 'CodeReviewBot', 'DataPipelineAgent', 'SummarizerBot', 'SupportAgent', 'CrawlerAgent', 'AnalyticsBot', 'TestGenAgent', 'DocAgent'];
@@ -320,7 +376,7 @@ const PROMPT_LIBRARY_INDEX = [
 window.MERIDIAN = {
   ...KPI,
   KPI, MODELS, TEAMS, TEAM_SPEND_CUSTOMIZATION, TEAM_COLORS, VIRTUAL_KEYS, ALERTS, ROUTING_RULES, AGENTS, AGENT_HISTORY, REQUEST_LOGS, CONTAINERS,
-  ROUTING_SAVINGS_30, SPEND_30,
+  ROUTING_SAVINGS_30, SPEND_30, SPEND_STACKED, KPI_SPARKS, KPI_DELTAS, ANOMALIES,
   fmtMoney, fmtMoneyShort, fmtNum,
   uiDemoSampleData,
   COST_PER_1K_ROUTER, TRAINING_DATASET_EXAMPLES, PROMPT_FEATURE_DIMENSIONS, ML_CLASSIFIER_STACK, ML_PIPELINE_STEPS,
