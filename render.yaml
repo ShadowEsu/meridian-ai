@@ -1,0 +1,36 @@
+# Render Blueprint — Meridian API + dashboard
+# https://render.com/docs/blueprint-spec
+#
+# After connecting this repo in Render:
+#   1. Set secret env vars in the dashboard (see docs/WEB_PUBLISH.md).
+#   2. Copy your Render URL into Supabase + Google OAuth redirect settings.
+#   3. Redeploy once env is saved.
+
+services:
+  - type: web
+    name: meridian-2-0
+    runtime: node
+    plan: free
+    branch: main
+    buildCommand: npm install
+    startCommand: npm run start:api
+    healthCheckPath: /api/auth/config
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: MERIDIAN_STORE
+        value: supabase
+      - key: PORT
+        value: "10000"
+      - key: JWT_SECRET
+        sync: false
+      - key: ENCRYPTION_KEY
+        sync: false
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_ANON_KEY
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+      - key: SUPABASE_JWT_SECRET
+        sync: false

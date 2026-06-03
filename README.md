@@ -1,149 +1,156 @@
-# Meridian
+# Meridian 2.0
 
-AI cost intelligence and spend management for enterprises. Meridian is a middleware/dashboard that observes traffic to LLM providers (OpenAI, Anthropic, Google, Azure), exposes per-team and per-key budgets, flags runaway agents, and routes prompts to the cheapest model that still meets the quality bar.
+**AI cost intelligence for LLM fleets** — see spend by team, cap budgets per key, catch runaway agents, and route prompts to cheaper models when quality holds.
 
-This repository contains the dashboard UI, an optional Express API server (auth, encrypted provider-key storage), and a Python ML service that powers the cost router.
+Built by [Preston Susanto](https://github.com/PrestonSusanto).
 
-## Repository layout
+---
 
-```
-MeridianCode/
-├── Meridian.html              # Single-page entrypoint (loads JSX in order)
-├── package.json               # Node deps + scripts
-├── .env.example               # Required env vars for the API server
-├── src/
-│   ├── app.jsx                # Root component, page routing, demo gate
-│   ├── core/
-│   │   ├── data.jsx           # Mock dataset on window.MERIDIAN
-│   │   ├── icons.jsx          # SVG icon helper
-│   │   ├── charts.jsx         # MiniBars, LineChart, AreaChart, PieChart
-│   │   └── shell.jsx          # Sidebar, Header, GlobalSearch (⌘K)
-│   ├── pages/
-│   │   ├── overview.jsx       # KPI dashboard, daily savings, model mix
-│   │   ├── feed.jsx           # Live request stream
-│   │   ├── logs.jsx           # Request history table
-│   │   ├── agents.jsx         # Agent monitor, runaway protection
-│   │   ├── keys.jsx           # Virtual API key manager
-│   │   ├── alerts.jsx         # Threshold notifications
-│   │   ├── onboarding.jsx     # Provider connector wizard
-│   │   ├── auth.jsx           # Sign-in/up (not loaded; gated for demo)
-│   │   ├── intelligence.jsx   # ML waste metrics (deferred)
-│   │   └── router.jsx         # Routing graph (deferred)
-│   └── styles/
-│       └── styles.css         # Design tokens, layout, components
-├── server/
-│   ├── index.js               # Static file server (default)
-│   ├── index.with-api.js      # Express API: auth + provider keys + proxy
-│   ├── auth-middleware.js     # JWT cookie session helpers
-│   ├── crypto-secret.js       # AES-256-GCM for provider keys
-│   └── store/json.js          # Flat-file JSON store (dev backend)
-├── python/
-│   └── router_service/        # FastAPI tier-routing model
-│       ├── main.py            # POST /v1/route
-│       ├── features.py        # Prompt feature extraction
-│       └── train.py           # HistGradientBoostingClassifier trainer
-├── schema/
-│   └── meridian_ml_waste.sql  # Tables for api_calls, spend, training rows
-└── docs/
-    ├── GOAL.md                # Six-milestone product vision
-    ├── BACKEND_PLAN.md        # Architecture + migration sequence
-    ├── ML_PLAN.md             # Router product primer
-    ├── DESIGN_STITCH.md       # Visual identity / design system
-    └── screenshots/           # UI reference captures
-```
+## What it does
 
-## Quick start
+- **Dashboard** — Overview, live feed, request logs, agent monitor, virtual keys, alerts
+- **Auth** — Email/password + Google sign-in (via Supabase)
+- **Storage** — Supabase Postgres in production, JSON file for local dev
+- **Ingest API** — Apps report LLM usage with `X-Meridian-Key` headers
+- **ML router** — Python service classifies prompts into `cheap` / `mid` / `premium` tiers (train it yourself)
 
-### Static UI demo (no backend)
+---
 
-```
+## Quick start (local demo)
+
+No backend — sample data only:
+
+```bash
 npm install
 npm start
 ```
 
-Serves `Meridian.html` at `http://localhost:3000`. All numbers come from `src/core/data.jsx`. No login, no persistence.
+Open `http://localhost:3000`
 
-### Run with the live backend
+---
+
+## Quick start (live backend)
 
 ```bash
 cp .env.example .env
-
-# Generate secrets and paste into .env
-node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"   # → JWT_SECRET
-node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"   # → ENCRYPTION_KEY
+# Fill JWT_SECRET, ENCRYPTION_KEY, and Supabase vars (see below)
 
 npm install
-npm run doctor          # verify env + store paths are healthy
-npm run seed:demo       # optional: pre-populate demo data
-npm run start:api       # API server at http://localhost:5500
-```
-
-Then open the dashboard in a browser and run in the console:
-
-```js
-window.MERIDIAN_LIVE = true; location.reload();
-```
-
-The dashboard will now read from the live API instead of the static mock data.
-
-**Demo login (after `npm run seed:demo`):** `demo@meridian.local` / `demo123demo`
-
-#### Endpoint surface
-
-| Domain         | Routes                                              |
-|----------------|-----------------------------------------------------|
-| Auth           | `POST /api/auth/signup`, `/login`, `/logout`, `/me` |
-| Teams          | `GET/POST/PUT/DELETE /api/teams`                    |
-| Provider keys  | `GET/POST/DELETE /api/provider-keys`                |
-| Virtual keys   | `GET/POST/PUT/DELETE /api/virtual-keys`             |
-| Agents         | `GET/POST /api/agents`, `POST /api/agents/:id/runs` |
-| Alerts         | `GET/POST/PUT/DELETE /api/alerts`                   |
-| Request log    | `POST /api/v1/requests` (ingest), `GET /api/requests` (query) |
-| KPI            | `GET /api/kpi/overview`, `GET /api/kpi/feed`        |
-| Audit log      | `GET /api/audit-log`                                |
-
-Full schema and design rationale: [`docs/superpowers/plans/2026-05-07-backend-mvp.md`](docs/superpowers/plans/2026-05-07-backend-mvp.md).
-
-### API server (auth + encrypted provider keys)
-
-```
-cp .env.example .env
-# Set JWT_SECRET (random) and ENCRYPTION_KEY (64 hex chars)
 npm run start:api
 ```
 
-Serves the same UI plus REST endpoints under `/api/*`. Sessions are JWT in an httpOnly cookie. Provider keys are AES-256-GCM encrypted at rest in `data/meridian-store.json`.
+Open **`http://localhost:5500/?live=1`**
 
-### Python router service
+Optional demo data:
 
-```
-cd python/router_service
-python -m venv .venv && source .venv/bin/activate
-pip install -r requirements.txt
-uvicorn main:app --port 8001
+```bash
+npm run seed:demo
+# Login: demo@meridian.local / demo123demo
 ```
 
-Returns a tier prediction (`cheap` / `mid` / `premium`) for a given prompt. Falls back to heuristic rules if no trained model is loaded.
+---
 
-## Environment
+## Deploy to Render (production)
 
-| Var              | Purpose                                                        |
-|------------------|----------------------------------------------------------------|
-| `PORT`           | Node server port (default `3000`, API server defaults `5500`)  |
-| `JWT_SECRET`     | Signing secret for session cookies                             |
-| `ENCRYPTION_KEY` | 64-hex-char (32-byte) key for provider-key encryption          |
-| `NODE_ENV`       | `production` enables secure cookies, stricter CSP              |
+This repo includes a [`render.yaml`](render.yaml) blueprint.
 
-## Architecture at a glance
+### 1. Fork or clone this repo
 
-- **Frontend:** React 18 served as raw JSX, transpiled in-browser by `@babel/standalone`. Intentionally bundler-free for the demo phase. Components are exposed on `window.*` and composed by `src/app.jsx`.
-- **Backend (Node):** Express + Helmet + zod. JWT cookie auth. Provider keys encrypted with AES-256-GCM. Storage is pluggable via `MERIDIAN_STORE` (`json` today, `supabase` planned).
-- **ML (Python):** FastAPI service that classifies a prompt into a cost tier. Training pipeline reads exported logs from the Node side; retraining cadence is weekly and user-triggered.
+Use **your** GitHub account — connect this repo in [Render](https://dashboard.render.com/).
 
-## Status
+### 2. Supabase setup
 
-The static UI is feature-complete for the demo path (`npm start`). The backend MVP (M3) is shipped: all dashboard pages support a `MERIDIAN_LIVE` toggle that reads from the live API — auth, virtual keys, provider keys, agents, alerts, request log, KPI aggregation, and audit log are all backed by real storage. The ML service has feature extraction + a heuristic fallback but no production training loop.
+1. Create a [Supabase](https://supabase.com) project
+2. Run [`schema/000_init.sql`](schema/000_init.sql) in the SQL editor
+3. Enable **Google** under Authentication → Providers
+4. Set **Site URL** and **Redirect URLs** to your Render URL (see [docs/WEB_PUBLISH.md](docs/WEB_PUBLISH.md))
 
-Next: Supabase migration (M2), OTP auth (M1 remainder), ML cost router (M4), Vite + CSP hardening (M6).
+### 3. Render environment variables
 
-See [docs/GOAL.md](docs/GOAL.md) for the product vision and [PLAN.md](PLAN.md) for the engineering roadmap.
+In Render → **Environment**, set:
+
+| Variable | Value |
+|----------|-------|
+| `NODE_ENV` | `production` |
+| `MERIDIAN_STORE` | `supabase` |
+| `JWT_SECRET` | 64-char hex (`node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"`) |
+| `ENCRYPTION_KEY` | another 64-char hex |
+| `SUPABASE_URL` | `https://YOUR_PROJECT.supabase.co` |
+| `SUPABASE_ANON_KEY` | Supabase → Settings → API |
+| `SUPABASE_SERVICE_ROLE_KEY` | same page (server only) |
+| `SUPABASE_JWT_SECRET` | same page → JWT secret |
+
+`PORT` is set automatically by Render.
+
+### 4. Deploy
+
+- **New → Blueprint** → connect this repo → branch `main`
+- Or **Web Service**: build `npm install`, start `npm run start:api`
+- Health check: `/api/auth/config`
+
+Full walkthrough: **[docs/WEB_PUBLISH.md](docs/WEB_PUBLISH.md)**
+
+---
+
+## Wire your apps
+
+Each app gets a **virtual key** (`mk_…`). After every LLM call:
+
+```http
+POST https://YOUR-APP.onrender.com/api/v1/requests
+X-Meridian-Key: mk_your_secret_here
+Content-Type: application/json
+
+{
+  "provider": "openai",
+  "model": "gpt-4o-mini",
+  "promptTokens": 100,
+  "completionTokens": 50,
+  "latencyMs": 200,
+  "status": "ok"
+}
+```
+
+Traffic shows up on Overview, Live Feed, and Request Logs.
+
+---
+
+## Project structure
+
+```
+Meridian2.0/
+├── Meridian.html          # SPA entrypoint
+├── render.yaml            # Render deploy blueprint
+├── src/                   # React dashboard (in-browser JSX)
+├── server/                # Express API
+├── python/router_service/ # ML cost router
+├── schema/000_init.sql    # Supabase schema
+└── docs/                  # Plans + deploy guides
+```
+
+---
+
+## Scripts
+
+| Command | Description |
+|---------|-------------|
+| `npm start` | Static demo (port 3000) |
+| `npm run start:api` | API + dashboard (port 5500) |
+| `npm run seed:demo` | Populate demo user + 500 requests |
+| `npm run doctor` | Validate env + store |
+| `npm test` | Backend tests (Vitest) |
+
+---
+
+## Docs
+
+- [WEB_PUBLISH.md](docs/WEB_PUBLISH.md) — Google OAuth + Render + Supabase checklist
+- [SUPABASE_SETUP.md](docs/SUPABASE_SETUP.md) — Google sign-in setup
+- [DEPLOY.md](docs/DEPLOY.md) — Production notes
+- [GOAL.md](docs/GOAL.md) — Product vision
+
+---
+
+## License
+
+Private / all rights reserved unless otherwise noted.

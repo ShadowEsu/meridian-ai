@@ -330,11 +330,11 @@ function Header({ title, sub, search, demo }) {
   return (
     <div className="header">
       <div className="header-projects">
-        <div style={{ color: 'var(--text)', fontWeight: 500, fontSize: 14 }}>
-          {title || 'Project Alpha'}
+        <div style={{ color: 'var(--text)', fontWeight: 600, fontSize: 14, letterSpacing: '-0.01em' }}>
+          {title || 'Dashboard'}
         </div>
         {sub ? (
-          <div style={{ color: 'var(--text-mute)', fontWeight: 500, fontSize: 12 }}>
+          <div style={{ color: 'var(--text-faint)', fontWeight: 300, fontSize: 11.5 }}>
             {sub}
           </div>
         ) : null}
@@ -345,18 +345,23 @@ function Header({ title, sub, search, demo }) {
       </div>
 
       <div className="header-actions">
-        <button type="button" className="btn btn-primary" style={{ padding: '7px 12px' }}>
-          Deploy
+        <button type="button" className="btn" style={{ padding: '6px 12px', fontSize: 12 }}>
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M12 3v12M7 8l5-5 5 5"/><path d="M5 21h14"/>
+          </svg>
+          Export
         </button>
         <div
           title={demo ? `Sample data · ${title}` : title}
           style={{
-            width: 32, height: 32, borderRadius: 999,
+            width: 30, height: 30, borderRadius: 8,
             overflow: 'hidden',
-            border: '1px solid rgba(255,255,255,.20)',
-            background: 'rgba(255,255,255,.04)',
+            border: '1px solid rgba(255,255,255,.14)',
+            background: 'linear-gradient(135deg, #B87A5E, #5D8B7A)',
             display: 'grid', placeItems: 'center',
-            fontFamily: 'var(--font-sans)', fontWeight: 700, fontSize: 12,
+            fontFamily: 'var(--font-sans)', fontWeight: 700, fontSize: 11.5,
+            color: 'rgba(255,255,255,0.95)',
+            boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
           }}
         >
           M

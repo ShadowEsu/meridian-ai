@@ -1,8 +1,8 @@
 {
-  "name": "meridian",
-  "private": true,
-  "version": "0.1.0",
-  "description": "Meridian AI Cost Intelligence — static UI + optional API server",
+  "name": "meridian-2.0",
+  "private": false,
+  "version": "2.0.0",
+  "description": "Meridian 2.0 — AI cost intelligence dashboard with Supabase + Render deploy",
   "scripts": {
     "start": "node server/index.js",
     "start:api": "node server/index.with-api.js",
