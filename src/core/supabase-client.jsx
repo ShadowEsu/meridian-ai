@@ -91,7 +91,7 @@
     if (!c) {
       throw new Error('Google sign-in is not configured. See docs/SUPABASE_SETUP.md.');
     }
-    const redirect = location.origin + '/';
+    const redirect = location.origin + '/app?live=1';
     const { error } = await c.auth.signInWithOAuth({
       provider: 'google',
       options: { redirectTo: redirect },

@@ -13,15 +13,11 @@ const ROOT = path.join(__dirname, '..');
 const LANDING = path.join(ROOT, 'landing');
 
 const app = express();
-express.static.mime.define({ 'application/javascript': ['jsx'] });
-app.use('/home', express.static(LANDING, { extensions: ['html'] }));
-app.get('/home', (_req, res) => res.sendFile(path.join(LANDING, 'index.html')));
-app.use(express.static(ROOT, { extensions: ['html'] }));
-
-app.get('/', (_req, res) => res.sendFile(path.join(ROOT, 'Meridian.html')));
-app.get('/app', (_req, res) => res.redirect(301, '/'));
+const { mountStaticRoutes } = require('./lib/static-routes');
+mountStaticRoutes(app, { root: ROOT, landing: LANDING });
 
 app.listen(PORT, () => {
   console.log(`Meridian UI (static demo)  http://localhost:${PORT}`);
-  console.log(`  Marketing preview  http://localhost:${PORT}/home`);
+  console.log(`  Landing    http://localhost:${PORT}/`);
+  console.log(`  Dashboard  http://localhost:${PORT}/app`);
 });

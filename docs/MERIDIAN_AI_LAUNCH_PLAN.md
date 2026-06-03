@@ -23,8 +23,9 @@ This document is the single checklist for making the product **live** and rebuil
 
 | URL | What visitors see |
 |-----|-------------------|
-| `/` | Dashboard SPA (`Meridian.html`) — auth or demo |
-| `/home` | Marketing launch page |
+| `/` | Marketing launch page |
+| `/app` | Dashboard SPA (`Meridian.html`) — add `?live=1` for Google sign-in |
+| `/home` | Redirects to `/` |
 | `/api/*` | Express API |
 
 **Gap vs. original design** (`docs/LANDING_PAGE_PLAN.md`): marketing was meant to own `/`, with the app at `/app`. Cold traffic currently hits the dashboard first, not the story.
@@ -90,19 +91,19 @@ Do these in order. Full links: `docs/WEB_PUBLISH.md`.
 
 You said you will provide brand copy and details. Until then, use this structure. Design system: `design-system/meridian/DESIGN.md` (Action Blue `#0066cc`, SF Pro / Inter, light/dark tiles).
 
-### Phase A — Routing & CTAs (engineering, ~1 PR)
+### Phase A — Routing & CTAs ✅ shipped
 
 **Goal:** First-time visitors see marketing; product lives under `/app`.
 
-| Task | Detail |
+| Task | Status |
 |------|--------|
-| A.1 | `server/index.with-api.js`: serve `landing/index.html` at `GET /` |
-| A.2 | Serve `Meridian.html` at `GET /app` (and static assets unchanged) |
-| A.3 | Update all launch CTAs: `href="/app?live=1"` (not `/`) |
-| A.4 | `WEB_PUBLISH.md` + Supabase redirect URLs: add `https://meridian20.onrender.com/app**` |
-| A.5 | Google OAuth origins unchanged (same host) |
+| A.1 | `server/lib/static-routes.js` — landing at `/`, dashboard at `/app` | Done |
+| A.2 | Block `/data`, `/server`, etc. from static exposure | Done |
+| A.3 | Launch CTAs → `/app?live=1` | Done |
+| A.4 | Supabase redirect URLs include `/app**` | Done in `WEB_PUBLISH.md` |
+| A.5 | Google OAuth `redirectTo` → `/app?live=1` | Done |
 
-**Acceptance:** `https://meridian20.onrender.com/` shows hero; **Start free** opens live auth at `/app?live=1`.
+**Acceptance:** `/` shows hero; **Start free** opens live auth at `/app?live=1`.
 
 ### Phase B — Copy & positioning (needs your input)
 

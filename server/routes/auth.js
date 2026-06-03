@@ -92,7 +92,7 @@ function register(app, { store, audit }) {
 
   // Exchange a Supabase access token for a Meridian session cookie.
   // Frontend gets the token from supabase.auth.getSession() after Google OAuth.
-  // We verify the JWT locally with SUPABASE_JWT_SECRET, then auto-link by email.
+  // Verified via Supabase Auth (ECC) or legacy HS256; auto-link / create local user by email.
   app.post(
     '/api/auth/supabase-session',
     authLimiter,

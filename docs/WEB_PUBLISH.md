@@ -95,13 +95,14 @@ For a public demo, publish the app or add every tester email under Test users.
 
 ```
 http://localhost:5500/**
-http://localhost:5500/?live=1
+http://localhost:5500/app**
+http://localhost:5500/app?live=1
 https://meridian20.onrender.com/**
-https://meridian20.onrender.com/
-https://meridian20.onrender.com/?live=1
+https://meridian20.onrender.com/app**
+https://meridian20.onrender.com/app?live=1
 ```
 
-Dashboard and Google sign-in stay at the **site root** (`/`) — same as before. Optional marketing page: `/home`.
+Marketing homepage: **`/`** · Dashboard + Google sign-in: **`/app?live=1`** · Legacy `/home` redirects to `/`.
 
 **Save changes.**
 

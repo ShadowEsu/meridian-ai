@@ -260,7 +260,7 @@ flowchart LR
 
 | Area | Endpoints |
 |------|-----------|
-| **Auth** | `GET /api/auth/config`, `POST /api/auth/register`, `login`, `supabase-callback`, `logout`, `GET /api/auth/me` |
+| **Auth** | `GET /api/auth/config`, `POST /api/auth/signup`, `login`, `supabase-session`, `logout`, `GET /api/auth/me` |
 | **Ingest** | `POST /api/v1/requests` (virtual key), `GET /api/requests` (session) |
 | **KPI** | `GET /api/kpi/overview`, `GET /api/kpi/feed` |
 | **Keys** | `GET/POST/DELETE /api/provider-keys`, `GET/POST/PUT/DELETE /api/virtual-keys` |
@@ -281,8 +281,8 @@ npm install
 npm start
 ```
 
-- Dashboard (demo): `http://localhost:3000/`
-- Marketing preview: `http://localhost:3000/home`
+- Marketing: `http://localhost:3000/`
+- Dashboard (demo): `http://localhost:3000/app`
 
 Sample data from `src/core/data.jsx` — no login, no persistence.
 
@@ -298,7 +298,7 @@ npm install
 npm run start:api
 ```
 
-Open **`http://localhost:5500/`** (production mirror: **`https://meridian20.onrender.com/`**)
+Open **`http://localhost:5500/app?live=1`** (marketing: `/` · production: **`https://meridian20.onrender.com/`**)
 
 Optional demo data:
 

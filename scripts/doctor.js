@@ -20,13 +20,31 @@ function fail(name, detail) { checks.push({ ok: false, name, detail: detail || '
   ok('PORT', String(process.env.PORT || 5500));
   ok('NODE_ENV', String(process.env.NODE_ENV || 'development'));
 
+  const storeKind = (process.env.MERIDIAN_STORE || 'json').toLowerCase();
+  ok('MERIDIAN_STORE', storeKind);
+
+  if (storeKind === 'supabase') {
+    const url = process.env.SUPABASE_URL || '';
+    const anon = process.env.SUPABASE_ANON_KEY || '';
+    const svc = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
+    if (url.startsWith('https://') && url.includes('.supabase.co')) ok('SUPABASE_URL', url);
+    else fail('SUPABASE_URL', 'missing or invalid');
+    if (anon.length > 20) ok('SUPABASE_ANON_KEY', 'present');
+    else fail('SUPABASE_ANON_KEY', 'missing — publishable key from Supabase dashboard');
+    if (svc.length > 20) ok('SUPABASE_SERVICE_ROLE_KEY', 'present');
+    else fail('SUPABASE_SERVICE_ROLE_KEY', 'missing — secret key (server only)');
+  }
+
   // Store
   try {
     const { createStore } = require('../server/store');
     const storePath = process.env.MERIDIAN_STORE_PATH || path.join(__dirname, '..', 'data', 'meridian-store.json');
-    const store = createStore({ kind: 'json', path: storePath });
+    const store = storeKind === 'supabase'
+      ? createStore({ kind: 'supabase' })
+      : createStore({ kind: 'json', path: storePath });
     const users = await store.users.all();
-    ok('store', `${storePath} (${users.length} users)`);
+    const label = storeKind === 'supabase' ? 'supabase' : storePath;
+    ok('store', `${label} (${users.length} users)`);
   } catch (e) {
     fail('store', e.message);
   }
