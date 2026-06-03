@@ -8,16 +8,12 @@
     'src/core/data.jsx',
     'src/core/api.jsx',
     'src/core/supabase-client.jsx',
-    'src/design/theme.js',
     'src/core/icons.jsx',
-    'src/core/motion.jsx',
-    'src/components/ui.jsx',
-    'src/components/layout.jsx',
     'src/core/charts.jsx',
     'src/core/ui-actions.jsx',
     'src/core/shell.jsx',
     'src/pages/auth.jsx',
-    'src/pages/overview-production.jsx',
+    'src/pages/overview.jsx',
     'src/pages/feed.jsx',
     'src/pages/logs.jsx',
     'src/pages/agents.jsx',
@@ -45,7 +41,6 @@
         if (!res.ok) throw new Error('Failed to load ' + file + ' (HTTP ' + res.status + ')');
         const code = await res.text();
         const out = Babel.transform(code, { presets: ['react'] }).code;
-        // Global scope — same as inline <script type="text/babel">
         (0, eval)(out);
       }
     } catch (e) {

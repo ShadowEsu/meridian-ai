@@ -170,7 +170,7 @@ function HeroRow({ data }) {
       <article className="card-r hero-num-card">
         <HeroNumber data={data} />
       </article>
-      <article className="card-r alert-card">
+      <article className="card-r alert-card mc-critical-card">
         <AlertCard />
       </article>
     </section>
@@ -190,6 +190,7 @@ function HeroNumber({ data }) {
     setVal(v => heroSpendSet(v + inc));
     setDelta(`+$${inc.toFixed(2)}`);
     setTick(true);
+    try { window.dispatchEvent(new Event('meridian:hero-tick')); } catch (_) {}
     setTimeout(() => {
       setTick(false);
       pendingRef.current = false;
@@ -213,6 +214,11 @@ function HeroNumber({ data }) {
   const cents = Math.round((val - dollars) * 100);
   const fmtDollars = dollars.toLocaleString();
   const baselineDelta = data.fmtMoney(data.savingsUsd || 14200);
+  const MC = window.MissionControl;
+  const health = MC && MC.spendHealth
+    ? MC.spendHealth(val, data.budgetCap, data.projectedEOM)
+    : 'warn';
+  const burnSpeed = health === 'critical' ? 1.4 : health === 'warn' ? 1.1 : 1;
 
   return (
     <>
@@ -223,19 +229,24 @@ function HeroNumber({ data }) {
         <span className="sep">·</span>
         <span>vs $107.6k baseline</span>
       </div>
-      <div className="hero-num-row">
-        <h2 ref={numRef} className={`hero-num tnum${tick ? ' tick' : ''}`}>
-          ${fmtDollars}
-          <span className="cents">.{String(cents).padStart(2, '0')}</span>
-        </h2>
-        <span
-          className={`hero-delta mono${delta ? ' fly' : ''}`}
-          key={delta}  /* re-mount triggers animation each tick */
-        >{delta}</span>
-        <span className="vs-base">
-          <span className="lab">SAVED</span>
-          <span className="v">−{baselineDelta} (13.2%)</span>
-        </span>
+      <div className="mc-heartbeat-wrap">
+        <div className="hero-num-row">
+          <h2 ref={numRef} className={`hero-num mc-heartbeat-num tnum mc-health-${health}${tick ? ' tick' : ''}`}>
+            ${fmtDollars}
+            <span className="cents">.{String(cents).padStart(2, '0')}</span>
+          </h2>
+          <span
+            className={`hero-delta mono${delta ? ' fly' : ''}`}
+            key={delta}
+          >{delta}</span>
+          <span className="vs-base">
+            <span className="lab">SAVED</span>
+            <span className="v">−{baselineDelta} (13.2%)</span>
+          </span>
+        </div>
+        {MC && MC.HeartbeatWaveform
+          ? <MC.HeartbeatWaveform health={health} speed={burnSpeed} />
+          : null}
       </div>
       <div className="ministats-r">
         <Ministat k="CALLS / 30d" v={data.fmtNum(data.totalRequests)} sub="+8.4% w/w" />
@@ -262,7 +273,7 @@ function AlertCard() {
   return (
     <>
       <div className="alert-head">
-        <span className="pdot" aria-hidden="true"></span>
+        <span className="mc-radar-ping" aria-hidden="true"></span>
         CRITICAL · ENGINEERING<span className="sep">·</span><span className="ts">2m ago</span>
       </div>
       <h3 className="alert-headline">
