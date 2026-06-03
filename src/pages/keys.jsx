@@ -202,7 +202,7 @@ function PageKeys({ keysFilter }) {
               onChange={e => setFilter(e.target.value)}
               style={{ height: 30, fontSize: 12, padding: '0 10px', width: 160 }}
             />
-            <button type="button" className="ghost-r">Export</button>
+            <button type="button" className="ghost-r" onClick={() => window.MeridianUI && window.MeridianUI.exportData('API keys')}>Export</button>
           </div>
         </header>
 

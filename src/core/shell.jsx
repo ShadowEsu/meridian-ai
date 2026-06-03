@@ -98,9 +98,8 @@ const SIDE_ICONS = {
 
 const NAV_WORKSPACE = [
   { id: 'overview', label: 'Overview', icon: 'overview' },
-  { id: 'spend',    label: 'Spend',    icon: 'spend',   alias: 'overview' },
   { id: 'models',   label: 'Models',   icon: 'models'   },
-  { id: 'routing',  label: 'Routing rules', icon: 'routing' },
+  { id: 'routing',  label: 'Smart router', icon: 'routing', badge: 'ML' },
   { id: 'teams',    label: 'Teams',    icon: 'teams'    },
   { id: 'feed',     label: 'Live',     icon: 'live',    liveDot: true },
   { id: 'cache',    label: 'Cache',    icon: 'cache'    },
@@ -115,7 +114,36 @@ const NAV_OPS = [
   { id: 'settings',     label: 'Settings',     icon: 'settings' },
 ];
 
-function Sidebar({ page, setPage, user, collapsed, onToggle }) {
+function Sidebar({ page, setPage, user, collapsed, onToggle, sideWidth, onSideResize }) {
+  const resizeRef = React.useRef({ dragging: false, startX: 0, startW: 240 });
+
+  React.useEffect(() => {
+    function onMove(e) {
+      if (!resizeRef.current.dragging || collapsed) return;
+      const dx = e.clientX - resizeRef.current.startX;
+      const next = Math.round(Math.min(320, Math.max(200, resizeRef.current.startW + dx)));
+      onSideResize && onSideResize(next);
+    }
+    function onUp() {
+      if (!resizeRef.current.dragging) return;
+      resizeRef.current.dragging = false;
+      document.body.classList.remove('sidebar-resizing');
+    }
+    window.addEventListener('mousemove', onMove);
+    window.addEventListener('mouseup', onUp);
+    return () => {
+      window.removeEventListener('mousemove', onMove);
+      window.removeEventListener('mouseup', onUp);
+    };
+  }, [collapsed, onSideResize]);
+
+  function startResize(e) {
+    if (collapsed) return;
+    e.preventDefault();
+    resizeRef.current = { dragging: true, startX: e.clientX, startW: sideWidth || 240 };
+    document.body.classList.add('sidebar-resizing');
+  }
+
   function renderItem(it) {
     const targetId = it.alias || it.id;
     const isActive = page === targetId;
@@ -159,7 +187,15 @@ function Sidebar({ page, setPage, user, collapsed, onToggle }) {
   const initial = (userName[0] || 'M').toUpperCase();
 
   return (
-    <aside className="sidebar" aria-label="Primary navigation">
+    <aside className="sidebar" aria-label="Primary navigation" style={collapsed ? undefined : { width: sideWidth }}>
+      <div
+        className="side-resize"
+        role="separator"
+        aria-orientation="vertical"
+        aria-label="Resize sidebar"
+        title="Drag to resize sidebar"
+        onMouseDown={startResize}
+      />
       <div className="side-head">
         <div className="logo" aria-hidden="true">
           {Icon.logo()}
@@ -345,7 +381,7 @@ function Header({ title, sub, search, demo }) {
       </div>
 
       <div className="header-actions">
-        <button type="button" className="btn" style={{ padding: '6px 12px', fontSize: 12 }}>
+        <button type="button" className="btn" style={{ padding: '6px 12px', fontSize: 12 }} onClick={() => window.MeridianUI && window.MeridianUI.exportData('Dashboard')}>
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M12 3v12M7 8l5-5 5 5"/><path d="M5 21h14"/>
           </svg>

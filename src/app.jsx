@@ -56,7 +56,25 @@ function AuthenticatedApp({ user }) {
   const [page, setPage] = React.useState('overview');
   const [keysFilter, setKeysFilter] = React.useState('');
   const [showSetup, setShowSetup] = React.useState(false);
-  const [collapsed, setCollapsed] = React.useState(false);
+  const [collapsed, setCollapsed] = React.useState(() => {
+    try { return localStorage.getItem('meridian_sidebar_collapsed') === '1'; } catch { return false; }
+  });
+  const [sideWidth, setSideWidth] = React.useState(() => {
+    try {
+      const w = parseInt(localStorage.getItem('meridian_sidebar_w'), 10);
+      return Number.isFinite(w) && w >= 200 && w <= 320 ? w : 248;
+    } catch { return 248; }
+  });
+
+  React.useEffect(() => {
+    try { localStorage.setItem('meridian_sidebar_collapsed', collapsed ? '1' : '0'); } catch {}
+  }, [collapsed]);
+
+  React.useEffect(() => {
+    if (!collapsed) {
+      try { localStorage.setItem('meridian_sidebar_w', String(sideWidth)); } catch {}
+    }
+  }, [sideWidth, collapsed]);
 
   React.useEffect(() => {
     const k = 'meridian_setup_v1_' + user.id;
@@ -98,9 +116,15 @@ function AuthenticatedApp({ user }) {
 
   const M = window.MERIDIAN;
 
+  const sidebarPx = collapsed ? 68 : sideWidth;
+
   return (
-    <div className={`app${collapsed ? ' collapsed' : ''}`}>
+    <div
+      className={`app${collapsed ? ' collapsed' : ''}`}
+      style={{ '--sidebar-w': sidebarPx + 'px' }}
+    >
       <a href="#main-content" className="skip-link">Skip to main content</a>
+      {typeof ToastHost !== 'undefined' ? <ToastHost /> : null}
       {showSetup ? <SetupWizard user={user} onDone={() => setShowSetup(false)} /> : null}
       <Sidebar
         page={page}
@@ -108,6 +132,8 @@ function AuthenticatedApp({ user }) {
         user={user}
         collapsed={collapsed}
         onToggle={() => setCollapsed(c => !c)}
+        sideWidth={sideWidth}
+        onSideResize={setSideWidth}
       />
       <main className="main" id="main-content" tabIndex="-1">
         {M.uiDemoSampleData ? (

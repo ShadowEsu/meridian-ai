@@ -169,6 +169,7 @@ function PageTeams() {
  * ============================================================ */
 function PageRoutingRules() {
   const M = window.MERIDIAN;
+  const UI = window.MeridianUI;
   const rules = (M.ROUTING_RULES || [
     { id: 'r1', when: 'task = code-completion', route: 'gpt-4.1-mini', why: 'cheapest with code training' },
     { id: 'r2', when: 'tokens > 50k', route: 'claude-sonnet-4-6', why: '200k context, 5× cheaper than opus' },
@@ -179,10 +180,10 @@ function PageRoutingRules() {
 
   return (
     <div className="overview-r">
-      <PageHead title="Routing rules" eyebrow="Workspace" right={
+      <PageHead title="Smart router" eyebrow="Workspace · ML policy" right={
         <>
           <span className="chip"><span className="dot"></span>policy v3.2 · live</span>
-          <button type="button" className="cta-r">+ New rule</button>
+          <button type="button" className="cta-r" onClick={() => UI && UI.comingSoon('Custom routing rules')}>+ New rule</button>
         </>
       } />
 
@@ -217,7 +218,7 @@ function PageRoutingRules() {
                   <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--text-mute)' }}>→</span>
                   <span className="chip" style={{ fontFamily: 'var(--font-mono)' }}>{r.route}</span>
                 </div>
-                <button type="button" className="ghost-r">Edit</button>
+                <button type="button" className="ghost-r" onClick={() => UI && UI.comingSoon('Rule editor')}>Edit</button>
               </div>
             ))}
           </div>
@@ -344,7 +345,7 @@ function PageBilling() {
               <span className="sub">stripe-backed · auto-billed monthly</span>
             </div>
             <div className="r">
-              <button type="button" className="ghost-r">Download all</button>
+              <button type="button" className="ghost-r" onClick={() => window.MeridianUI && window.MeridianUI.exportData('Invoices')}>Download all</button>
             </div>
           </header>
           <table className="models-table">
@@ -413,6 +414,7 @@ function PageBilling() {
  * INTEGRATIONS — list of available + connected integrations
  * ============================================================ */
 function PageIntegrations() {
+  const UI = window.MeridianUI;
   const integrations = [
     { id: 'slack',     name: 'Slack',     blurb: 'Post alerts to a channel', status: 'connected', icon: '◇' },
     { id: 'pagerduty', name: 'PagerDuty', blurb: 'Page on-call for criticals', status: 'connected', icon: '!' },
@@ -425,8 +427,13 @@ function PageIntegrations() {
   return (
     <div className="overview-r">
       <PageHead title="Integrations" eyebrow="Operations" right={
-        <span className="chip">{integrations.filter(i => i.status === 'connected').length} connected · {integrations.length - integrations.filter(i => i.status === 'connected').length} available</span>
+        <span className="chip">{integrations.filter(i => i.status === 'connected').length} connected · preview</span>
       } />
+
+      <div className="coming-soon-banner card-r">
+        <strong>Integrations — coming soon</strong>
+        <span>Slack, PagerDuty, webhooks, and SSO connectors are on the roadmap.</span>
+      </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 12 }}>
         {integrations.map(i => {
@@ -447,7 +454,11 @@ function PageIntegrations() {
                 <div style={{ fontWeight: 500, fontSize: 14 }}>{i.name}</div>
                 <div style={{ fontSize: 12, color: 'var(--text-mute)', marginTop: 3 }}>{i.blurb}</div>
               </div>
-              <button type="button" className={connected ? 'ghost-r' : 'cta-r'}>
+              <button
+                type="button"
+                className={connected ? 'ghost-r' : 'cta-r'}
+                onClick={() => UI && UI.comingSoon(i.name + ' integration')}
+              >
                 {connected ? 'Configure' : 'Connect →'}
               </button>
             </article>

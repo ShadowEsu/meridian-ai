@@ -153,7 +153,7 @@ function PageLiveFeed() {
             <button type="button" className="ghost-r" onClick={() => setPaused(!paused)}>
               {paused ? 'Resume' : 'Pause'}
             </button>
-            <button type="button" className="ghost-r">Filter</button>
+            <button type="button" className="ghost-r" onClick={() => window.MeridianUI && window.MeridianUI.toast('Filter panel — preview', 'info')}>Filter</button>
           </div>
         </header>
 

@@ -3,11 +3,23 @@
 // spend flow stacked bars · team budgets + provider mix · footer.
 
 const PROVIDER_COLOR = {
-  openai:    { c: '#6B9080', c2: '#8AAB99' },  // sage
-  anthropic: { c: '#C28A6A', c2: '#D6A687' },  // clay
-  google:    { c: '#7C8AAA', c2: '#9AA6BF' },  // slate
-  other:     { c: '#7C7A78', c2: '#9C9A98' },  // warm gray
+  openai:    { c: 'var(--oa)',  c2: 'var(--oa-2)' },
+  anthropic: { c: 'var(--an)',  c2: 'var(--an-2)' },
+  google:    { c: 'var(--go)',  c2: 'var(--go-2)' },
+  other:     { c: 'var(--ot)',  c2: 'var(--ot)' },
 };
+
+/** Persist hero spend across Overview remounts (sidebar re-click). */
+let _heroSpendCache = null;
+function heroSpendInitial(data) {
+  if (_heroSpendCache != null) return _heroSpendCache;
+  _heroSpendCache = data.totalSpendUsd + 0.32;
+  return _heroSpendCache;
+}
+function heroSpendSet(next) {
+  _heroSpendCache = next;
+  return next;
+}
 function familyToProvider(family) {
   if (family === 'gpt')    return 'openai';
   if (family === 'claude') return 'anthropic';
@@ -68,8 +80,12 @@ function PageOverview() {
   if (error) return <div className="meridian-error">{error.message}</div>;
   if (!data) return <div className="meridian-loading">Loading…</div>;
 
+  const M = window.MERIDIAN;
+  const saved = data.savingsUsd || M.KPI.routingSavings || 14200;
+
   return (
     <div className="overview-r">
+      <SavingsStrip saved={saved} fmtMoney={data.fmtMoney} />
       <PageHeaderR />
       <HeroRow data={data} />
       <MidRow data={data} />
@@ -80,8 +96,34 @@ function PageOverview() {
   );
 }
 
+function SavingsStrip({ saved, fmtMoney }) {
+  const UI = window.MeridianUI;
+  return (
+    <section className="savings-strip card-r" aria-label="API savings">
+      <div className="savings-strip-main">
+        <span className="savings-strip-badge">ML router</span>
+        <div>
+          <div className="savings-strip-title">Save API credits — route to the right model</div>
+          <div className="savings-strip-sub">
+            Smart-routing cut spend by <b>{fmtMoney(saved)}</b> vs gpt-4-only baseline this month
+          </div>
+        </div>
+      </div>
+      <div className="savings-strip-actions">
+        <button type="button" className="cta-r" onClick={() => UI && UI.navigate('routing')}>
+          View routing rules
+        </button>
+        <button type="button" className="ghost-r" onClick={() => UI && UI.navigate('models')}>
+          Compare models
+        </button>
+      </div>
+    </section>
+  );
+}
+
 function PageHeaderR() {
   const [range, setRange] = React.useState('MTD');
+  const UI = window.MeridianUI;
   return (
     <header className="pghead">
       <div className="pghead-l">
@@ -99,17 +141,20 @@ function PageHeaderR() {
               key={r}
               type="button"
               className={range === r ? 'on' : ''}
-              onClick={() => setRange(r)}
+              onClick={() => {
+                setRange(r);
+                if (UI) UI.toast('Showing ' + r + ' range (preview)', 'info');
+              }}
               aria-current={range === r ? 'true' : undefined}
             >{r}</button>
           ))}
         </div>
-        <button type="button" className="iconbtn" title="Search" aria-label="Search">
+        <button type="button" className="iconbtn" title="Search" aria-label="Search" onClick={() => UI && UI.toast('Press ⌘K to search', 'info')}>
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/>
           </svg>
         </button>
-        <button type="button" className="iconbtn" title="Export" aria-label="Export">
+        <button type="button" className="iconbtn" title="Export" aria-label="Export" onClick={() => UI && UI.exportData('Overview')}>
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M12 3v12M7 8l5-5 5 5"/><path d="M5 21h14"/>
           </svg>
@@ -133,7 +178,7 @@ function HeroRow({ data }) {
 }
 
 function HeroNumber({ data }) {
-  const [val, setVal] = React.useState(data.totalSpendUsd + 0.32);
+  const [val, setVal] = React.useState(() => heroSpendInitial(data));
   const [delta, setDelta] = React.useState('');
   const [tick, setTick] = React.useState(false);
   const numRef = React.useRef(null);
@@ -142,7 +187,7 @@ function HeroNumber({ data }) {
   function trigger(inc) {
     if (pendingRef.current) return;
     pendingRef.current = true;
-    setVal(v => v + inc);
+    setVal(v => heroSpendSet(v + inc));
     setDelta(`+$${inc.toFixed(2)}`);
     setTick(true);
     setTimeout(() => {
@@ -213,6 +258,7 @@ function Ministat({ k, v, vClass, sub }) {
 }
 
 function AlertCard() {
+  const UI = window.MeridianUI;
   return (
     <>
       <div className="alert-head">
@@ -233,11 +279,11 @@ function AlertCard() {
         but it isn't enough at this burn.
       </p>
       <div className="alert-actions">
-        <button type="button" className="cta-r">
+        <button type="button" className="cta-r" onClick={() => UI && UI.investigate()}>
           Investigate <span className="arrow" aria-hidden="true">→</span>
         </button>
-        <button type="button" className="ghost-r">Pause auto-route</button>
-        <button type="button" className="ghost-r">Snooze 1h</button>
+        <button type="button" className="ghost-r" onClick={() => UI && UI.pauseAutoRoute()}>Pause auto-route</button>
+        <button type="button" className="ghost-r" onClick={() => UI && UI.snooze(1)}>Snooze 1h</button>
       </div>
     </>
   );
@@ -255,6 +301,14 @@ function MidRow({ data }) {
           <div className="r">
             <span className="chip"><span className="dot"></span>healthy</span>
             <span className="chip amber"><span className="dot"></span>cache 38%</span>
+            <button
+              type="button"
+              className="ghost-r"
+              style={{ height: 28, fontSize: 11 }}
+              onClick={() => window.MeridianUI && window.MeridianUI.navigate('routing')}
+            >
+              Rules →
+            </button>
           </div>
         </header>
         <RoutingConstellation />
@@ -277,18 +331,18 @@ function MidRow({ data }) {
 }
 
 const ROUTE_INPUTS = [
-  { id: 'eng', tag: 'EN', name: 'Engineering', sub: 'code · grader · 18k req/h', pct: '42%', c: '#D9534A' },
-  { id: 'rsh', tag: 'RS', name: 'Research',    sub: 'analysis · long-ctx',       pct: '22%', c: '#7C8AAA' },
-  { id: 'prd', tag: 'PR', name: 'Product',     sub: 'chat · summarize',          pct: '18%', c: '#6B9080' },
-  { id: 'sup', tag: 'SU', name: 'Support',     sub: 'tickets · classify',        pct: '12%', c: '#C28A6A' },
-  { id: 'grw', tag: 'GR', name: 'Growth',      sub: 'copy · embed',              pct: '6%',  c: '#7C7A78' },
+  { id: 'eng', tag: 'EN', name: 'Engineering', sub: 'code · grader · 18k req/h', pct: '42%', c: 'var(--red)' },
+  { id: 'rsh', tag: 'RS', name: 'Research',    sub: 'analysis · long-ctx',       pct: '22%', c: 'var(--go)' },
+  { id: 'prd', tag: 'PR', name: 'Product',     sub: 'chat · summarize',          pct: '18%', c: 'var(--oa)' },
+  { id: 'sup', tag: 'SU', name: 'Support',     sub: 'tickets · classify',        pct: '12%', c: 'var(--an)' },
+  { id: 'grw', tag: 'GR', name: 'Growth',      sub: 'copy · embed',              pct: '6%',  c: 'var(--ot)' },
 ];
 const ROUTE_MODELS = [
-  { id: 'gpt4o',  tag: '4o', name: 'gpt-4o',            sub: 'OpenAI · $23.6k MTD',    pct: '38%', c: '#6B9080' },
-  { id: 'sonnet', tag: '3.5', name: 'claude-3.5-sonnet', sub: 'Anthropic · $20.2k MTD', pct: '26%', c: '#C28A6A' },
-  { id: 'gem15',  tag: 'G1', name: 'gemini-1.5-pro',     sub: 'Google · $9.9k MTD',     pct: '14%', c: '#7C8AAA' },
-  { id: 'haiku',  tag: 'HK', name: 'claude-haiku',       sub: 'Anthropic · $5.7k MTD',  pct: '12%', c: '#D6A687' },
-  { id: 'mini',   tag: '4m', name: 'gpt-4o-mini',        sub: 'OpenAI · $5.9k MTD',     pct: '10%', c: '#8AAB99' },
+  { id: 'gpt4o',  tag: '4o', name: 'gpt-4o',            sub: 'OpenAI · $23.6k MTD',    pct: '38%', c: 'var(--oa)' },
+  { id: 'sonnet', tag: '3.5', name: 'claude-3.5-sonnet', sub: 'Anthropic · $20.2k MTD', pct: '26%', c: 'var(--an)' },
+  { id: 'gem15',  tag: 'G1', name: 'gemini-1.5-pro',     sub: 'Google · $9.9k MTD',     pct: '14%', c: 'var(--go)' },
+  { id: 'haiku',  tag: 'HK', name: 'claude-haiku',       sub: 'Anthropic · $5.7k MTD',  pct: '12%', c: 'var(--an-2)' },
+  { id: 'mini',   tag: '4m', name: 'gpt-4o-mini',        sub: 'OpenAI · $5.9k MTD',     pct: '10%', c: 'var(--oa-2)' },
 ];
 const ROUTE_MAP = {
   eng: [['gpt4o', 0.45], ['sonnet', 0.30], ['mini', 0.15], ['haiku', 0.10]],
@@ -540,14 +594,14 @@ function RoutingConstellation() {
 }
 
 const SAMPLE_REQS = [
-  { model: 'o1-preview',         team: 'Research',    tokens: '42,180', lat: '3.2s',  cost: 5.20, c: '#6B9080', tag: 'o1' },
-  { model: 'claude-3.5-sonnet',  team: 'Engineering', tokens: '28,400', lat: '1.4s',  cost: 3.82, c: '#C28A6A', tag: '3.5' },
-  { model: 'gpt-4o',             team: 'Engineering', tokens: '19,200', lat: '680ms', cost: 2.14, c: '#6B9080', tag: '4o' },
-  { model: 'gemini-1.5-pro',     team: 'Research',    tokens: '35,600', lat: '880ms', cost: 1.92, c: '#7C8AAA', tag: 'G1' },
-  { model: 'claude-3.5-sonnet',  team: 'Engineering', tokens: '22,100', lat: '1.1s',  cost: 1.84, c: '#C28A6A', tag: '3.5' },
-  { model: 'gpt-4o',             team: 'Product',     tokens: '14,800', lat: '720ms', cost: 1.40, c: '#6B9080', tag: '4o' },
-  { model: 'claude-opus',        team: 'Research',    tokens: '12,300', lat: '2.4s',  cost: 1.32, c: '#D6A687', tag: 'OP' },
-  { model: 'gemini-1.5-pro',     team: 'Engineering', tokens: '18,400', lat: '560ms', cost: 1.05, c: '#7C8AAA', tag: 'G1' },
+  { model: 'o1-preview',         team: 'Research',    tokens: '42,180', lat: '3.2s',  cost: 5.20, c: 'var(--oa)', tag: 'o1' },
+  { model: 'claude-3.5-sonnet',  team: 'Engineering', tokens: '28,400', lat: '1.4s',  cost: 3.82, c: 'var(--an)', tag: '3.5' },
+  { model: 'gpt-4o',             team: 'Engineering', tokens: '19,200', lat: '680ms', cost: 2.14, c: 'var(--oa)', tag: '4o' },
+  { model: 'gemini-1.5-pro',     team: 'Research',    tokens: '35,600', lat: '880ms', cost: 1.92, c: 'var(--go)', tag: 'G1' },
+  { model: 'claude-3.5-sonnet',  team: 'Engineering', tokens: '22,100', lat: '1.1s',  cost: 1.84, c: 'var(--an)', tag: '3.5' },
+  { model: 'gpt-4o',             team: 'Product',     tokens: '14,800', lat: '720ms', cost: 1.40, c: 'var(--oa)', tag: '4o' },
+  { model: 'claude-opus',        team: 'Research',    tokens: '12,300', lat: '2.4s',  cost: 1.32, c: 'var(--an-2)', tag: 'OP' },
+  { model: 'gemini-1.5-pro',     team: 'Engineering', tokens: '18,400', lat: '560ms', cost: 1.05, c: 'var(--go)', tag: 'G1' },
 ];
 
 function ExpensiveRequests() {
@@ -579,6 +633,13 @@ function ExpensiveRequests() {
     return () => clearInterval(id);
   }, []);
 
+  function openRow(r) {
+    if (window.MeridianUI) {
+      window.MeridianUI.navigate('logs');
+      window.MeridianUI.toast('Inspecting ' + r.reqId, 'info');
+    }
+  }
+
   return (
     <>
       <div className="ex-list">
@@ -589,6 +650,8 @@ function ExpensiveRequests() {
             style={{ '--c': r.c }}
             role="button"
             tabIndex={0}
+            onClick={() => openRow(r)}
+            onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openRow(r); } }}
           >
             <span className="badge">{r.tag}</span>
             <div className="ttl">
@@ -604,7 +667,7 @@ function ExpensiveRequests() {
       </div>
       <div className="ex-foot">
         <span>147 requests over $1.00 today</span>
-        <a href="#">View all →</a>
+        <button type="button" className="ex-foot-link" onClick={() => window.MeridianUI && window.MeridianUI.navigate('logs')}>View all →</button>
       </div>
     </>
   );

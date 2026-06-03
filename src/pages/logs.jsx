@@ -148,7 +148,7 @@ function PageRequestLogs() {
             <option>Error</option>
             <option>Rate Limited</option>
           </select>
-          <button type="button" className="ghost-r" style={{ marginLeft: 'auto' }}>Export CSV</button>
+          <button type="button" className="ghost-r" style={{ marginLeft: 'auto' }} onClick={() => window.MeridianUI && window.MeridianUI.exportData('Request logs')}>Export CSV</button>
         </div>
       </div>
 

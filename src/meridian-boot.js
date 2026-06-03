@@ -10,6 +10,7 @@
     'src/core/supabase-client.jsx',
     'src/core/icons.jsx',
     'src/core/charts.jsx',
+    'src/core/ui-actions.jsx',
     'src/core/shell.jsx',
     'src/pages/auth.jsx',
     'src/pages/overview.jsx',

@@ -79,7 +79,12 @@ function PageAgents() {
             Agent "<b style={{ color: 'var(--text)' }}>{warnAgent?.name || 'Neural_Scraper_v4'}</b>" is executing a recursive loop in Production.
           </div>
         </div>
-        <button type="button" className="cta-r" style={{ background: 'var(--red)', color: '#fff' }}>
+        <button
+          type="button"
+          className="cta-r"
+          style={{ background: 'var(--red)', color: '#fff' }}
+          onClick={() => window.MeridianUI && window.MeridianUI.intercept(warnAgent?.name)}
+        >
           Intercept now
         </button>
       </div>
@@ -154,7 +159,7 @@ function PageAgents() {
             <span className="sub">{M.AGENT_HISTORY.length} sessions · last 14 days</span>
           </div>
           <div className="r">
-            <button type="button" className="ghost-r">Export</button>
+            <button type="button" className="ghost-r" onClick={() => window.MeridianUI && window.MeridianUI.exportData('Agent runs')}>Export</button>
           </div>
         </header>
         <table className="models-table">
