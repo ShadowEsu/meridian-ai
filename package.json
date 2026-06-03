@@ -1,8 +1,8 @@
 {
-  "name": "meridian-2.0",
+  "name": "meridian-ai",
   "private": false,
   "version": "2.0.0",
-  "description": "Meridian 2.0 — AI cost intelligence dashboard with Supabase + Render deploy",
+  "description": "Meridian AI — LLM cost intelligence dashboard with Supabase + Render deploy",
   "scripts": {
     "build:css": "node ./node_modules/tailwindcss/lib/cli.js -i ./src/styles/input.css -o ./src/styles/meridian.bundle.css --minify",
     "build": "npm run build:css",

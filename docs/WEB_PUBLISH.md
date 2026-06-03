@@ -1,8 +1,10 @@
-# Publish Meridian to the Web
+# Publish Meridian AI to the Web
 
-Complete checklist for **Preston / meridian-498300** using your existing Supabase project and Google OAuth client.
+Complete checklist for **Preston Jay Susanto** (`prestonjaysusanto@gmail.com`) using your Supabase project and Google Cloud project **meridian-498300**.
 
-**Do not commit** `client_secret_*.json` or `.env` to git. Paste secrets only into Supabase and your host's env dashboard.
+**GitHub repo:** [ShadowEsu/meridian-ai](https://github.com/ShadowEsu/meridian-ai)
+
+**Do not commit** `client_secret_*.json` or `.env` to git. Paste secrets only into Supabase and Render's environment dashboard.
 
 ---
 
@@ -110,7 +112,7 @@ Dashboard and Google sign-in stay at the **site root** (`/`) — same as before.
 ### 5a. Connect repo
 
 1. [render.com/dashboard](https://dashboard.render.com/) → **New** → **Blueprint** (or **Web Service**)
-2. Connect GitHub repo `ShadowEsu/Meridian2.0` (or your fork)
+2. Connect GitHub repo **`ShadowEsu/meridian-ai`** (branch `main`)
 3. Branch: `main`
 4. Render reads `render.yaml` at repo root
 
@@ -133,12 +135,13 @@ JWT_SECRET=<same 64-char hex from your local .env>
 ENCRYPTION_KEY=<same 64-char hex from your local .env>
 
 SUPABASE_URL=https://berelpcqwplzagtktgnl.supabase.co
-SUPABASE_ANON_KEY=<your sb_publishable_… key>
-SUPABASE_SERVICE_ROLE_KEY=<your sb_secret_… key>
-SUPABASE_JWT_SECRET=e7bfaf0e-01f1-4ee9-adaf-f8fdd5f5448a
+SUPABASE_ANON_KEY=<publishable key from Supabase → Settings → API>
+SUPABASE_SERVICE_ROLE_KEY=<secret key from same page — never expose in browser>
 ```
 
-Copy values from your local `.env` (never commit `.env`).
+`SUPABASE_JWT_SECRET` is **optional** for this project: Supabase uses **ECC (P-256)** signing keys. The Node backend verifies Google tokens via `GET /auth/v1/user` using `SUPABASE_URL` + `SUPABASE_ANON_KEY` only.
+
+Copy values from your local `.env` (never commit `.env`). If you pasted keys in chat, rotate them in Supabase → Settings → API.
 
 ### 5c. First deploy
 
@@ -199,7 +202,7 @@ Content-Type: application/json
 | Google works locally, not on Render | Add Render URL to Google **JavaScript origins** + Supabase **Redirect URLs** |
 | `Access blocked` / app not verified | Publish OAuth consent screen or add user as Test user |
 | `Could not establish session` | Run `schema/000_init.sql` in Supabase |
-| `Invalid Supabase token` | `SUPABASE_JWT_SECRET` in Render must match Supabase → Settings → API → JWT Secret |
+| `Invalid Supabase token` | Check `SUPABASE_ANON_KEY` (publishable) and `SUPABASE_URL`; ECC projects do not need `SUPABASE_JWT_SECRET` |
 | Render free tier sleeps | First request after idle takes ~30s; upgrade or use a keep-alive ping |
 | Blank page | Must use `npm run start:api` (not static `npm start` on port 3000) |
 

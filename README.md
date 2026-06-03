@@ -1,8 +1,14 @@
-# Meridian 2.0
+# Meridian AI
 
 **AI cost intelligence for LLM fleets** — see spend by team, cap budgets per key, catch runaway agents, and route prompts to cheaper models when quality holds.
 
-Built by [Preston Susanto](https://github.com/PrestonSusanto).
+| | |
+|---|---|
+| **Repository** | [github.com/ShadowEsu/meridian-ai](https://github.com/ShadowEsu/meridian-ai) |
+| **Live app** | [meridian20.onrender.com](https://meridian20.onrender.com/) |
+| **Author** | [Preston Jay Susanto](https://github.com/ShadowEsu) · prestonjaysusanto@gmail.com |
+
+> **Go live:** follow **[docs/WEB_PUBLISH.md](docs/WEB_PUBLISH.md)** — Supabase (`berelpcqwplzagtktgnl`), Google Cloud (`meridian-498300`), and Render env vars.
 
 ---
 
@@ -307,9 +313,14 @@ npm run seed:demo
 
 This repo includes a [`render.yaml`](render.yaml) blueprint.
 
-### 1. Fork or clone this repo
+### 1. Clone this repo
 
-Use **your** GitHub account — connect this repo in [Render](https://dashboard.render.com/).
+```bash
+git clone https://github.com/ShadowEsu/meridian-ai.git
+cd meridian-ai
+```
+
+Connect **`ShadowEsu/meridian-ai`** (branch `main`) in [Render](https://dashboard.render.com/).
 
 ### 2. Supabase setup
 
@@ -329,9 +340,9 @@ In Render → **Environment**, set:
 | `JWT_SECRET` | 64-char hex (`node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"`) |
 | `ENCRYPTION_KEY` | another 64-char hex |
 | `SUPABASE_URL` | `https://YOUR_PROJECT.supabase.co` |
-| `SUPABASE_ANON_KEY` | Supabase → Settings → API |
-| `SUPABASE_SERVICE_ROLE_KEY` | same page (server only) |
-| `SUPABASE_JWT_SECRET` | same page → JWT secret |
+| `SUPABASE_ANON_KEY` | Supabase → Settings → API → **publishable** key (`sb_publishable_…`) |
+| `SUPABASE_SERVICE_ROLE_KEY` | same page → **secret** key (`sb_secret_…`, server only) |
+| `SUPABASE_JWT_SECRET` | optional — only for legacy HS256; ECC (P-256) projects can omit |
 
 `PORT` is set automatically by Render.
 
@@ -371,7 +382,7 @@ Traffic shows up on Overview, Live Feed, and Request Logs.
 ## Project structure
 
 ```
-MeridianCode-1/
+meridian-ai/
 ├── Meridian.html              # SPA entrypoint
 ├── src/meridian-boot.js       # Sequential JSX loader
 ├── src/core/                  # api, data, shell, charts…
@@ -414,4 +425,4 @@ Full visual map: [`docs/diagrams/09-repo-structure.svg`](docs/diagrams/09-repo-s
 
 ## License
 
-Private / all rights reserved unless otherwise noted.
+© 2026 Preston Jay Susanto. Source is public for portfolio and deployment; reuse beyond fork/deploy requires permission.
