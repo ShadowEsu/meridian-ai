@@ -1,6 +1,10 @@
 # Marketing Landing Page — Plan
 
-**Status:** stub · queued by Aadi 2026-05-18 · owner: Aadi (working on later)
+**Status:** ✅ done / superseded 2026-05-31 — realized as `landing/index.html` +
+`landing/meridian-home.css`, served at `/` (dashboard moved to `/app`). NOTE: the shipped
+design is a **light Apple-style** language (`design-system/meridian/DESIGN.md`), not the
+dark dashboard-token inheritance this plan originally assumed. The section list / copy
+notes below are historical reference.
 
 ## Why this exists
 

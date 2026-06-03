@@ -61,7 +61,7 @@ npm install
 npm start
 ```
 
-Serves `Meridian.html` at `http://localhost:3000`. All numbers come from `src/core/data.jsx`. No login, no persistence.
+Serves the marketing homepage (`landing/index.html`) at `http://localhost:3000/`, and the dashboard SPA (`Meridian.html`) at `http://localhost:3000/app`. Dashboard numbers come from `src/core/data.jsx`. No login, no persistence.
 
 ### Run with the live backend
 

@@ -1,5 +1,9 @@
 ## Meridian — Stitch design doc
 
+> ⚠️ **Historical / superseded (2026-05-31).** This is the original Crimson-Pro-era
+> design intent. The canonical design system is now `design-system/meridian/DESIGN.md`
+> (Apple-style light + Action Blue `#0066cc`, SF Pro). Kept for context only.
+
 ### One-liner
 Meridian is an AI spend + operations dashboard that makes model usage feel like a “fleet”: you connect providers as containers, watch spend by team, and keep agents from running away.
 
