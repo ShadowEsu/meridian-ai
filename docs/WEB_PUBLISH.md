@@ -88,16 +88,19 @@ For a public demo, publish the app or add every tester email under Test users.
 
 | Field | Value |
 |-------|-------|
-| **Site URL** | `https://YOUR_RENDER_URL` |
+| **Site URL** | `https://YOUR_RENDER_URL/app` |
 | **Redirect URLs** | one per line: |
 
 ```
 http://localhost:5500/**
-http://localhost:5500/?live=1
+http://localhost:5500/app
+http://localhost:5500/app?live=1
 https://YOUR_RENDER_URL/**
-https://YOUR_RENDER_URL/
-https://YOUR_RENDER_URL/?live=1
+https://YOUR_RENDER_URL/app
+https://YOUR_RENDER_URL/app?live=1
 ```
+
+Marketing homepage is `/`; the signed-in dashboard SPA is `/app`.
 
 **Save changes.**
 

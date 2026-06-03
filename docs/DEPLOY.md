@@ -102,8 +102,10 @@ curl https://your-domain/api/models                   # 9-model catalogue
 # Auth round-trip
 curl https://your-domain/api/auth/me                  # 401 expected (no cookie)
 
-# Open the dashboard
-open https://your-domain/                             # should render Meridian.html
+# Open the marketing homepage (landing/index.html)
+open https://your-domain/                             # should render the homepage
+# Open the dashboard SPA
+open https://your-domain/app                          # should render Meridian.html
 ```
 
 If the dashboard loads and `/api/models` returns the pricing table, the deploy is healthy.

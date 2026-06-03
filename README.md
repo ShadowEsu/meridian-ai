@@ -25,7 +25,10 @@ npm install
 npm start
 ```
 
-Open `http://localhost:3000`
+- Marketing homepage: `http://localhost:3000/`
+- Dashboard (demo): `http://localhost:3000/app`
+
+Sample data from `src/core/data.jsx` — no login, no persistence.
 
 ---
 
@@ -39,7 +42,7 @@ npm install
 npm run start:api
 ```
 
-Open **`http://localhost:5500/?live=1`**
+Open **`http://localhost:5500/app`** (add `?live=1` if auto-detect does not flip to live)
 
 Optional demo data:
 

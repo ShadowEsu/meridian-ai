@@ -15,6 +15,7 @@ services:
     buildCommand: npm install
     startCommand: npm run start:api
     healthCheckPath: /api/auth/config
+    # Public site: / = landing, /app = dashboard SPA, /api/* = backend
     envVars:
       - key: NODE_ENV
         value: production

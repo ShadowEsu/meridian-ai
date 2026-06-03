@@ -20,6 +20,7 @@ const { createApp } = require('./app');
 
 const PORT = Number(process.env.PORT) || 5500;
 const ROOT = path.join(__dirname, '..');
+const LANDING = path.join(ROOT, 'landing');
 const STORE_KIND = (process.env.MERIDIAN_STORE || 'json').toLowerCase();
 const STORE_PATH = process.env.MERIDIAN_STORE_PATH || path.join(ROOT, 'data', 'meridian-store.json');
 const IS_PROD = process.env.NODE_ENV === 'production';
@@ -48,10 +49,16 @@ const app = createApp({ store });
 
 // Serve .jsx as JavaScript so browsers/Babel fetch accepts them
 express.static.mime.define({ 'application/javascript': ['jsx'] });
+// Landing first: '/' -> landing/index.html, '/meridian-home.css' -> landing asset.
+app.use(express.static(LANDING, { extensions: ['html'] }));
+// Then ROOT: '/src/*', '/node_modules/*', '/Meridian.html', etc.
 app.use(express.static(ROOT, { extensions: ['html'] }));
-app.get('/', (_req, res) => res.sendFile(path.join(ROOT, 'Meridian.html')));
+app.get('/', (_req, res) => res.sendFile(path.join(LANDING, 'index.html')));
+app.get('/app', (_req, res) => res.sendFile(path.join(ROOT, 'Meridian.html')));
 
 app.listen(PORT, () => {
   console.log(`Meridian server http://localhost:${PORT}`);
+  console.log(`  Landing  http://localhost:${PORT}/`);
+  console.log(`  App      http://localhost:${PORT}/app  (?live=1 for auth + APIs)`);
   console.log(`Store: ${STORE_KIND}${STORE_KIND === 'json' ? ` (${STORE_PATH})` : ''}`);
 });

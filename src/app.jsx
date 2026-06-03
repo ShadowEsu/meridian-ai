@@ -8,16 +8,18 @@ function useAuthGate() {
   // Track live mode reactively so the async auto-detect in Meridian.html
   // can flip us from demo → live after first paint.
   const [live, setLive] = React.useState(!!(window.MeridianAPI && window.MeridianAPI.live));
+  React.useEffect(() => {
+    const onLive = () => setLive(true);
+    window.addEventListener('meridian:live-detected', onLive);
+    return () => window.removeEventListener('meridian:live-detected', onLive);
+  }, []);
 
   const [state, setState] = React.useState(
-    () => (window.MERIDIAN_LIVE || (window.MeridianAPI && window.MeridianAPI.live))
-      ? { phase: 'loading', user: null }
-      : { phase: 'ready', user: DEMO_USER }
+    live ? { phase: 'loading', user: null } : { phase: 'ready', user: DEMO_USER }
   );
 
   const refresh = React.useCallback(() => {
-    const isLive = !!(window.MERIDIAN_LIVE || (window.MeridianAPI && window.MeridianAPI.live));
-    if (!isLive) return;
+    if (!live) return;
     setState({ phase: 'loading', user: null });
     window.MeridianAPI.auth.me()
       .then(d => setState({ phase: 'ready', user: d.user }))
@@ -25,29 +27,18 @@ function useAuthGate() {
         if (e && e.status === 401) setState({ phase: 'signin', user: null });
         else setState({ phase: 'error', user: null, error: e });
       });
-  }, []);
+  }, [live]);
 
   React.useEffect(() => {
-    const onLive = () => {
-      setLive(true);
-      refresh();
-    };
-    window.addEventListener('meridian:live-detected', onLive);
-    return () => window.removeEventListener('meridian:live-detected', onLive);
-  }, [refresh]);
-
-  React.useEffect(() => {
-    const isLive = !!(window.MERIDIAN_LIVE || (window.MeridianAPI && window.MeridianAPI.live));
-    if (!isLive) {
+    if (!live) {
       setState({ phase: 'ready', user: DEMO_USER });
       return;
     }
-    setLive(true);
     refresh();
     const onChange = () => refresh();
     window.addEventListener('meridian:auth-changed', onChange);
     return () => window.removeEventListener('meridian:auth-changed', onChange);
-  }, [refresh]);
+  }, [live, refresh]);
 
   return { state, refresh };
 }
