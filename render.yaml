@@ -12,7 +12,7 @@ services:
     runtime: node
     plan: free
     branch: main
-    buildCommand: npm install
+    buildCommand: npm install && npm run build:css
     startCommand: npm run start:api
     healthCheckPath: /api/auth/config
     envVars:
