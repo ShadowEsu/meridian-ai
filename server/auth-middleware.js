@@ -37,7 +37,11 @@ function signSession(res, payload) {
 }
 
 function clearSession(res) {
-  res.clearCookie(COOKIE, { path: '/' });
+  res.clearCookie(COOKIE, {
+    path: '/',
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
+  });
 }
 
 function readUser(req) {

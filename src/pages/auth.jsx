@@ -21,6 +21,16 @@ function PageAuth({ onAuthed }) {
     return () => { alive = false; };
   }, []);
 
+  // Show server-side OAuth exchange failures (e.g. wrong JWT secret, missing DB)
+  React.useEffect(() => {
+    const onErr = (e) => {
+      const msg = (e && e.detail && e.detail.message) || 'Google sign-in failed after redirect.';
+      setError(msg + (e.detail && e.detail.status === 500 ? ' — check Supabase schema (000_init.sql) and SUPABASE_JWT_SECRET in Render.' : ''));
+    };
+    window.addEventListener('meridian:auth-error', onErr);
+    return () => window.removeEventListener('meridian:auth-error', onErr);
+  }, []);
+
   // ── Live readouts: UTC clock + transit counter ────────────────────────────
   const [utc, setUtc] = React.useState('00:00:00');
   const [transit, setTransit] = React.useState(1847392);
