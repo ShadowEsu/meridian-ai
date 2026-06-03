@@ -107,7 +107,7 @@ function register(app, { store, audit }) {
       }
       let claims;
       try {
-        claims = verifyAccessToken(req.validated.body.accessToken);
+        claims = await verifyAccessToken(req.validated.body.accessToken);
       } catch (e) {
         return jsonError(res, 401, 'Invalid Supabase token', { code: 'INVALID_TOKEN', detail: e.message });
       }
