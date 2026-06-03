@@ -1,8 +1,9 @@
 # Marketing Landing Page — Plan
 
-**Status:** ✅ done / superseded 2026-05-31 — realized as `landing/index.html` +
-`landing/meridian-home.css`, served at `/` (dashboard moved to `/app`). NOTE: the shipped
-design is a **light Apple-style** language (`design-system/meridian/DESIGN.md`), not the
+**Status:** Page **built** (`landing/index.html` + `meridian-home.css`) but served at **`/home`**, not `/`.
+Dashboard still owns `/`. Active go-live + rebuild plan: **[MERIDIAN_AI_LAUNCH_PLAN.md](./MERIDIAN_AI_LAUNCH_PLAN.md)**.
+
+NOTE: the shipped design is a **light Apple-style** language (`design-system/meridian/DESIGN.md`), not the
 dark dashboard-token inheritance this plan originally assumed. The section list / copy
 notes below are historical reference.
 

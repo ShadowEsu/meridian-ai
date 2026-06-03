@@ -8,7 +8,7 @@
 | **Live app** | [meridian20.onrender.com](https://meridian20.onrender.com/) |
 | **Author** | [Preston Jay Susanto](https://github.com/ShadowEsu) · prestonjaysusanto@gmail.com |
 
-> **Go live:** follow **[docs/WEB_PUBLISH.md](docs/WEB_PUBLISH.md)** — Supabase (`berelpcqwplzagtktgnl`), Google Cloud (`meridian-498300`), and Render env vars.
+> **Go live:** **[docs/WEB_PUBLISH.md](docs/WEB_PUBLISH.md)** (Supabase + Google + Render) · **Launch page plan:** **[docs/MERIDIAN_AI_LAUNCH_PLAN.md](docs/MERIDIAN_AI_LAUNCH_PLAN.md)**
 
 ---
 
