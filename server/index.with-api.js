@@ -46,6 +46,8 @@ const store = STORE_KIND === 'supabase'
 
 const app = createApp({ store });
 
+// Serve .jsx as JavaScript so browsers/Babel fetch accepts them
+express.static.mime.define({ 'application/javascript': ['jsx'] });
 app.use(express.static(ROOT, { extensions: ['html'] }));
 app.get('/', (_req, res) => res.sendFile(path.join(ROOT, 'Meridian.html')));
 

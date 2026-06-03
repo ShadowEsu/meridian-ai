@@ -12,6 +12,7 @@ const PORT = Number(process.env.PORT) || 3000;
 const ROOT = path.join(__dirname, '..');
 
 const app = express();
+express.static.mime.define({ 'application/javascript': ['jsx'] });
 app.use(express.static(ROOT, { extensions: ['html'] }));
 
 app.get('/', (_req, res) => {
