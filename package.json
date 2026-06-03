@@ -4,9 +4,12 @@
   "version": "2.0.0",
   "description": "Meridian 2.0 — AI cost intelligence dashboard with Supabase + Render deploy",
   "scripts": {
+    "build:css": "tailwindcss -i ./src/styles/input.css -o ./src/styles/meridian.bundle.css --minify",
+    "prestart": "npm run build:css",
+    "prestart:api": "npm run build:css",
     "start": "node server/index.js",
     "start:api": "node server/index.with-api.js",
-    "dev": "node server/index.js",
+    "dev": "npm run build:css && node server/index.js",
     "test": "vitest run",
     "test:watch": "vitest",
     "doctor": "node scripts/doctor.js",
@@ -30,7 +33,10 @@
     "zod": "^3.25.76"
   },
   "devDependencies": {
+    "autoprefixer": "^10.4.20",
+    "postcss": "^8.4.49",
     "supertest": "^7.2.2",
+    "tailwindcss": "^3.4.17",
     "vitest": "^2.1.9"
   }
 }
