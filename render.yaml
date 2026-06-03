@@ -8,14 +8,14 @@
 
 services:
   - type: web
-    name: meridian-2-0
+    name: meridian20
     runtime: node
     plan: free
     branch: main
     buildCommand: npm install
     startCommand: npm run start:api
     healthCheckPath: /api/auth/config
-    # Public site: / = landing, /app = dashboard SPA, /api/* = backend
+    # Production URL: https://meridian20.onrender.com/ (dashboard at /)
     envVars:
       - key: NODE_ENV
         value: production

@@ -49,16 +49,17 @@ const app = createApp({ store });
 
 // Serve .jsx as JavaScript so browsers/Babel fetch accepts them
 express.static.mime.define({ 'application/javascript': ['jsx'] });
-// Landing first: '/' -> landing/index.html, '/meridian-home.css' -> landing asset.
-app.use(express.static(LANDING, { extensions: ['html'] }));
-// Then ROOT: '/src/*', '/node_modules/*', '/Meridian.html', etc.
+// Marketing site (optional): /home
+app.use('/home', express.static(LANDING, { extensions: ['html'] }));
+app.get('/home', (_req, res) => res.sendFile(path.join(LANDING, 'index.html')));
+// Dashboard + APIs at site root (same as meridian20.onrender.com production)
 app.use(express.static(ROOT, { extensions: ['html'] }));
-app.get('/', (_req, res) => res.sendFile(path.join(LANDING, 'index.html')));
-app.get('/app', (_req, res) => res.sendFile(path.join(ROOT, 'Meridian.html')));
+app.get('/', (_req, res) => res.sendFile(path.join(ROOT, 'Meridian.html')));
+app.get('/app', (_req, res) => res.redirect(301, '/'));
 
 app.listen(PORT, () => {
   console.log(`Meridian server http://localhost:${PORT}`);
-  console.log(`  Landing  http://localhost:${PORT}/`);
-  console.log(`  App      http://localhost:${PORT}/app  (?live=1 for auth + APIs)`);
+  console.log(`  Dashboard  http://localhost:${PORT}/`);
+  console.log(`  Landing    http://localhost:${PORT}/home`);
   console.log(`Store: ${STORE_KIND}${STORE_KIND === 'json' ? ` (${STORE_PATH})` : ''}`);
 });

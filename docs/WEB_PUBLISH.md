@@ -17,7 +17,7 @@ Complete checklist for **Preston / meridian-498300** using your existing Supabas
 | Google OAuth client ID | `609424288083-2l51l52m5lo3evvmaiqb5imdteqbsquf.apps.googleusercontent.com` |
 | Google client edit | [Open OAuth client](https://console.cloud.google.com/auth/clients?project=meridian-498300) |
 
-Replace `YOUR_RENDER_URL` below with your live URL after deploy (e.g. `https://meridian-xxxx.onrender.com`).
+**Production URL (unchanged):** `https://meridian20.onrender.com`
 
 ---
 
@@ -47,7 +47,7 @@ Add **both** (keep localhost for local dev):
 
 ```
 http://localhost:5500
-https://YOUR_RENDER_URL
+https://meridian20.onrender.com
 ```
 
 ### Authorized redirect URIs
@@ -88,19 +88,18 @@ For a public demo, publish the app or add every tester email under Test users.
 
 | Field | Value |
 |-------|-------|
-| **Site URL** | `https://YOUR_RENDER_URL/app` |
+| **Site URL** | `https://meridian20.onrender.com` |
 | **Redirect URLs** | one per line: |
 
 ```
 http://localhost:5500/**
-http://localhost:5500/app
-http://localhost:5500/app?live=1
-https://YOUR_RENDER_URL/**
-https://YOUR_RENDER_URL/app
-https://YOUR_RENDER_URL/app?live=1
+http://localhost:5500/?live=1
+https://meridian20.onrender.com/**
+https://meridian20.onrender.com/
+https://meridian20.onrender.com/?live=1
 ```
 
-Marketing homepage is `/`; the signed-in dashboard SPA is `/app`.
+Dashboard and Google sign-in stay at the **site root** (`/`) — same as before. Optional marketing page: `/home`.
 
 **Save changes.**
 
@@ -111,8 +110,8 @@ Marketing homepage is `/`; the signed-in dashboard SPA is `/app`.
 ### 5a. Connect repo
 
 1. [render.com/dashboard](https://dashboard.render.com/) → **New** → **Blueprint** (or **Web Service**)
-2. Connect GitHub repo `AAdityaisme/MeridianCode`
-3. Branch: `Prestonedits`
+2. Connect GitHub repo `ShadowEsu/Meridian2.0` (or your fork)
+3. Branch: `main`
 4. Render reads `render.yaml` at repo root
 
 Or manual Web Service:
@@ -143,25 +142,23 @@ Copy values from your local `.env` (never commit `.env`).
 
 ### 5c. First deploy
 
-Deploy → copy the URL (e.g. `https://meridian-xxxx.onrender.com`).
-
-Go back to **Step 2** and **Step 4** and replace `YOUR_RENDER_URL` with that URL, then redeploy if needed.
+Deploy → service URL should remain **`https://meridian20.onrender.com`** (Render service name `meridian20`).
 
 ---
 
 ## Step 6 — Smoke test
 
 ```bash
-curl https://YOUR_RENDER_URL/api/auth/config
+curl https://meridian20.onrender.com/api/auth/config
 # → { "googleEnabled": true, "supabaseUrl": "...", ... }
 
-curl https://YOUR_RENDER_URL/api/models
+curl https://meridian20.onrender.com/api/models
 # → model catalogue JSON
 ```
 
 In browser:
 
-1. Open `https://YOUR_RENDER_URL/`
+1. Open `https://meridian20.onrender.com/`
 2. Should auto-detect live mode (probes `/api/auth/config`)
 3. Click **Sign in with Google**
 4. Land in dashboard after Google approves
@@ -178,7 +175,7 @@ After sign-in:
 4. From each app, POST after every LLM call:
 
 ```http
-POST https://YOUR_RENDER_URL/api/v1/requests
+POST https://meridian20.onrender.com/api/v1/requests
 X-Meridian-Key: mk_your_secret_here
 Content-Type: application/json
 

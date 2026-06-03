@@ -14,15 +14,14 @@ const LANDING = path.join(ROOT, 'landing');
 
 const app = express();
 express.static.mime.define({ 'application/javascript': ['jsx'] });
-// Landing first: '/' -> landing/index.html, '/meridian-home.css' -> landing asset.
-app.use(express.static(LANDING, { extensions: ['html'] }));
-// Then ROOT: '/src/*', '/node_modules/*', '/Meridian.html', etc.
+app.use('/home', express.static(LANDING, { extensions: ['html'] }));
+app.get('/home', (_req, res) => res.sendFile(path.join(LANDING, 'index.html')));
 app.use(express.static(ROOT, { extensions: ['html'] }));
 
-app.get('/', (_req, res) => res.sendFile(path.join(LANDING, 'index.html')));
-app.get('/app', (_req, res) => res.sendFile(path.join(ROOT, 'Meridian.html')));
+app.get('/', (_req, res) => res.sendFile(path.join(ROOT, 'Meridian.html')));
+app.get('/app', (_req, res) => res.redirect(301, '/'));
 
 app.listen(PORT, () => {
   console.log(`Meridian UI (static demo)  http://localhost:${PORT}`);
-  console.log(`Tip: VS Code Live Server also works for this frontend-only mode.`);
+  console.log(`  Marketing preview  http://localhost:${PORT}/home`);
 });
